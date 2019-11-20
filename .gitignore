@@ -1,0 +1,16 @@
+# vim temporary files
+.*.sw*
+
+# Don't add to git files which are supposed to be customized
+config.sh
+config.php
+.htaccess
+token.json
+credentials.json
+
+# php unit cache file
+tests/.phpunit.result.cache
+file.html
+
+# phar files
+vendor
