@@ -37,7 +37,7 @@ class MysqlConnector {
           . ") AS tmp"
           . " WHERE lastRegistrationDate > :until"
           . " ORDER BY lastRegistrationDate");
-      $strDate = $until->format('Y-m-d\TH:i:s'); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
+      $strDate = $this->dateTimeToMysqlStr($until); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
       $stmtGetRegistrations->bindParam(':until', $strDate);
       $stmtGetRegistrations->execute();
       $ret = array();
@@ -49,6 +49,30 @@ class MysqlConnector {
       $loggerInstance->log_error("Failed to retrieve latest registrations from mysql: " . $e->getMessage());
       die();
     }
+  }
+
+  public function deleteRegistrationsOlderThan(DateTime $upTo) {
+    global $loggerInstance;
+    try {
+      $stmtDeleteOldRegistrations = $this->dbo->prepare(
+          "DELETE from registration_events WHERE date < :upTo"
+      );
+
+      $strDate = $this->dateTimeToMysqlStr($upTo); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
+      $stmtDeleteOldRegistrations->bindParam(':upTo', $strDate);
+      $ret = $stmtDeleteOldRegistrations->execute();
+      if ($ret === FALSE) {
+        $loggerInstance->log_error("delete query returned FALSE. Something unexpected went wrong");
+        die();
+      }
+    } catch(PDOException $e){
+      $loggerInstance->log_error("Failed to delete old registrations: " . $e->getMessage());
+      die();
+    }
+  }
+
+  private function dateTimeToMysqlStr(DateTime $d) : string {
+    return $d->format('Y-m-d\TH:i:s');
   }
 
   public function registerEvent(RegistrationEvent $event){
