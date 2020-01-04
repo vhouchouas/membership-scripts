@@ -26,7 +26,7 @@ class MysqlConnector {
     $this->stmt = NULL;
   }
 
-  public function getOrderedListOfLastRegistrations($until) : array {
+  public function getOrderedListOfLastRegistrations(DateTime $until) : array {
     global $loggerInstance;
     try {
       $stmtGetRegistrations = $this->dbo->prepare(
@@ -37,7 +37,8 @@ class MysqlConnector {
           . ") AS tmp"
           . " WHERE lastRegistrationDate > :until"
           . " ORDER BY lastRegistrationDate");
-      $stmtGetRegistrations->bindParam(':until', $until);
+      $strDate = $until->format('Y-m-d\TH:i:s'); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
+      $stmtGetRegistrations->bindParam(':until', $strDate);
       $stmtGetRegistrations->execute();
       $ret = array();
       while($row = $stmtGetRegistrations->fetch()){

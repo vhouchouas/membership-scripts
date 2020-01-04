@@ -4,7 +4,7 @@ require_once(ZWP_TOOLS . 'mysql.php');
 
 $nbDays = isset($_GET["nbDays"]) ? (int) $_GET["nbDays"] : 366;
 $nbDays = ($nbDays >= 1) ? $nbDays : 366;
-$until = date("o-m-d\T00:00:00", time() - $nbDays*24*3600);
+$until = new DateTime(date("o-m-d\T00:00:00", time() - $nbDays*24*3600));
 $mysqlConnector = new MysqlConnector();
 $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistrations($until);
 
