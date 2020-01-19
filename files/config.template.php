@@ -19,3 +19,8 @@ define("DB_HOST", 'TO_FILL');
 
 //Conf for google
 define("G_GROUP_NAME",  "TO_FILL");
+
+//Conf to tell about returning members
+define("ADMIN_EMAIL", "TO_FILL");
+define("EMAIL_SUBJECT", "TO_FILL");
+define("EMAIL_BODY_INTRODUCTION", "TO_FILL");

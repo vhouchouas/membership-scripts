@@ -6,7 +6,7 @@ require_once(ZWP_TOOLS . 'mysql.php');
 
 use PHPUnit\Framework\TestCase;
 
-final class Test_OutdatedMemberDeleter extends TestCase {
+final class Test_OutdatedMemberManager extends TestCase {
   public function test_getDateAfterWhichMembershipIsConsideredValid(){
     $expected = new DateTime("2019-01-01T00:00:00", new DateTimeZone("Europe/Paris"));
 
@@ -18,8 +18,8 @@ final class Test_OutdatedMemberDeleter extends TestCase {
 
   private function assertCorrectValidMembershipDate(DateTime $expected, DateTime $now, string $explanation): void{
     $unusedArrayOfConnectors = array();
-    $deleter = new OutdatedMemberDeleter($now, $unusedArrayOfConnectors);
-    $this->assertEquals($expected, $deleter->getDateAfterWhichMembershipIsConsideredValid(), $explanation);
+    $sut = new OutdatedMemberManager($now, $unusedArrayOfConnectors);
+    $this->assertEquals($expected, $sut->getDateAfterWhichMembershipIsConsideredValid(), $explanation);
   }
 
   public function test_needToDeleteOutdatedMember(){
@@ -46,8 +46,8 @@ final class Test_OutdatedMemberDeleter extends TestCase {
 
   private function assertCorrectlyDetectNeedToDeleteOutdatedMember(bool $expected, DateTime $now, DateTime $lastRun, string $explanation){
     $unusedArrayOfConnectors = array();
-    $deleter = new OutdatedMemberDeleter($now, $unusedArrayOfConnectors);
-    $this->assertEquals($expected, $deleter->needToDeleteOutdatedMembers($lastRun), $explanation);
+    $sut = new OutdatedMemberManager($now, $unusedArrayOfConnectors);
+    $this->assertEquals($expected, $sut->needToDeleteOutdatedMembers($lastRun), $explanation);
   }
 
   public function test_deleteExpectedUsers(){
@@ -71,7 +71,7 @@ final class Test_OutdatedMemberDeleter extends TestCase {
     $mysql->expects($this->once())->method('deleteRegistrationsOlderThan')->with($this->equalTo(new DateTime("2018-01-01T00:00:00", new DateTimeZone("Europe/Paris"))));
 
     // Perform the test with dates such that we're suppose to perform deletions
-    $sut = new OutdatedMemberDeleter(new DateTime("2019-02-02Z"), $groups);
+    $sut = new OutdatedMemberManager(new DateTime("2019-02-02Z"), $groups);
     $sut->deleteOutdatedMembersIfNeeded(new DateTime("2019-01-30Z"), $mysql);
 
     // No assertions since expectations are already set on the mocks
@@ -91,9 +91,42 @@ final class Test_OutdatedMemberDeleter extends TestCase {
     $mysql->expects($this->never())->method('deleteRegistrationsOlderThan');
 
     // Perform the test with dates such that we're not suppose to try any deletion
-    $sut = new OutdatedMemberDeleter(new DateTime("2019-08-02Z"), $groups);
+    $sut = new OutdatedMemberManager(new DateTime("2019-08-02Z"), $groups);
     $sut->deleteOutdatedMembersIfNeeded(new DateTime("2019-07-30Z"), $mysql);
 
     // No assertions since expectations are already set on the mocks
+  }
+
+  public function test_sendMailIfOldMembersRegisteredAgain(){
+    // Setup
+    $now = new DateTime("2020-06-01");
+    // // Create test data. Start with the data we'll use as input for the test
+    $inputData = [
+      $this->buildRegistrationEventWithEmail("toto@toto.com"),
+      $this->buildRegistrationEventWithEmail("titi@titi.com"),
+      $this->buildRegistrationEventWithEmail("tutu@tutu.com")
+    ];
+
+    // // Create test data which will be returned by the mysql mock. Let's consider it returns only two emails
+    $mysql = $this->createMock(MysqlConnector::class);
+    $mysql->expects($this->once())->method('findMembersInArrayWhoDoNotRegisteredAfterGivenDate')->with($this->equalTo(array("toto@toto.com", "titi@titi.com", "tutu@tutu.com")), $this->equalTo(new dateTime("2020-01-01", new DateTimeZone("Europe/Paris"))))->willReturn(array("toto@toto.com", "titi@titi.com"));
+
+    // // Setup the EmailSender mock
+    $emailSender = $this->createMock(EmailSender::class);
+    $emailSender->expects($this->once())->method('sendMailToWarnAboutReturningMembers')->with(array("toto@toto.com", "titi@titi.com"));
+
+    //Act
+    $unusedArrayOfConnectors = array();
+    $sut = new OutdatedMemberManager($now, $unusedArrayOfConnectors);
+    $sut->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($inputData, $mysql, $emailSender);
+
+    // No need to assert because we already set up 'expects'
+
+  }
+
+  private function buildRegistrationEventWithEmail(string $email) : RegistrationEvent {
+    $event = new RegistrationEvent();
+    $event->email = $email;
+    return $event;
   }
 }

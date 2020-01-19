@@ -22,8 +22,14 @@ $helloAssoConnector = new HelloAssoConnector();
 $subscriptions = $helloAssoConnector->getAllHelloAssoSubscriptions($lastSuccessfulRunDate, $now);
 $loggerInstance->log_info("retrieved data from HelloAsso. Got " . count($subscriptions) . " action(s)");
 
+// Look for old members who weren't registered anymore, and tell admins so that can re-enable their Slack account.
+// This has to be done before we actually register members, otherwise we'll consider they are still registered
 $mailchimpConnector = new MailChimpConnector();
 $googleGroupConnector = new GoogleGroupConnector();
+$outdatedManager = new OutdatedMemberManager($now, array($mailchimpConnector, $googleGroupConnector));
+$outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $mysqlConnector, new EmailSender());
+
+// Register new members
 foreach($subscriptions as $subscription){
   $mysqlConnector->registerEvent($subscription);
   $mailchimpConnector->registerEvent($subscription);
@@ -31,8 +37,7 @@ foreach($subscriptions as $subscription){
 }
 
 // Remove outdated members if needed
-$deleter = new OutdatedMemberDeleter($now, array($mailchimpConnector, $googleGroupConnector));
-$deleter->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $mysqlConnector);
+$outdatedManager->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $mysqlConnector);
 
 // cleanup maintenance
 $mysqlConnector->writeLastSuccessfulRunStartDate($now);

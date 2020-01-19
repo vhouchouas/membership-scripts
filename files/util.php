@@ -85,7 +85,7 @@ class SimplifiedRegistrationEvent {
   }
 }
 
-class OutdatedMemberDeleter {
+class OutdatedMemberManager {
   private $now;
   private $groups;
   private $timeZone = 1;
@@ -149,6 +149,57 @@ class OutdatedMemberDeleter {
       $usersToDelete = array_diff($currentUsers, $mailsToKeep);
       $group->deleteUsers($usersToDelete);
     }
+  }
+
+  /**
+   * This method is supposed to be called with the emails of the last members who registered, and it
+   * returns information about those of them who were members in the past and who have been deactivated.
+   * Currently it's used to send a notification to admins, because the accounts of returning members need
+   * to be manually reactivated on some of our tools.
+   * @param RegistrationEvent[] $events The list of members
+   * @return SimplifiedRegistrationEvent[]
+   */
+  public function findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently(array $events, MysqlConnector $mysql) : array {
+    $emails = array_map(function($event){return $event->email;}, $events);
+    return $mysql->findMembersInArrayWhoDoNotRegisteredAfterGivenDate($emails, $this->getDateAfterWhichMembershipIsConsideredValid());
+  }
+
+  /**
+   * @param RegistrationEvent[] $subscriptions
+   * @param EmailSender $emailSender
+   */
+  function tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate(array $subscriptions, MysqlConnector $mysql, EmailSender $emailSender) : void {
+    $returningMembers = $this->findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently($subscriptions, $mysql);
+    if (count($returningMembers) > 0){
+      $emailSender->sendMailToWarnAboutReturningMembers($returningMembers);
+    }
+  }
+}
+
+class EmailSender {
+  /**
+   * @param SimplifiedRegistrationEvent[] $returningMembers
+   */
+  function sendMailToWarnAboutReturningMembers(array $returningMembers) : void {
+    if (count($returningMembers) == 0){
+      // Throw instead of returning because if we expect the check to be done by the client,
+      // it makes it easier to check in a unit test that the check has been performed.
+      throw new Exception("Called sendMailToWarnAboutReturningMembers with an empty array");
+    }
+    mail(ADMIN_EMAIL, EMAIL_SUBJECT, $this->buildReturningMembersEmailBody($returningMembers));
+  }
+
+  function buildReturningMembersEmailBody(array $returningMembers) {
+    $endl = "\r\n";
+    $body = EMAIL_BODY_INTRODUCTION . $endl;
+    $body .= "Name; Email; Last registration date" . $endl;
+    foreach($returningMembers as $returningMember) {
+      $body .= $returningMember->first_name . " " . $returningMember->last_name . "; "
+        . $returningMember->email . "; "
+        . $returningMember->event_date
+        . $endl;
+    }
+    return $body;
   }
 }
 

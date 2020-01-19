@@ -51,6 +51,45 @@ class MysqlConnector {
     }
   }
 
+  /**
+   * This method is supposed to be called with the emails of the last members who registered, and it
+   * returns information about those of them who were members in the past and who have been deactivated.
+   * Currently it's used to send a notification to admins, because the accounts of returning members need
+   * to be manually reactivated on some of our tools.
+   * @param string[] $membersEmail A list of mail of people who just registered
+   * @param DateTime $registeredBefore The date after which we expect users haven't registered
+   * @return SimplifiedRegistrationEvent[] data about members in $membersEmail who already registered
+   *                                       but who never registered after $registeredBefore
+   */
+  public function findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array {
+    global $loggerInstance;
+    if ( count($membersEmail) == 0 ){
+      return array();
+    }
+
+    try {
+      $in = str_repeat('?', count($membersEmail));
+      $stmtGetReturningMembers = $this->dbo->prepare(
+        "SELECT * FROM ("
+        . "  SELECT first_name, last_name, email, MAX(date) AS lastRegistration "
+        . "  FROM registration_events"
+        . "  WHERE email IN ($in)"
+        . "  GROUP BY email"
+        . ") AS tmp"
+        . " WHERE lastRegistration < ?");
+      $params = array_merge($membersEmail, [$this->dateTimeToMysqlStr($registeredBefore)]);
+      $stmtGetRegistrations->execute($params);
+      $ret = array();
+      foreach($stmtGetRegistrations->fetchAll() as $row){
+        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["lastRegistrationDate"]);
+      }
+      return $ret;
+    } catch(PDOException $e){
+      $loggerInstance->log_error("Failed to find returning old members from mysql: " . $e->getMessage());
+      die();
+    }
+  }
+
   public function deleteRegistrationsOlderThan(DateTime $upTo) {
     global $loggerInstance;
     try {
