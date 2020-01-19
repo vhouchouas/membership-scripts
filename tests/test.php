@@ -64,9 +64,11 @@ final class Test_OutdatedMemberDeleter extends TestCase {
     $groups = array($group1, $group2);
 
     // // Create a mysql mock to return the list of users
+    // // This mock should also be called in order to delete old data in mysql
     $mysql = $this->createMock(MysqlConnector::class);
     $mysql->method('getOrderedListOfLastRegistrations')->willReturn(array('userOk1', 'userOk2'));
     $mysql->expects($this->once())->method('getOrderedListOfLastRegistrations')->with($this->equalTo(new DateTime("2019-01-01T00:00:00", new DateTimeZone("Europe/Paris"))));
+    $mysql->expects($this->once())->method('deleteRegistrationsOlderThan')->with($this->equalTo(new DateTime("2018-01-01T00:00:00", new DateTimeZone("Europe/Paris"))));
 
     // Perform the test with dates such that we're suppose to perform deletions
     $sut = new OutdatedMemberDeleter(new DateTime("2019-02-02Z"), $groups);
@@ -86,6 +88,7 @@ final class Test_OutdatedMemberDeleter extends TestCase {
     // // Create a mysql mock
     $mysql = $this->createMock(MysqlConnector::class);
     $mysql->expects($this->never())->method('getOrderedListOfLastRegistrations');
+    $mysql->expects($this->never())->method('deleteRegistrationsOlderThan');
 
     // Perform the test with dates such that we're not suppose to try any deletion
     $sut = new OutdatedMemberDeleter(new DateTime("2019-08-02Z"), $groups);
