@@ -169,9 +169,13 @@ class OutdatedMemberManager {
    * @param EmailSender $emailSender
    */
   function tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate(array $subscriptions, MysqlConnector $mysql, EmailSender $emailSender) : void {
+  global $loggerInstance;
     $returningMembers = $this->findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently($subscriptions, $mysql);
     if (count($returningMembers) > 0){
+      $loggerInstance->log_info("Got " . count($returningMembers) . ". Going to send a notification");
       $emailSender->sendMailToWarnAboutReturningMembers($returningMembers);
+    } else {
+      $loggerInstance->log_info("No returning members. We don't send a notification.");
     }
   }
 }

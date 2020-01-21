@@ -68,19 +68,19 @@ class MysqlConnector {
     }
 
     try {
-      $in = str_repeat('?', count($membersEmail));
+      $in = str_repeat('?,', count($membersEmail)-1).'?';
       $stmtGetReturningMembers = $this->dbo->prepare(
         "SELECT * FROM ("
-        . "  SELECT first_name, last_name, email, MAX(date) AS lastRegistration "
+        . "  SELECT first_name, last_name, email, MAX(date) AS lastRegistrationDate"
         . "  FROM registration_events"
         . "  WHERE email IN ($in)"
         . "  GROUP BY email"
         . ") AS tmp"
-        . " WHERE lastRegistration < ?");
+        . " WHERE lastRegistrationDate < ?");
       $params = array_merge($membersEmail, [$this->dateTimeToMysqlStr($registeredBefore)]);
-      $stmtGetRegistrations->execute($params);
+      $stmtGetReturningMembers->execute($params);
       $ret = array();
-      foreach($stmtGetRegistrations->fetchAll() as $row){
+      foreach($stmtGetReturningMembers->fetchAll() as $row){
         $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["lastRegistrationDate"]);
       }
       return $ret;
