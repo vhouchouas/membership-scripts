@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 define('ZWP_TOOLS', __DIR__ . '/../files/');
-require_once(ZWP_TOOLS . 'registrationDateUtil.php');
+require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 
 use PHPUnit\Framework\TestCase;
 

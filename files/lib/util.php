@@ -2,7 +2,7 @@
 
 if(!defined('ZWP_TOOLS')){  die(); }
 register_shutdown_function( "fatal_handler" );
-require_once ZWP_TOOLS . 'logging.php';
+require_once ZWP_TOOLS . 'lib/logging.php';
 
 function do_curl_query($curl){
   global $loggerInstance;

@@ -1,9 +1,9 @@
 <?php
 
 if(!defined('ZWP_TOOLS')){  die(); }
-require_once ZWP_TOOLS . 'registrationDateUtil.php';
-require_once ZWP_TOOLS . 'logging.php';
-require_once ZWP_TOOLS . 'util.php';
+require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
+require_once ZWP_TOOLS . 'lib/logging.php';
+require_once ZWP_TOOLS . 'lib/util.php';
 
 class OutdatedMemberManager {
   private $dateUtil;

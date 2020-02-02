@@ -1,6 +1,6 @@
 <?php
 define('ZWP_TOOLS', dirname(__FILE__).'/');
-require_once(ZWP_TOOLS . 'mysql.php');
+require_once(ZWP_TOOLS . 'lib/mysql.php');
 
 $nbDays = isset($_GET["nbDays"]) ? (int) $_GET["nbDays"] : 366;
 $nbDays = ($nbDays >= 1) ? $nbDays : 366;

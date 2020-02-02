@@ -3,10 +3,10 @@ define('ZWP_TOOLS', dirname(__FILE__).'/');
 require_once(ZWP_TOOLS . 'logging.php');
 $loggerInstance = new ProdLogger();
 
-require_once(ZWP_TOOLS . 'util.php');
-require_once(ZWP_TOOLS . 'helloasso.php');
-require_once(ZWP_TOOLS . 'mailchimp.php');
-require_once(ZWP_TOOLS . 'mysql.php');
+require_once(ZWP_TOOLS . 'lib/util.php');
+require_once(ZWP_TOOLS . 'lib/helloasso.php');
+require_once(ZWP_TOOLS . 'lib/mailchimp.php');
+require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'google/GoogleGroupConnector.php');
 
 $loggerInstance->log_info("Starting run");
