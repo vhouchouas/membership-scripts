@@ -90,6 +90,30 @@ class MysqlConnector {
     }
   }
 
+  public function countMembersPerPostal(DateTime $registeredAfter) : array {
+    global $loggerInstance;
+    try {
+      $stmtCountPerPostal = $this->dbo->prepare(
+        "SELECT COUNT(*) AS count, postal_code FROM ("
+        . "  SELECT email, postal_code"
+        . "  FROM registration_events"
+        . "  WHERE date > ?"
+        . "  GROUP BY email"
+        . "  ) AS tmp"
+        . " GROUP BY postal_code"
+        . " ORDER BY count DESC");
+      $stmtCountPerPostal->execute(array($this->dateTimeToMysqlStr($registeredAfter)));
+      $ret = array();
+      foreach($stmtCountPerPostal->fetchAll() as $row){
+        $ret[$row["postal_code"]] = $row["count"];
+      }
+      return $ret;
+    } catch(PDOException $e){
+      $loggerInstance->log_error("Failed to count members per postal code from mysql: " . $e->getMessage());
+      die();
+    }
+  }
+
   public function deleteRegistrationsOlderThan(DateTime $upTo) {
     global $loggerInstance;
     try {
