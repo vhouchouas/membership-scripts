@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 define('ZWP_TOOLS', __DIR__ . '/../files/');
+require_once(ZWP_TOOLS . 'outdatedMemberManager.php');
 require_once(ZWP_TOOLS . 'util.php');
 require_once(ZWP_TOOLS . 'mysql.php');
 
