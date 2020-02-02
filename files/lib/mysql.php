@@ -101,7 +101,7 @@ class MysqlConnector {
         . "  GROUP BY email"
         . "  ) AS tmp"
         . " GROUP BY postal_code"
-        . " ORDER BY count DESC");
+        . " ORDER BY count DESC, postal_code");
       $stmtCountPerPostal->execute(array($this->dateTimeToMysqlStr($registeredAfter)));
       $ret = array();
       foreach($stmtCountPerPostal->fetchAll() as $row){
