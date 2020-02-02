@@ -57,7 +57,7 @@ final class Test_OutdatedMemberManager extends TestCase {
     $group1->method('getUsers')->willReturn(array('userOk1', 'userToDelete1'));
     $group1->expects($this->once())->method('deleteUsers')->with($this->equalTo(array(1 => 'userToDelete1')));
 
-    $group2 = $this->createMock(GroupWIthDeletableUsers::class);
+    $group2 = $this->createMock(GroupWithDeletableUsers::class);
     $group2->method('getUsers')->willReturn(array('userOk2', 'userToDelete2'));
     $group2->expects($this->once())->method('deleteUsers')->with($this->equalTo(array(1 => 'userToDelete2')));
 
@@ -66,7 +66,11 @@ final class Test_OutdatedMemberManager extends TestCase {
     // // Create a mysql mock to return the list of users
     // // This mock should also be called in order to delete old data in mysql
     $mysql = $this->createMock(MysqlConnector::class);
-    $mysql->method('getOrderedListOfLastRegistrations')->willReturn(array('userOk1', 'userOk2'));
+    $mysql->method('getOrderedListOfLastRegistrations')->willReturn(array(
+          $this->buildRegistrationEventWithEmail('userOk1'),
+          $this->buildRegistrationEventWithEmail('userOk2')
+        )
+    );
     $mysql->expects($this->once())->method('getOrderedListOfLastRegistrations')->with($this->equalTo(new DateTime("2019-01-01T00:00:00", new DateTimeZone("Europe/Paris"))));
     $mysql->expects($this->once())->method('deleteRegistrationsOlderThan')->with($this->equalTo(new DateTime("2018-01-01T00:00:00", new DateTimeZone("Europe/Paris"))));
 

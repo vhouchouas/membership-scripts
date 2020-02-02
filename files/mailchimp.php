@@ -99,6 +99,7 @@ class MailChimpConnector implements GroupWithDeletableUsers {
         $users[] = $member->email_address;
       }
     }
+    return $users;
   }
 
   private function getPageOfUsers($page){

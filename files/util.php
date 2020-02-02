@@ -142,7 +142,8 @@ class OutdatedMemberManager {
     $mysql->deleteRegistrationsOlderThan($this->getMaxDateBeforeWhichRegistrationsInfoShouldBeDiscarded());
 
     $loggerInstance->log_info("We're going to delete outdated members");
-    $mailsToKeep = $mysql->getOrderedListOfLastRegistrations($this->getDateAfterWhichMembershipIsConsideredValid());
+    $usersToKeep = $mysql->getOrderedListOfLastRegistrations($this->getDateAfterWhichMembershipIsConsideredValid());
+    $mailsToKeep = array_map(function($event){return $event->email;}, $usersToKeep);
 
     foreach($this->groups as $group){
       $currentUsers = $group->getUsers();
