@@ -31,7 +31,7 @@ class MysqlConnector {
     try {
       $stmtGetRegistrations = $this->dbo->prepare(
           "SELECT * from ("
-          . "  SELECT first_name, last_name, email, MAX(`date`) AS lastRegistrationDate "
+          . "  SELECT first_name, last_name, email, MAX(`date`) AS lastRegistrationDate, postal_code "
           . "  FROM registration_events"
           . "  GROUP BY email"
           . ") AS tmp"
@@ -42,7 +42,7 @@ class MysqlConnector {
       $stmtGetRegistrations->execute();
       $ret = array();
       while($row = $stmtGetRegistrations->fetch()){
-        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["lastRegistrationDate"]);
+        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["postal_code"], $row["lastRegistrationDate"]);
       }
       return $ret;
     } catch(PDOException $e){
@@ -71,7 +71,7 @@ class MysqlConnector {
       $in = str_repeat('?,', count($membersEmail)-1).'?';
       $stmtGetReturningMembers = $this->dbo->prepare(
         "SELECT * FROM ("
-        . "  SELECT first_name, last_name, email, MAX(date) AS lastRegistrationDate"
+        . "  SELECT first_name, last_name, email, MAX(date) AS lastRegistrationDate, postal_code "
         . "  FROM registration_events"
         . "  WHERE email IN ($in)"
         . "  GROUP BY email"
@@ -81,7 +81,7 @@ class MysqlConnector {
       $stmtGetReturningMembers->execute($params);
       $ret = array();
       foreach($stmtGetReturningMembers->fetchAll() as $row){
-        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["lastRegistrationDate"]);
+        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["postal_code"], $row["lastRegistrationDate"]);
       }
       return $ret;
     } catch(PDOException $e){

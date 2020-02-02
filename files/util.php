@@ -76,12 +76,14 @@ class SimplifiedRegistrationEvent {
   public $last_name;
   public $event_date;
   public $email;
+  public $postal_code;
 
-  public function __construct($first_name, $last_name, $email, $event_date){
+  public function __construct($first_name, $last_name, $email, $postal_code, $event_date){
     $this->first_name = $first_name;
     $this->last_name = $last_name;
     $this->email = $email;
     $this->event_date = $event_date;
+    $this->postal_code = $postal_code;
   }
 }
 

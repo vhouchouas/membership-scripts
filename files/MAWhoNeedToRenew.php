@@ -21,10 +21,10 @@ $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistratio
   </form>
 
   <table>
-    <tr><th>Dernière date d'adhésion</th><th>Nom</th><th>Mail</th></tr>
+    <tr><th>Dernière date d'adhésion</th><th>Nom</th><th>Mail</th><th>Code Postal</th></tr>
 <?php
   foreach($simplifiedRegistrationEvents as $event){
-    echo "<tr><td>" . $event->event_date . "</td><td>" . $event->first_name . " " . $event->last_name . "</td><td>" . $event->email . '</td></tr>';
+    echo "<tr><td>" . $event->event_date . "</td><td>" . $event->first_name . " " . $event->last_name . "</td><td>" . $event->email . '</td><td>' . $event->postal_code . '</td></tr>';
   }
 ?>
   </table>
