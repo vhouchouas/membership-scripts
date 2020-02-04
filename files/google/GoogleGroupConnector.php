@@ -1,7 +1,7 @@
 <?php
 
 if(!defined('ZWP_TOOLS')){  die(); }
-require_once(ZWP_TOOLS . 'util.php');
+require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'config.php');
 
 require_once 'vendor/autoload.php';
