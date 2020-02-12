@@ -10,7 +10,7 @@ require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/outdatedMemberManager.php');
 require_once(ZWP_TOOLS . 'google/GoogleGroupConnector.php');
 
-$loggerInstance->log_info("Starting run");
+$loggerInstance->log_info("*** Starting run ***");
 
 // derive dates to use
 $now            = new DateTime();
