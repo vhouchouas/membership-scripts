@@ -30,19 +30,18 @@ class MysqlConnector {
     global $loggerInstance;
     try {
       $stmtGetRegistrations = $this->dbo->prepare(
-          "SELECT * from ("
-          . "  SELECT first_name, last_name, email, MAX(`date`) AS lastRegistrationDate, postal_code "
-          . "  FROM registration_events"
-          . "  GROUP BY email"
-          . ") AS tmp"
-          . " WHERE lastRegistrationDate > :until"
-          . " ORDER BY lastRegistrationDate");
+          "SELECT B.* FROM ("
+          . "   SELECT email, postal_code, max(date) AS date"
+          . "     FROM registration_events"
+          . "      WHERE date > :until"
+          . "      GROUP BY email"
+          . ") A INNER JOIN registration_events B USING (email, date)");
       $strDate = $this->dateTimeToMysqlStr($until); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
       $stmtGetRegistrations->bindParam(':until', $strDate);
       $stmtGetRegistrations->execute();
       $ret = array();
       while($row = $stmtGetRegistrations->fetch()){
-        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["postal_code"], $row["lastRegistrationDate"]);
+        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["postal_code"], $row["date"]);
       }
       return $ret;
     } catch(PDOException $e){
