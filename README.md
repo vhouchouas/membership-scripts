@@ -78,7 +78,7 @@ If we ever want to recreate the database, here is the schema:
       `amount` decimal(7,2) NOT NULL,
       `first_name` varchar(30) NOT NULL,
       `last_name` varchar(30) NOT NULL,
-      `email` varchar(30) NOT NULL,
+      `email` varchar(100) NOT NULL,
       `phone` varchar(30) DEFAULT NULL,
       `birth_date` date DEFAULT NULL,
       `address` varchar(100) DEFAULT NULL,
