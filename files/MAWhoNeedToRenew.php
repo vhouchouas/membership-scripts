@@ -1,10 +1,22 @@
 <?php
 define('ZWP_TOOLS', dirname(__FILE__).'/');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
+require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 
-$nbDays = isset($_GET["nbDays"]) ? (int) $_GET["nbDays"] : 366;
-$nbDays = ($nbDays >= 1) ? $nbDays : 366;
-$until = new DateTime(date("Y-m-d\T00:00:00", time() - $nbDays*24*3600));
+$until = null;
+if (isset($_GET["until"])){
+  try {
+    $until = new DateTime($_GET["until"]);
+  } catch(Exception $e){
+    // Nothing to do. If we reach this point it means the parameter was badly formatted.
+    // We leave `$until` to `null`, it will be handle afterwards
+  }
+}
+if (is_null($until)){
+  $registrationDateUtil = new RegistrationDateUtil(new DateTime());
+  $until = $registrationDateUtil->getDateAfterWhichMembershipIsConsideredValid();
+}
+
 $mysqlConnector = new MysqlConnector();
 $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistrations($until);
 
@@ -16,7 +28,7 @@ $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistratio
 </head>
 <body>
   <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="get" >
-    Remonter jusqu'à <input type="number" step="1" name="nbDays"  value="<?php echo $nbDays; ?>" /> jours.
+    Remonter jusqu'à <input name="until" type="date" value="<?php echo $until->format("Y-m-d"); ?>" />
     <input type="submit" value="Rafraichir" />
   </form>
 
