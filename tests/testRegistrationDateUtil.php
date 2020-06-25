@@ -16,8 +16,7 @@ final class Test_RegistrationDateUtil extends TestCase {
   }
 
   private function assertCorrectValidMembershipDate(DateTime $expected, DateTime $now, string $explanation): void{
-    $unusedArrayOfConnectors = array();
-    $sut = new RegistrationDateUtil($now, $unusedArrayOfConnectors);
+    $sut = new RegistrationDateUtil($now);
     $this->assertEquals($expected, $sut->getDateAfterWhichMembershipIsConsideredValid(), $explanation);
   }
 
@@ -44,8 +43,7 @@ final class Test_RegistrationDateUtil extends TestCase {
   }
 
   private function assertCorrectlyDetectNeedToDeleteOutdatedMember(bool $expected, DateTime $now, DateTime $lastRun, string $explanation){
-    $unusedArrayOfConnectors = array();
-    $sut = new OutdatedMemberManager($now, $unusedArrayOfConnectors);
+    $sut = new RegistrationDateUtil($now);
     $this->assertEquals($expected, $sut->needToDeleteOutdatedMembers($lastRun), $explanation);
   }
 }
