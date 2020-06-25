@@ -144,7 +144,7 @@ class MysqlConnector {
       $want_to_be_volunteer = $event->want_to_be_volunteer == "Oui";
       $is_zwf_adherent = $event->is_zwf_adherent == "Oui";
       $is_zw_professional = $event->is_zw_professional == "Oui";
-      $birth_date = is_null($event->birth_date) ? null : DateTime::createFromFormat('d/m/Y', $event->birth_date)->format('Y-m-d');
+      $birth_date = is_null($event->birth_date) ? null : self::helloAssoStringDateToPhpDate($event->birth_date)->format('Y-m-d');
 
       $this->stmt->bindParam(':id_HelloAsso', $event->helloasso_event_id);
       $this->stmt->bindParam(':date', $event->event_date);
@@ -173,6 +173,25 @@ class MysqlConnector {
         die();
       }
     }
+  }
+
+  /**
+   * We may get date formatted either like 04/12/1993 or 1993-12-04 00:00:00.0000000 so we
+   * check both format. Note that the latter case is a bit subtle because it has 7 trailing 0s
+   * whereas we should have only 6 if it was microseconds
+   */
+  public static function helloAssoStringDateToPhpDate(string $d){
+    global $loggerInstance;
+    $result = DateTime::createFromFormat('d/m/Y', $d);
+    if ($result === false){
+      $result = DateTime::createFromFormat('Y-m-d H:i:s.u0', $d); // trailing '0' in the format because of the 7 ones we may have in input
+    }
+    if ($result === false){
+      $errorMessage = "Fail to parse date: " . $d;
+      $loggerInstance->log_error($errorMessage);
+      throw new Exception($errorMessage);
+    }
+    return $result;
   }
 
   public function readLastSuccessfulRunStartDate() : DateTime {
