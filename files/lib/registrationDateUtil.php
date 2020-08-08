@@ -45,5 +45,34 @@ class RegistrationDateUtil {
   public function needToDeleteOutdatedMembers(DateTime $lastSuccessfulRun) : bool {
     return $this->now >= $this->februaryFirstThisYear && $lastSuccessfulRun < $this->februaryFirstThisYear;
   }
+
+  /**
+   * We want to send a weekly mail to draw the attention of admins on the latest registrations.
+   * This mail should be received on Thursday morning in order to be received and handled
+   * before the week-end.
+   * Since we can't be sure of the hour at which this script will run, we consider that if it's
+   * later than Wednesday 18h it's ok
+   */
+  public function needToSendNotificationAboutLatestRegistrations(DateTime $lastSuccessfulRun) : bool {
+    $deadlineHour = 18;
+    if (self::isAWednesday($lastSuccessfulRun) && self::getHour($lastSuccessfulRun) < $deadlineHour) {
+      // We handle this case particularly because "next wednesday" would be next week but in this case it should be today at 18:00
+      $nextDeadline = $lastSuccessfulRun;
+    } else  {
+      $nextDeadline = new DateTime();
+      $nextDeadline->setTimeZone($this->timeZone);
+      $nextDeadline->setTimestamp(strtotime('next Wednesday', $lastSuccessfulRun->getTimestamp()));
+    }
+    $nextDeadline->setTime($deadlineHour, 0);
+    return $this->now >= $nextDeadline;
+  }
+
+  private static function isAWednesday(DateTime $date) : bool {
+    return date('w', $date->getTimestamp()) === "3";
+  }
+
+  private static function getHour(DateTime $date) : int {
+    return date('H', $date->getTimestamp());
+  }
 }
 
