@@ -88,6 +88,9 @@ class SimplifiedRegistrationEvent {
 }
 
 class EmailSender {
+
+  private static $endl = "\r\n";
+
   /**
    * @param SimplifiedRegistrationEvent[] $returningMembers
    */
@@ -97,20 +100,42 @@ class EmailSender {
       // it makes it easier to check in a unit test that the check has been performed.
       throw new Exception("Called sendMailToWarnAboutReturningMembers with an empty array");
     }
-    mail(ADMIN_EMAIL, EMAIL_SUBJECT, $this->buildReturningMembersEmailBody($returningMembers));
+    mail(ADMIN_EMAIL_FOR_RETURNING_MEMBERS, EMAIL_SUBJECT_FOR_RETURNING_MEMBERS, $this->buildReturningMembersEmailBody($returningMembers));
   }
 
   function buildReturningMembersEmailBody(array $returningMembers) {
-    $endl = "\r\n";
-    $body = EMAIL_BODY_INTRODUCTION . $endl;
-    $body .= "Name; Email; Last registration date" . $endl;
+    $body = EMAIL_BODY_INTRODUCTION_FOR_RETURNING_MEMBERS . self::$endl;
+    $body .= "Name; Email; Last registration date" . self::$endl;
     foreach($returningMembers as $returningMember) {
       $body .= $returningMember->first_name . " " . $returningMember->last_name . "; "
         . $returningMember->email . "; "
         . $returningMember->event_date
-        . $endl;
+        . self::$endl;
     }
     return $body;
+  }
+
+  function sendEmailNotificationForAdminsAboutNewcomers(array $newMembers) {
+    $body = "";
+    if (empty($newMembers)) {
+      $body = "Oh non, il n'y a pas eu de nouveaux membres cette semaine ! :(";
+    } else {
+      $body = "Voici les " . count($newMembers) . " membres qui ont rejoint l'asso cette semaine." . self::$endl;
+      $body .= "(Attention : ce mail contient des données personnelles, ne le transférez pas, et pensez à le supprimer à terme.) " . self::$endl;
+      foreach($newMembers as $newMember) {
+        $body .= self::$endl;
+        $body .= $newMember->first_name . " " . $newMember->last_name . " (" . $newMember->email . ")" . self::$endl;
+        $body .= "Adhésion le " . $newMember->event_date . self::$endl;
+        $body .= "Réside à : " . $newMember->city . " (" . $newMember->postal_code . ")" . self::$endl;
+        $body .= "A connu l'asso : " . $newMember->how_did_you_know_zwp . self::$endl;
+        $body .= "Il/Elle est motivé par : " . $newMember->want_to_do . self::$endl;
+      }
+
+      $body .= self::endl;
+      $body .= "Il y a un projet en cours qui leur correspond ? Un GT qui recherche de nouveaux membres ? C’est le moment de leur dire et/ou d’en parler à un.e référent.e ! ";
+    }
+
+    mail(ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS, EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS, $body);
   }
 }
 
