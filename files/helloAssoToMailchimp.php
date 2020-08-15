@@ -9,6 +9,7 @@ require_once(ZWP_TOOLS . 'lib/mailchimp.php');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/outdatedMemberManager.php');
 require_once(ZWP_TOOLS . 'google/GoogleGroupConnector.php');
+require_once ZWP_TOOLS . 'lib/emailSender.php';
 
 $loggerInstance->log_info("*** Starting run ***");
 
