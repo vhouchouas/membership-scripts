@@ -27,8 +27,9 @@ $loggerInstance->log_info("retrieved data from HelloAsso. Got " . count($subscri
 // This has to be done before we actually register members, otherwise we'll consider they are still registered
 $mailchimpConnector = new MailChimpConnector();
 $googleGroupConnector = new GoogleGroupConnector();
+$emailSender = new EmailSender();
 $outdatedManager = new OutdatedMemberManager($now, array($mailchimpConnector, $googleGroupConnector));
-$outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $mysqlConnector, new EmailSender());
+$outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $mysqlConnector, $emailSender);
 
 // Register new members
 foreach($subscriptions as $subscription){
@@ -36,6 +37,9 @@ foreach($subscriptions as $subscription){
   $mailchimpConnector->registerEvent($subscription);
   $googleGroupConnector->registerEvent($subscription);
 }
+
+// Send weekly notification about new members if needed
+sendEmailNotificationForAdminsAboutNewcomersIfneeded($emailSender, $mysqlConnector, $lastSuccessfulRunDate, $now);
 
 // Remove outdated members if needed
 $outdatedManager->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $mysqlConnector);

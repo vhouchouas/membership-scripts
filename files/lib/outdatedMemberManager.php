@@ -9,7 +9,7 @@ class OutdatedMemberManager {
   private $dateUtil;
   private $groups;
 
-  public function __construct(DateTime $now, array $groupsWithDeletableUsers){
+  public function __construct(DateTime $now, array $groupsWithDeletableUsers = array()){
     $this->dateUtil = new RegistrationDateUtil($now);
     $this->groups = $groupsWithDeletableUsers;
   }

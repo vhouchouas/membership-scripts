@@ -3,6 +3,7 @@
 if(!defined('ZWP_TOOLS')){  die(); }
 register_shutdown_function( "fatal_handler" );
 require_once ZWP_TOOLS . 'lib/logging.php';
+require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
 
 function do_curl_query($curl){
   global $loggerInstance;
@@ -84,6 +85,19 @@ class SimplifiedRegistrationEvent {
     $this->email = $email;
     $this->event_date = $event_date;
     $this->postal_code = $postal_code;
+  }
+}
+
+function sendEmailNotificationForAdminsAboutNewcomersIfneeded(EmailSender $sender, MysqlConnector $mysql, DateTime $lastSuccessfulRun, DateTime $now) {
+  global $loggerInstance;
+  $dateUtil = new RegistrationDateUtil($now);
+  if ($dateUtil->needToSendNotificationAboutLatestRegistrations($lastSuccessfulRun)){
+    $loggerInstance->log_info("Going to send weekly email about newcomers");
+    $newcomers = $mysql->getRegistrationsForWhichNoNotificationHasBeenSentToAdmins();
+    $sender->sendEmailNotificationForAdminsAboutNewcomers($newcomers);
+    $mysql->updateRegistrationsForWhichNotificationHasBeenSentoToAdmins($newcomers);
+  } else {
+    $loggerInstance->log_info("Now isn't the time to send the email about newcomers");
   }
 }
 
