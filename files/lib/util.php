@@ -2,7 +2,9 @@
 
 if(!defined('ZWP_TOOLS')){  die(); }
 register_shutdown_function( "fatal_handler" );
+require_once ZWP_TOOLS . 'lib/emailSender.php';
 require_once ZWP_TOOLS . 'lib/logging.php';
+require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
 
 function do_curl_query($curl){
   global $loggerInstance;
@@ -87,30 +89,16 @@ class SimplifiedRegistrationEvent {
   }
 }
 
-class EmailSender {
-  /**
-   * @param SimplifiedRegistrationEvent[] $returningMembers
-   */
-  function sendMailToWarnAboutReturningMembers(array $returningMembers) : void {
-    if (count($returningMembers) == 0){
-      // Throw instead of returning because if we expect the check to be done by the client,
-      // it makes it easier to check in a unit test that the check has been performed.
-      throw new Exception("Called sendMailToWarnAboutReturningMembers with an empty array");
-    }
-    mail(ADMIN_EMAIL, EMAIL_SUBJECT, $this->buildReturningMembersEmailBody($returningMembers));
-  }
-
-  function buildReturningMembersEmailBody(array $returningMembers) {
-    $endl = "\r\n";
-    $body = EMAIL_BODY_INTRODUCTION . $endl;
-    $body .= "Name; Email; Last registration date" . $endl;
-    foreach($returningMembers as $returningMember) {
-      $body .= $returningMember->first_name . " " . $returningMember->last_name . "; "
-        . $returningMember->email . "; "
-        . $returningMember->event_date
-        . $endl;
-    }
-    return $body;
+function sendEmailNotificationForAdminsAboutNewcomersIfneeded(EmailSender $sender, MysqlConnector $mysql, DateTime $lastSuccessfulRun, DateTime $now) {
+  global $loggerInstance;
+  $dateUtil = new RegistrationDateUtil($now);
+  if ($dateUtil->needToSendNotificationAboutLatestRegistrations($lastSuccessfulRun)){
+    $loggerInstance->log_info("Going to send weekly email about newcomers");
+    $newcomers = $mysql->getRegistrationsForWhichNoNotificationHasBeenSentToAdmins();
+    $sender->sendEmailNotificationForAdminsAboutNewcomers($newcomers);
+    $mysql->updateRegistrationsForWhichNotificationHasBeenSentoToAdmins($newcomers);
+  } else {
+    $loggerInstance->log_info("Now isn't the time to send the email about newcomers");
   }
 }
 

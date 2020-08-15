@@ -16,8 +16,7 @@ final class Test_RegistrationDateUtil extends TestCase {
   }
 
   private function assertCorrectValidMembershipDate(DateTime $expected, DateTime $now, string $explanation): void{
-    $unusedArrayOfConnectors = array();
-    $sut = new RegistrationDateUtil($now, $unusedArrayOfConnectors);
+    $sut = new RegistrationDateUtil($now);
     $this->assertEquals($expected, $sut->getDateAfterWhichMembershipIsConsideredValid(), $explanation);
   }
 
@@ -44,8 +43,29 @@ final class Test_RegistrationDateUtil extends TestCase {
   }
 
   private function assertCorrectlyDetectNeedToDeleteOutdatedMember(bool $expected, DateTime $now, DateTime $lastRun, string $explanation){
-    $unusedArrayOfConnectors = array();
-    $sut = new OutdatedMemberManager($now, $unusedArrayOfConnectors);
+    $sut = new RegistrationDateUtil($now);
     $this->assertEquals($expected, $sut->needToDeleteOutdatedMembers($lastRun), $explanation);
   }
+
+  public function test_needToSendNotificationAboutLatestRegistrations(){
+    $now = new DateTime("2020-08-08T00:00:00", new DateTimeZone("Europe/Paris")); // Saturday
+    $sut = new RegistrationDateUtil($now);
+
+    // Test with a few days before or after the deadline
+    $this->assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(true, $now, new DateTime("2020-08-04"), "last run occured on Tuesday so it's time to send notification");
+    $this->assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(false, $now, new DateTime("2020-08-06"), "last run occured on Friday so we don't need to send notification");
+
+    // Test with a few seconds before or after the deadline
+    $oneSecondBefore = new DateTime("2020-08-05T17:59:59", new DateTimeZone("Europe/Paris"));
+    $oneSecondAfter  = new DateTime("2020-08-05T18:00:01", new DateTimeZone("Europe/Paris"));
+    $twoSecondsAfter = new DateTime("2020-08-05T18:00:02", new DateTimeZone("Europe/Paris"));
+    $this->assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(true, $oneSecondAfter, $oneSecondBefore, "last run occured a few second before deadline. We're a few second after. We should send the notif");
+    $this->assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(false, $twoSecondsAfter, $oneSecondAfter, "last run occured 1 second after this week's deadline so we don't need to send the notif");
+  }
+
+  private function assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(bool $expected, DateTime $now, DateTime $lastRun, string $explanation){
+    $sut = new RegistrationDateUtil($now);
+    $this->assertEquals($expected, $sut->needToSendNotificationAboutLatestRegistrations($lastRun), $explanation);
+  }
+
 }

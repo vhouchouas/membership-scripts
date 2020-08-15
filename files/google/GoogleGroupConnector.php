@@ -1,7 +1,7 @@
 <?php
 
 if(!defined('ZWP_TOOLS')){  die(); }
-require_once(ZWP_TOOLS . 'util.php');
+require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'config.php');
 
 require_once 'vendor/autoload.php';
@@ -33,7 +33,7 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
         $member->setRole("MEMBER");
         try {
             $this->service->members->insert(G_GROUP_NAME, $member);
-            $loggerInstance->log_info("Done with this registration in the Gogle group");
+            $loggerInstance->log_info("Done with this registration in the Google group");
         } catch(Google_Service_Exception $e){
             $reason = $e->getErrors()[0]["reason"];
             if($reason === "duplicate"){

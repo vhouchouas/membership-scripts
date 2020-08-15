@@ -30,19 +30,18 @@ class MysqlConnector {
     global $loggerInstance;
     try {
       $stmtGetRegistrations = $this->dbo->prepare(
-          "SELECT * from ("
-          . "  SELECT first_name, last_name, email, MAX(`date`) AS lastRegistrationDate, postal_code "
-          . "  FROM registration_events"
-          . "  GROUP BY email"
-          . ") AS tmp"
-          . " WHERE lastRegistrationDate > :until"
-          . " ORDER BY lastRegistrationDate");
+          "SELECT B.* FROM ("
+          . "   SELECT email, postal_code, max(date) AS date"
+          . "     FROM registration_events"
+          . "      WHERE date > :until"
+          . "      GROUP BY email"
+          . ") A INNER JOIN registration_events B USING (email, date)");
       $strDate = $this->dateTimeToMysqlStr($until); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
       $stmtGetRegistrations->bindParam(':until', $strDate);
       $stmtGetRegistrations->execute();
       $ret = array();
       while($row = $stmtGetRegistrations->fetch()){
-        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["postal_code"], $row["lastRegistrationDate"]);
+        $ret[] = new SimplifiedRegistrationEvent($row["first_name"], $row["last_name"], $row["email"], $row["postal_code"], $row["date"]);
       }
       return $ret;
     } catch(PDOException $e){
@@ -145,7 +144,7 @@ class MysqlConnector {
       $want_to_be_volunteer = $event->want_to_be_volunteer == "Oui";
       $is_zwf_adherent = $event->is_zwf_adherent == "Oui";
       $is_zw_professional = $event->is_zw_professional == "Oui";
-      $birth_date = is_null($event->birth_date) ? null : DateTime::createFromFormat('d/m/Y', $event->birth_date)->format('Y-m-d');
+      $birth_date = is_null($event->birth_date) ? null : self::helloAssoStringDateToPhpDate($event->birth_date)->format('Y-m-d');
 
       $this->stmt->bindParam(':id_HelloAsso', $event->helloasso_event_id);
       $this->stmt->bindParam(':date', $event->event_date);
@@ -174,6 +173,25 @@ class MysqlConnector {
         die();
       }
     }
+  }
+
+  /**
+   * We may get date formatted either like 04/12/1993 or 1993-12-04 00:00:00.0000000 so we
+   * check both format. Note that the latter case is a bit subtle because it has 7 trailing 0s
+   * whereas we should have only 6 if it was microseconds
+   */
+  public static function helloAssoStringDateToPhpDate(string $d){
+    global $loggerInstance;
+    $result = DateTime::createFromFormat('d/m/Y', $d);
+    if ($result === false){
+      $result = DateTime::createFromFormat('Y-m-d H:i:s.u0', $d); // trailing '0' in the format because of the 7 ones we may have in input
+    }
+    if ($result === false){
+      $errorMessage = "Fail to parse date: " . $d;
+      $loggerInstance->log_error($errorMessage);
+      throw new Exception($errorMessage);
+    }
+    return $result;
   }
 
   public function readLastSuccessfulRunStartDate() : DateTime {
@@ -218,5 +236,70 @@ class MysqlConnector {
     } catch(PDOException $e){
       $loggerInstance->log_error("Failed write to sql option with key $key and value $value because of error $e->getMessage())");
     }
+  }
+
+  public function getRegistrationsForWhichNoNotificationHasBeenSentToAdmins() : array {
+    global $loggerInstance;
+    try {
+      $stmt = $this->dbo->prepare("SELECT * FROM registration_events WHERE NOT notification_sent_to_admin");
+      $stmt->execute();
+      $ret = array();
+      while($row = $stmt->fetch()){
+        $registration = new RegistrationEvent();
+        $registration->helloasso_event_id = $row["id_HelloAsso"];
+        $registration->event_date = $row["date"];
+        $registration->amount = $row["amount"];
+        $registration->first_name = $row["first_name"];
+        $registration->last_name = $row["last_name"];
+        $registration->email = $row["email"];
+        $registration->phone = $row["phone"];
+        $registration->address = $row["address"];
+        $registration->postal_code = $row["postal_code"];
+        $registration->birth_date = $row["birth_date"];
+        $registration->city = $row["city"];
+        $registration->want_to_be_volunteer = $this->toHelloassoBoolString($row["want_to_be_volunteer"]);
+        $registration->is_zw_professional = $this->toHelloassoBoolString($row["is_zw_professional"]);
+        $registration->is_zwf_adherent = $this->toHelloassoBoolString($row["is_zwf_adherent"]);
+        $registration->how_did_you_know_zwp = $row["how_did_you_know_zwp"];
+        $registration->want_to_do = $row["want_to_do"];
+        $ret[] = $registration;
+      }
+      return $ret;
+    } catch(PDOException $e){
+      $loggerInstance->log_error("Failed to get regitrations for which no notification has been sent to admins. Error: " . $e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function updateRegistrationsForWhichNotificationHasBeenSentoToAdmins(array $registrations) : void {
+    if (empty($registrations)) {
+      // so the code afterwards doesn't have to handle this corner case
+      return;
+    }
+
+    global $loggerInstance;
+    try {
+      $in = str_repeat('?,', count($registrations)-1) . '?';
+      $stmt = $this->dbo->prepare("UPDATE registration_events SET notification_sent_to_admin=true WHERE id_HelloAsso IN ($in)");
+      $params = array();
+      foreach($registrations as $registration) {
+        $params[] = $registration->helloasso_event_id;
+      }
+      $stmt->execute($params);
+    } catch(PDOException $e) {
+      $loggerInstance->log_error("Failed to update registrations for which notification has been sent to admins because of error " . $e->getMessage());
+      throw $e;
+    }
+  }
+
+  /**
+   * Boolean fields received from helloasso have value "Oui" or "Non" (not sure if it's because of helloasso
+   * or because of the way we set up our registration form)
+   * Boolean fields are stored in mysql as tinyint (because mysql doesn't have a boolean type).
+   * This method converts boolean value from mysql into boolean value suitable for an object
+   * which represents data as received by helloasso.
+   */
+  private static function toHelloassoBoolString($sqlBool) {
+    return $sqlBool ? "Oui" : "Non";
   }
 }

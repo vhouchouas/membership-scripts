@@ -9,7 +9,7 @@ class OutdatedMemberManager {
   private $dateUtil;
   private $groups;
 
-  public function __construct(DateTime $now, array $groupsWithDeletableUsers){
+  public function __construct(DateTime $now, array $groupsWithDeletableUsers = array()){
     $this->dateUtil = new RegistrationDateUtil($now);
     $this->groups = $groupsWithDeletableUsers;
   }
@@ -56,7 +56,7 @@ class OutdatedMemberManager {
   global $loggerInstance;
     $returningMembers = $this->findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently($subscriptions, $mysql);
     if (count($returningMembers) > 0){
-      $loggerInstance->log_info("Got " . count($returningMembers) . ". Going to send a notification");
+      $loggerInstance->log_info("Got " . count($returningMembers) . " returning members. Going to send a notification");
       $emailSender->sendMailToWarnAboutReturningMembers($returningMembers);
     } else {
       $loggerInstance->log_info("No returning members. We don't send a notification.");

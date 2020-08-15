@@ -21,6 +21,10 @@ define("DB_HOST", 'TO_FILL');
 define("G_GROUP_NAME",  "TO_FILL");
 
 //Conf to tell about returning members
-define("ADMIN_EMAIL", "TO_FILL");
-define("EMAIL_SUBJECT", "TO_FILL");
-define("EMAIL_BODY_INTRODUCTION", "TO_FILL");
+define("ADMIN_EMAIL_FOR_RETURNING_MEMBERS", "TO_FILL");
+define("EMAIL_SUBJECT_FOR_RETURNING_MEMBERS", "TO_FILL");
+define("EMAIL_BODY_INTRODUCTION_FOR_RETURNING_MEMBERS", "TO_FILL");
+
+//Conf to tell about all new registrations
+define("ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS", "TO_FILL");
+define("EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS", "TO_FILL");
