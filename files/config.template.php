@@ -20,6 +20,9 @@ define("DB_HOST", 'TO_FILL');
 //Conf for google
 define("G_GROUP_NAME",  "TO_FILL");
 
+//Generic conf for emails
+define("FROM", "webmaster@yourdomain.com");
+
 //Conf to tell about returning members
 define("ADMIN_EMAIL_FOR_RETURNING_MEMBERS", "TO_FILL");
 define("EMAIL_SUBJECT_FOR_RETURNING_MEMBERS", "TO_FILL");

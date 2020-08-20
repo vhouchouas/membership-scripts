@@ -2,6 +2,7 @@
 if(!defined('ZWP_TOOLS')){  die(); }
 
 require_once ZWP_TOOLS . 'lib/logging.php';
+require_once ZWP_TOOLS . 'config.php';
 
 class EmailSender {
 
@@ -52,5 +53,11 @@ class EmailSender {
     }
 
     mail(ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS, EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS, $body);
+  }
+
+  function sendMail($to, $subject, $message) {
+    $headers = 'From: ' . FROM . "\r\n" .
+      "Content-Type: text/plain; charset=UTF-8";
+    mail($to, $subject, $message, $headers);
   }
 }
