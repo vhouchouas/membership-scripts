@@ -31,3 +31,6 @@ define("EMAIL_BODY_INTRODUCTION_FOR_RETURNING_MEMBERS", "TO_FILL");
 //Conf to tell about all new registrations
 define("ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS", "TO_FILL");
 define("EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS", "TO_FILL");
+
+//To who mails for error logs should be sent
+define("ADMIN_EMAIL_FOR_ERRORS", "TO_FILL");

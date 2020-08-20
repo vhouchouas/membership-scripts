@@ -17,7 +17,7 @@ class ProdLogger implements Logger {
     $full_message = $this->get_log_prefix() . $message;
     $this->log_to_console_and_file("[ERR]" . $full_message);
     error_log($full_message, 4 /*write in apache logs*/);
-    error_log($full_message, 1 /*send an email*/, "outils_numeriques@zerowasteparis.fr");
+    error_log($full_message, 1 /*send an email*/, ADMIN_EMAIL_FOR_ERRORS);
   }
 
   private function log_to_console_and_file(string $full_message): void{
