@@ -57,7 +57,10 @@ class EmailSender {
 
   function sendMail($to, $subject, $message) {
     $headers = 'From: ' . FROM . "\r\n" .
-      "Content-Type: text/plain; charset=UTF-8";
-    mail($to, $subject, $message, $headers);
+      "Content-Type: text/plain; charset=UTF-8 \r\n" .
+      "MIME-Version: 1.0 \r\n" .
+      "Content-Transfer-Encoding: base64";
+    $subject = "=?UTF-8?B?".base64_encode($subject)."?=";
+    mail($to, $subject, base64_encode($message), $headers);
   }
 }
