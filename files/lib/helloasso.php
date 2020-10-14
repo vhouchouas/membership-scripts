@@ -47,10 +47,10 @@ class HelloAssoConnector {
         case "Date de naissance":
            $result->birth_date = $custom_info["value"];
            break;
-        case "Si oui, sur quels projets souhaites-tu t'investir?":
+        case "Sur quels projets souhaiterais-tu t'investir?":
            $result->want_to_do = $custom_info["value"];
            break;
-        case "Comment as-tu connu le groupe local? ": //beware of the trailing whitespace
+        case "Comment as-tu connu le groupe local?": //beware of the trailing whitespace
            $result->how_did_you_know_zwp = $custom_info["value"];
            break;
       }
