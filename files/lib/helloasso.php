@@ -46,6 +46,9 @@ class HelloAssoConnector {
         case "Es-tu déjà adhérent⋅e à Zero Waste France ?":
            $result->is_zwf_adherent = $custom_info["value"];
            break;
+        case "Es-tu bénévole à la Maison du Zéro Déchet ?":
+           $result->is_mzd_volunteer = $custom_info["value"];
+           break;
         case "Portes-tu un projet professionnel autour du zéro déchet ?":
            $result->is_zw_professional = $custom_info["value"];
            break;
