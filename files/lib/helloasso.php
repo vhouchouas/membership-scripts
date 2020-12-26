@@ -52,6 +52,9 @@ class HelloAssoConnector {
         case "Portes-tu un projet professionnel autour du zéro déchet ?":
            $result->is_zw_professional = $custom_info["value"];
            break;
+        case "Si tu étais déjà adhérent⋅e l'an dernier, quand as-tu rejoint l'asso pour la première fois ?":
+           $result->is_already_member_since = $custom_info["value"];
+           break;
         case "Devenir Membre Actif bénévole pour participer aux activités sur le terrain (Accès aux outils interne de communication)":
            $result->want_to_be_volunteer = $custom_info["value"];
            break;   
