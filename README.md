@@ -88,6 +88,7 @@ If we ever want to recreate the database, here is the schema:
       `is_zwf_adherent` tinyint(1) DEFAULT NULL,
       `is_zw_professional` tinyint(1) NOT NULL,
       `is_mzd_volunteer` tinyint(1) NOT NULL,
+      `is_already_member_since` smallint DEFAULT NULL,
       `want_to_do` varchar(1000) DEFAULT NULL,
       `how_did_you_know_zwp` varchar(1000) DEFAULT NULL,
       `notification_sent_to_admins` tinyint(1) NOT NULL DEFAULT 0
