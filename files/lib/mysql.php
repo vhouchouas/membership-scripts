@@ -14,7 +14,7 @@ class MysqlConnector {
       $cnxString = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
       $this->dbo = new PDO($cnxString, DB_USER, DB_PASSWORD);
       $this->dbo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->stmt  = $this->dbo->prepare("INSERT INTO registration_events (id_HelloAsso, date, amount, first_name, last_name, email, phone, birth_date, address, postal_code, city, want_to_be_volunteer, is_zwf_adherent, is_zw_professional, how_did_you_know_zwp, want_to_do) VALUES (:id_HelloAsso, :date, :amount, :first_name, :last_name, :email, :phone, :birth_date, :address, :postal_code, :city, :want_to_be_volunteer, :is_zwf_adherent, :is_zw_professional, :how_did_you_know_zwp, :want_to_do)");
+      $this->stmt  = $this->dbo->prepare("INSERT INTO registration_events (id_HelloAsso, date, amount, first_name, last_name, email, phone, birth_date, address, postal_code, city, want_to_be_volunteer, is_zwf_adherent, is_zw_professional, how_did_you_know_zwp, want_to_do, is_mzd_volunteer, is_already_member_since) VALUES (:id_HelloAsso, :date, :amount, :first_name, :last_name, :email, :phone, :birth_date, :address, :postal_code, :city, :want_to_be_volunteer, :is_zwf_adherent, :is_zw_professional, :how_did_you_know_zwp, :want_to_do, :is_mzd_volunteer, :is_already_member_since)");
     } catch(PDOException $e){
       $loggerInstance->log_error("Failed to connect to mysql: " . $e->getMessage());
       die();
