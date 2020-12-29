@@ -69,6 +69,8 @@ class RegistrationEvent {
   public $want_to_be_volunteer; // Beware, this is a string with value either "Oui" or "Non"
   public $is_zw_professional;   // Beware, this is a string with value either "Oui" or "Non"
   public $is_zwf_adherent;      // Beware, this is a string with value either "Oui" or "Non"
+  public $is_mzd_volunteer;     // Beware, this is a string with value either "Oui" or "Non"
+  public $is_already_member_since;
   public $how_did_you_know_zwp;
   public $want_to_do;
 }
