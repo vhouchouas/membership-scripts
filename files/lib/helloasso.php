@@ -34,6 +34,9 @@ class HelloAssoConnector {
         case "Date de naissance":
            $result->birth_date = $custom_info["value"];
            break; 
+        case "Déjà adhérent à Zero Waste France?": //Legacy field. Not used  starting in 2021
+          $result->is_zwf_adherent = $custom_info["value"];
+           break;
         case "Numéro de téléphone":
            $result->phone = $custom_info["value"];
            break;
