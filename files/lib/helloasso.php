@@ -37,6 +37,9 @@ class HelloAssoConnector {
         case "Déjà adhérent à Zero Waste France?": //Legacy field. Not used  starting in 2021
           $result->is_zwf_adherent = $custom_info["value"];
            break;
+        case "Porteur d’un projet professionnel sur la démarche zéro déchet, zéro gaspillage?": //Legacy field. Not used starting in 2021
+           $result->is_zw_professional = $custom_info["value"];
+           break;
         case "Numéro de téléphone":
            $result->phone = $custom_info["value"];
            break;
