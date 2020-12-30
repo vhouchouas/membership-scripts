@@ -16,43 +16,51 @@ class HelloAssoConnector {
 
     foreach($json["custom_infos"] as $custom_info){
       switch($custom_info["label"]){
-        case "Ville":
-          $result->city = $custom_info["value"];
-          break;
-        case "Code Postal":
-          $result->postal_code = $custom_info["value"];
-          break;
+        case "Email":
+           // Don't use $json["email"] because it may not be the correct one when several people registered at once
+           $result->email = $custom_info["value"];
+           break;
         case "Adresse":
-          $result->address = $custom_info["value"];
-          break;
-        case "Devenir Membre Actif bénévole pour participer aux activités sur le terrain (Accès aux outils interne de communication)":
-          $result->want_to_be_volunteer = $custom_info["value"];
-          break;
-        case "Déjà adhérent à Zero Waste France?":
+           // HelloAsso native label for this field. Shouldn't be changed in HelloAsso
+           $result->address = $custom_info["value"];
+           break;
+        case "Ville":
+           $result->city = $custom_info["value"];
+           break;
+        case "Code Postal":
+           // HelloAsso native label for this field. Shouldn't be changed in HelloAsso.
+           $result->postal_code = $custom_info["value"];
+           break;
+        case "Date de naissance":
+           $result->birth_date = $custom_info["value"];
+           break; 
+        case "Déjà adhérent à Zero Waste France?": //Legacy field. Not used  starting in 2021
           $result->is_zwf_adherent = $custom_info["value"];
            break;
         case "Numéro de téléphone":
            $result->phone = $custom_info["value"];
            break;
-        case "Porteur d’un projet professionnel sur la démarche zéro déchet, zéro gaspillage?":
-           $result->is_zw_professional = $custom_info["value"];
-           break;
-        case "Email":
-           // Don't use $json["email"] because it may not be the correct one when several people registered at once
-           $result->email = $custom_info["value"];
-           break;
-        case "Ville":
-           $result->city = $custom_info["value"];
-           break;
-        case "Date de naissance":
-           $result->birth_date = $custom_info["value"];
-           break;
-        case "Sur quels projets souhaiterais-tu t'investir?":
-           $result->want_to_do = $custom_info["value"];
-           break;
-        case "Comment as-tu connu le groupe local?": //beware of the trailing whitespace
+        case "Comment as-tu connu Zero Waste Paris ?": //beware of the trailing whitespace
            $result->how_did_you_know_zwp = $custom_info["value"];
            break;
+        case "Sur quels projets souhaites-tu t'investir ?":
+           $result->want_to_do = $custom_info["value"];
+           break;
+        case "Es-tu déjà adhérent⋅e à Zero Waste France ?":
+           $result->is_zwf_adherent = $custom_info["value"];
+           break;
+        case "Es-tu bénévole à la Maison du Zéro Déchet ?":
+           $result->is_mzd_volunteer = $custom_info["value"];
+           break;
+        case "Portes-tu un projet professionnel autour du zéro déchet ?":
+           $result->is_zw_professional = $custom_info["value"];
+           break;
+        case "Si tu étais déjà adhérent⋅e l'an dernier, quand as-tu rejoint l'asso pour la première fois ?":
+           $result->is_already_member_since = $custom_info["value"];
+           break;
+        case "Devenir Membre Actif bénévole pour participer aux activités sur le terrain (Accès aux outils interne de communication)":
+           $result->want_to_be_volunteer = $custom_info["value"];
+           break;   
       }
     }
 

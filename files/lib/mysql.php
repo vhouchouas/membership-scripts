@@ -14,7 +14,7 @@ class MysqlConnector {
       $cnxString = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
       $this->dbo = new PDO($cnxString, DB_USER, DB_PASSWORD);
       $this->dbo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->stmt  = $this->dbo->prepare("INSERT INTO registration_events (id_HelloAsso, date, amount, first_name, last_name, email, phone, birth_date, address, postal_code, city, want_to_be_volunteer, is_zwf_adherent, is_zw_professional, how_did_you_know_zwp, want_to_do) VALUES (:id_HelloAsso, :date, :amount, :first_name, :last_name, :email, :phone, :birth_date, :address, :postal_code, :city, :want_to_be_volunteer, :is_zwf_adherent, :is_zw_professional, :how_did_you_know_zwp, :want_to_do)");
+      $this->stmt  = $this->dbo->prepare("INSERT INTO registration_events (id_HelloAsso, date, amount, first_name, last_name, email, phone, birth_date, address, postal_code, city, want_to_be_volunteer, is_zwf_adherent, is_zw_professional, how_did_you_know_zwp, want_to_do, is_mzd_volunteer, is_already_member_since) VALUES (:id_HelloAsso, :date, :amount, :first_name, :last_name, :email, :phone, :birth_date, :address, :postal_code, :city, :want_to_be_volunteer, :is_zwf_adherent, :is_zw_professional, :how_did_you_know_zwp, :want_to_do, :is_mzd_volunteer, :is_already_member_since)");
     } catch(PDOException $e){
       $loggerInstance->log_error("Failed to connect to mysql: " . $e->getMessage());
       die();
@@ -143,6 +143,7 @@ class MysqlConnector {
       $loggerInstance->log_info("Going to register on mysql user " . $event->first_name . " " . $event->last_name);
       $want_to_be_volunteer = $event->want_to_be_volunteer == "Oui";
       $is_zwf_adherent = $event->is_zwf_adherent == "Oui";
+      $is_mzd_volunteer = $event->is_mzd_volunteer == "Oui";
       $is_zw_professional = $event->is_zw_professional == "Oui";
       $birth_date = is_null($event->birth_date) ? null : self::helloAssoStringDateToPhpDate($event->birth_date)->format('Y-m-d');
 
@@ -160,6 +161,8 @@ class MysqlConnector {
       $this->stmt->bindParam(':want_to_be_volunteer', $want_to_be_volunteer);
       $this->stmt->bindParam(':is_zwf_adherent', $is_zwf_adherent);
       $this->stmt->bindParam(':is_zw_professional', $is_zw_professional);
+      $this->stmt->bindParam(':is_mzd_volunteer', $is_mzd_volunteer);
+      $this->stmt->bindParam(':is_already_member_since', $is_already_member_since);
       $this->stmt->bindParam(':how_did_you_know_zwp', $event->how_did_you_know_zwp);
       $this->stmt->bindParam(':want_to_do', $event->want_to_do);
 
