@@ -162,7 +162,7 @@ class MysqlConnector {
       $this->stmt->bindParam(':is_zwf_adherent', $is_zwf_adherent);
       $this->stmt->bindParam(':is_zw_professional', $is_zw_professional);
       $this->stmt->bindParam(':is_mzd_volunteer', $is_mzd_volunteer);
-      $this->stmt->bindParam(':is_already_member_since', $is_already_member_since);
+      $this->stmt->bindParam(':is_already_member_since', $event->is_already_member_since);
       $this->stmt->bindParam(':how_did_you_know_zwp', $event->how_did_you_know_zwp);
       $this->stmt->bindParam(':want_to_do', $event->want_to_do);
 
