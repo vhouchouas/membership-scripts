@@ -70,6 +70,6 @@ fi
 
 # Releasing
 echo "All good, we're going to perform the release"
-rsync -avz --delete --size-only "$FILES_DIR/" "$RSYNC_DESTINATION"
+rsync -avz --delete "$FILES_DIR/" "$RSYNC_DESTINATION"
 
 echo DONE
