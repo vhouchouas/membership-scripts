@@ -7,9 +7,11 @@ require_once(ZWP_TOOLS . 'config.php');
 class MysqlConnector {
   const OPTIONS_TABLE = "script_options";
   const OPTION_LASTSUCCESSFULRUN_KEY = "last_successful_run_date";
+  private $debug;
 
-  public function __construct(){
+  public function __construct(bool $debug){
     global $loggerInstance;
+    $this->debug = $debug;
     try {
       $cnxString = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
       $this->dbo = new PDO($cnxString, DB_USER, DB_PASSWORD);
@@ -122,11 +124,7 @@ class MysqlConnector {
 
       $strDate = $this->dateTimeToMysqlStr($upTo); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
       $stmtDeleteOldRegistrations->bindParam(':upTo', $strDate);
-      $ret = $stmtDeleteOldRegistrations->execute();
-      if ($ret === FALSE) {
-        $loggerInstance->log_error("delete query returned FALSE. Something unexpected went wrong");
-        die();
-      }
+      $this->executeWriteOrDeleteStatement($stmtDeleteOldRegistrations, "delete old registrations");
     } catch(PDOException $e){
       $loggerInstance->log_error("Failed to delete old registrations: " . $e->getMessage());
       die();
@@ -166,7 +164,7 @@ class MysqlConnector {
       $this->stmt->bindParam(':how_did_you_know_zwp', $event->how_did_you_know_zwp);
       $this->stmt->bindParam(':want_to_do', $event->want_to_do);
 
-      $this->stmt->execute();
+      $this->executeWriteOrDeleteStatement($this->stmt, "insert event in db");
       $loggerInstance->log_info("Done with this mysql registration");
     } catch(PDOException $e){
       if($e->errorInfo[1] == 1062){ // case of duplicated entry. See https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_dup_entry
@@ -235,7 +233,7 @@ class MysqlConnector {
       $stmtOpt = $this->dbo->prepare("UPDATE " . self::OPTIONS_TABLE . " SET value=:value WHERE `key`=:key");
       $stmtOpt->bindParam(':value', $value);
       $stmtOpt->bindParam(':key', $key);
-      $stmtOpt->execute();
+      $this->executeWriteOrDeleteStatement($stmtOpt, "write option $key");
     } catch(PDOException $e){
       $loggerInstance->log_error("Failed write to sql option with key $key and value $value because of error $e->getMessage())");
     }
@@ -288,7 +286,7 @@ class MysqlConnector {
       foreach($registrations as $registration) {
         $params[] = $registration->helloasso_event_id;
       }
-      $stmt->execute($params);
+      $this->executeWriteOrDeleteStatement($stmt, "update registration for which notification has been sent to admin");
     } catch(PDOException $e) {
       $loggerInstance->log_error("Failed to update registrations for which notification has been sent to admins because of error " . $e->getMessage());
       throw $e;
@@ -304,5 +302,18 @@ class MysqlConnector {
    */
   private static function toHelloassoBoolString($sqlBool) {
     return $sqlBool ? "Oui" : "Non";
+  }
+
+  private function executeWriteOrDeleteStatement($stmt, $description){
+    global $loggerInstance;
+    if($this->debug){
+      $loggerInstance->log_info("debug mode: we don't $description");
+    } else {
+      $ret = $stmt->execute();
+      if ($ret === FALSE) {
+        $loggerInstance->log_error("Failed query to $description. Something unexpected went wrong");
+        die();
+      }
+    }
   }
 }

@@ -5,6 +5,11 @@ require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'config.php');
 
 class MailChimpConnector implements GroupWithDeletableUsers {
+  private $debug;
+
+  function __construct(bool $debug){
+    $this->debug = $debug;
+  }
 
   private function registrationEventToJsonPayload(RegistrationEvent $event){
     $merge_fields = array();
@@ -44,18 +49,22 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     curl_setopt($curl, CURLOPT_POSTFIELDS, $payload_str);
     curl_setopt($curl, CURLOPT_USERPWD, MC_USERPWD);
 
-    // Just for debug.
-    // /!\ Beware: uncommenting it would leak our secret token /!\
-    // echo "Going to run: curl -XPOST -d '$payload_str' --user '" . MC_USERPWD ."' '". MC_LIST_URL . "'";
+    if ($this->debug){
+      $loggerInstance->log_info("Debug mode: we skip mailchimp registration");
+    } else {
+      // Just for debug.
+      // /!\ Beware: uncommenting it would leak our secret token /!\
+      // echo "Going to run: curl -XPOST -d '$payload_str' --user '" . MC_USERPWD ."' '". MC_LIST_URL . "'";
 
-    $loggerInstance->log_info("Going to register on MailChimp user " . $event->first_name . " " . $event->last_name);
-    $response = do_curl_query($curl)->response;
+      $loggerInstance->log_info("Going to register on MailChimp user " . $event->first_name . " " . $event->last_name);
+      $response = do_curl_query($curl)->response;
 
-    if ( strpos($response, "is already a list member") !== FALSE ){
-      $loggerInstance->log_info("This user was already registered. Moving on");
-    } else if ( strpos($response, '"status":"subscribed"') === FALSE // when a user is correctly registered we should get this
-               || strpos($response, '"status":4') !== FALSE ){ // status 4 is ok when it's because member was already registered. Otherwise it's weird
-      $loggerInstance->log_error("Unexpexted answer from mailchimp: got: " . $response); //TODO: log it as an error once in prod
+      if ( strpos($response, "is already a list member") !== FALSE ){
+        $loggerInstance->log_info("This user was already registered. Moving on");
+      } else if ( strpos($response, '"status":"subscribed"') === FALSE // when a user is correctly registered we should get this
+          || strpos($response, '"status":4') !== FALSE ){ // status 4 is ok when it's because member was already registered. Otherwise it's weird
+        $loggerInstance->log_error("Unexpexted answer from mailchimp: got: " . $response); //TODO: log it as an error once in prod
+      }
     }
     $loggerInstance->log_info("Done with this registration");
   }
@@ -73,17 +82,21 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
     curl_setopt($curl, CURLOPT_USERPWD, MC_USERPWD);
 
-    $loggerInstance->log_info("Going to archive from Mailchimp user " . $email);
-    $curl_result = do_curl_query($curl);
-    if ( strpos($curl_result->response, "Resource Not Found") !== FALSE ){
-      $loggerInstance->log_info("Couldn't archive: this email has probably never been in the list");
-    } else if ( strpos($curl_result->response, "This list member cannot be removed") !== FALSE ){
-      $loggerInstance->log_info("Couldn't archive: this email was probably already deleted");
-    } else if ($curl_result->httpCode === 204){
-      $loggerInstance->log_info("The user has been successful archived");
+    if ($this->debug){
+      $loggerInstance->log_info("Debug mode: skipping deleting user from mailchimp");
     } else {
-      $loggerInstance->log_error("Unexpected return when trying to delete $email from mailchimp: http code: " . $curl_result->httpCode . ", response: " . $curl_result->response);
-      die();
+      $loggerInstance->log_info("Going to archive from Mailchimp user " . $email);
+      $curl_result = do_curl_query($curl);
+      if ( strpos($curl_result->response, "Resource Not Found") !== FALSE ){
+        $loggerInstance->log_info("Couldn't archive: this email has probably never been in the list");
+      } else if ( strpos($curl_result->response, "This list member cannot be removed") !== FALSE ){
+        $loggerInstance->log_info("Couldn't archive: this email was probably already deleted");
+      } else if ($curl_result->httpCode === 204){
+        $loggerInstance->log_info("The user has been successful archived");
+      } else {
+        $loggerInstance->log_error("Unexpected return when trying to delete $email from mailchimp: http code: " . $curl_result->httpCode . ", response: " . $curl_result->response);
+        die();
+      }
     }
   }
 

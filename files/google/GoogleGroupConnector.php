@@ -9,11 +9,13 @@ include "google_client.php";
 
 class GoogleGroupConnector implements GroupWithDeletableUsers {
     var $service;
+    private $debug;
 
-    function __construct()
+    function __construct(bool $debug)
     {
         $client = getClient();
         $this->service = new Google_Service_Directory($client);
+        $this->debug = $debug;
     }
 
     function registerEvent(RegistrationEvent $event){
@@ -31,19 +33,23 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
         $member = new Google_Service_Directory_Member();
         $member->setEmail($email);
         $member->setRole("MEMBER");
-        try {
+        if ($this->debug) {
+          $loggerInstance->log_info("Debug mode: skipping Google registration");
+        } else {
+          try {
             $this->service->members->insert(G_GROUP_NAME, $member);
             $loggerInstance->log_info("Done with this registration in the Google group");
-        } catch(Google_Service_Exception $e){
+          } catch(Google_Service_Exception $e){
             $reason = $e->getErrors()[0]["reason"];
             if($reason === "duplicate"){
-                $loggerInstance->log_info("This member already exists");
+              $loggerInstance->log_info("This member already exists");
             } else if ($reason === "notFound"){
-                $loggerInstance->log_error("Error 'not found'. Perhaps the email adress $email is invalid?");
+              $loggerInstance->log_error("Error 'not found'. Perhaps the email adress $email is invalid?");
             } else {
-                $loggerInstance->log_error("Unknow error: " . $e);
-                die();
+              $loggerInstance->log_error("Unknow error: " . $e);
+              die();
             }
+          }
         }
     }
 
@@ -56,16 +62,20 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
     function deleteUser(string $email): void{
         global $loggerInstance;
         $loggerInstance->log_info("Going to delete from " . G_GROUP_NAME . " the email " . $email);
-        try {
+        if ($this->debug) {
+          $loggerInstance->log_info("Debug mode: skipping deletion from Google");
+        } else {
+          try {
             $this->service->members->delete(G_GROUP_NAME, $email);
             $loggerInstance->log_info("Done with this deletion");
-        } catch(Google_Service_Exception $e){
+          } catch(Google_Service_Exception $e){
             if($e->getErrors()[0]["message"] === "Resource Not Found: memberKey"){
-                $loggerInstance->log_info("This email wasn't in the group already");
+              $loggerInstance->log_info("This email wasn't in the group already");
             } else {
-                $loggerInstance->log_error("Unknown error: " . $e);
-                die();
+              $loggerInstance->log_error("Unknown error: " . $e);
+              die();
             }
+          }
         }
     }
 

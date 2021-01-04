@@ -1,7 +1,10 @@
 <?php
 define('ZWP_TOOLS', dirname(__FILE__).'/');
+
+$debug = !isset($_REQUEST["debug"]) || $_REQUEST["debug"] !== "false";
+
 require_once(ZWP_TOOLS . 'lib/logging.php');
-$loggerInstance = new ProdLogger();
+$loggerInstance = new ProdLogger($debug);
 
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
@@ -15,7 +18,7 @@ $loggerInstance->log_info("*** Starting run ***");
 
 // derive dates to use
 $now            = new DateTime();
-$mysqlConnector = new MysqlConnector();
+$mysqlConnector = new MysqlConnector($debug);
 $lastSuccessfulRunDate = $mysqlConnector->readLastSuccessfulRunStartDate();
 $loggerInstance->log_info("Last successful run was at " . dateToStr($lastSuccessfulRunDate) . ". Starting now at " . dateToStr($now) . ".");
 
@@ -26,9 +29,9 @@ $loggerInstance->log_info("retrieved data from HelloAsso. Got " . count($subscri
 
 // Look for old members who weren't registered anymore, and tell admins so that can re-enable their Slack account.
 // This has to be done before we actually register members, otherwise we'll consider they are still registered
-$mailchimpConnector = new MailChimpConnector();
-$googleGroupConnector = new GoogleGroupConnector();
-$emailSender = new EmailSender();
+$mailchimpConnector = new MailChimpConnector($debug);
+$googleGroupConnector = new GoogleGroupConnector($debug);
+$emailSender = new EmailSender($debug);
 $outdatedManager = new OutdatedMemberManager($now, array($mailchimpConnector, $googleGroupConnector));
 $outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $mysqlConnector, $emailSender);
 

@@ -8,6 +8,16 @@ interface Logger {
 
 class ProdLogger implements Logger {
   private static $log_file = ZWP_TOOLS . "../HelloAsso_To_Mailchimp_glue.log";
+  private $debug;
+
+  public function __construct(bool $debug){
+    $this->debug = $debug;
+    $this->log_info("Using prodLogger. Debug flag is: " . self::boolToStr($this->debug));
+  }
+
+  private static function boolToStr(bool $bool) {
+    return $bool ? "TRUE" : "FALSE";
+  }
 
   public function log_info(string $message): void{
     $this->log_to_console_and_file("[INF]" . $this->get_log_prefix() . $message);
@@ -16,13 +26,17 @@ class ProdLogger implements Logger {
   public function log_error(string $message): void{
     $full_message = $this->get_log_prefix() . $message;
     $this->log_to_console_and_file("[ERR]" . $full_message);
-    error_log($full_message, 4 /*write in apache logs*/);
-    error_log($full_message, 1 /*send an email*/, ADMIN_EMAIL_FOR_ERRORS);
+    if (!$this->debug){
+      error_log($full_message, 4 /*write in apache logs*/);
+      error_log($full_message, 1 /*send an email*/, ADMIN_EMAIL_FOR_ERRORS);
+    }
   }
 
   private function log_to_console_and_file(string $full_message): void{
     echo $full_message.  "\n";
-    error_log($full_message . "\n", 3 /*write to file*/, self::$log_file);
+    if (!$this->debug){
+      error_log($full_message . "\n", 3 /*write to file*/, self::$log_file);
+    }
   }
 
   private function get_log_prefix(): string{

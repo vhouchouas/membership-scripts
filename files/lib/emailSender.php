@@ -7,6 +7,11 @@ require_once ZWP_TOOLS . 'config.php';
 class EmailSender {
 
   private static $endl = "\r\n";
+  private $debug;
+
+  function __construct(bool $debug){
+    $this->debug = $debug;
+  }
 
   /**
    * @param SimplifiedRegistrationEvent[] $returningMembers
@@ -56,11 +61,16 @@ class EmailSender {
   }
 
   function sendMail($to, $subject, $message) {
+    global $loggerInstance;
     $headers = 'From: ' . FROM . "\r\n" .
       "Content-Type: text/plain; charset=UTF-8 \r\n" .
       "MIME-Version: 1.0 \r\n" .
       "Content-Transfer-Encoding: base64";
     $subject = "=?UTF-8?B?".base64_encode($subject)."?=";
-    mail($to, $subject, base64_encode($message), $headers);
+    if($this->debug){
+      $loggerInstance->log_info("debug mode: we don't send an email");
+    } else {
+      mail($to, $subject, base64_encode($message), $headers);
+    }
   }
 }
