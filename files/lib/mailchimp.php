@@ -63,7 +63,7 @@ class MailChimpConnector implements GroupWithDeletableUsers {
         $loggerInstance->log_info("This user was already registered. Moving on");
       } else if ( strpos($response, '"status":"subscribed"') === FALSE // when a user is correctly registered we should get this
           || strpos($response, '"status":4') !== FALSE ){ // status 4 is ok when it's because member was already registered. Otherwise it's weird
-        $loggerInstance->log_error("Unexpexted answer from mailchimp: got: " . $response); //TODO: log it as an error once in prod
+        $loggerInstance->log_error("Unexpexted answer from mailchimp: got: " . $response);
       }
     }
     $loggerInstance->log_info("Done with this registration");
