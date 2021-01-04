@@ -66,7 +66,6 @@ class RegistrationEvent {
   public $postal_code;
   public $birth_date; // String with format dd/mm/yyyy
   public $city;
-  public $want_to_be_volunteer; // Beware, this is a string with value either "Oui" or "Non"
   public $is_zw_professional;   // Beware, this is a string with value either "Oui" or "Non"
   public $is_zwf_adherent;      // Beware, this is a string with value either "Oui" or "Non"
   public $is_mzd_volunteer;     // Beware, this is a string with value either "Oui" or "Non"

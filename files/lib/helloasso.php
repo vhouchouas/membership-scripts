@@ -58,9 +58,6 @@ class HelloAssoConnector {
       }
     }
 
-    // legacy field. Always set to "Oui" until we remove it from the schemas of our storages
-    $result->want_to_be_volunteer = "Oui";
-
     return $result;
   }
 

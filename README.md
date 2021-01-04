@@ -84,7 +84,6 @@ If we ever want to recreate the database, here is the schema:
       `address` varchar(100) DEFAULT NULL,
       `postal_code` varchar(10) DEFAULT NULL,
       `city` varchar(30) DEFAULT NULL,
-      `want_to_be_volunteer` tinyint(1) NOT NULL,
       `is_zwf_adherent` tinyint(1) DEFAULT NULL,
       `is_zw_professional` tinyint(1) NOT NULL,
       `is_mzd_volunteer` tinyint(1) NOT NULL,

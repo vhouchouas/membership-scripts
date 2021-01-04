@@ -20,10 +20,6 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
 
     function registerEvent(RegistrationEvent $event){
         global $loggerInstance;
-        if($event->want_to_be_volunteer !== "Oui"){
-            $loggerInstance->log_info($event->email . " doesn't want to be a volunteer so we skip ggroup insertion");
-            return;
-        }
         $this->registerEmailToGroup($event->email);
     }
 
