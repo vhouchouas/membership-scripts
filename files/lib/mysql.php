@@ -283,7 +283,11 @@ class MysqlConnector {
       foreach($registrations as $registration) {
         $params[] = $registration->helloasso_event_id;
       }
-      $this->executeWriteOrDeleteStatement($stmt, "update registration for which notification has been sent to admin");
+      if($this->debug){
+        $loggerInstance->log_info("debug mode: we don't update registrations for which notification has been sent to admin");
+      } else {
+        $stmt->execute($params);
+      }
     } catch(PDOException $e) {
       $loggerInstance->log_error("Failed to update registrations for which notification has been sent to admins because of error " . $e->getMessage());
       throw $e;
