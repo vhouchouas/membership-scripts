@@ -22,7 +22,7 @@ class EmailSender {
       // it makes it easier to check in a unit test that the check has been performed.
       throw new Exception("Called sendMailToWarnAboutReturningMembers with an empty array");
     }
-    mail(ADMIN_EMAIL_FOR_RETURNING_MEMBERS, EMAIL_SUBJECT_FOR_RETURNING_MEMBERS, $this->buildReturningMembersEmailBody($returningMembers));
+    $this->sendMail(ADMIN_EMAIL_FOR_RETURNING_MEMBERS, EMAIL_SUBJECT_FOR_RETURNING_MEMBERS, $this->buildReturningMembersEmailBody($returningMembers));
   }
 
   function buildReturningMembersEmailBody(array $returningMembers) {
@@ -57,10 +57,10 @@ class EmailSender {
       $body .= "Il y a un projet en cours qui leur correspond ? Un GT qui recherche de nouveaux membres ? C’est le moment de leur dire et/ou d’en parler à un.e référent.e ! ";
     }
 
-    mail(ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS, EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS, $body);
+    $this->sendMail(ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS, EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS, $body);
   }
 
-  function sendMail($to, $subject, $message) {
+  private function sendMail($to, $subject, $message) {
     global $loggerInstance;
     $headers = 'From: ' . FROM . "\r\n" .
       "Content-Type: text/plain; charset=UTF-8 \r\n" .
