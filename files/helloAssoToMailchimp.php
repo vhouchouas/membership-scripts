@@ -15,6 +15,7 @@ require_once(ZWP_TOOLS . 'google/GoogleGroupConnector.php');
 require_once ZWP_TOOLS . 'lib/emailSender.php';
 
 $loggerInstance->log_info("*** Starting run ***");
+$loggerInstance->log_info("Run triggered by " . getRunRequester());
 
 // derive dates to use
 $now            = new DateTime();

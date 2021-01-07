@@ -33,6 +33,16 @@ function dateToStr(DateTime $d) : string {
   return $d->format('Y-m-d\TH:i:s');
 }
 
+function getRunRequester() : string {
+  if (PHP_SAPI === 'cli') {
+    return "CLI";
+  } else if (isset($_SERVER["PHP_AUTH_USER"])){
+    return "user: " . $_SERVER["PHP_AUTH_USER"];
+  } else {
+    return "Unknown user";
+  }
+}
+
 function fatal_handler() {
   global $loggerInstance;
   $errfile = "unknown file";
