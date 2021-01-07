@@ -52,6 +52,21 @@ class MysqlConnector {
     }
   }
 
+  public function existsRegistrationWithId(string $helloAssoEventId) : bool {
+    global $loggerInstance;
+    try {
+      $stmt = $this->dbo->prepare("SELECT COUNT(*) FROM registration_events WHERE id_HelloAsso = :helloAssoEventId");
+      $stmt->bindParam(":helloAssoEventId", $helloAssoEventId);
+      $stmt->execute();
+      while($row = $stmt->fetch()){
+        return $row[0] == 1;
+      }
+    } catch(PDOException $e){
+      $loggerInstance->log_error("Failed to find if there is a registration with id $helloAssoEventId");
+      die();
+    }
+  }
+
   /**
    * This method is supposed to be called with the emails of the last members who registered, and it
    * returns information about those of them who were members in the past and who have been deactivated.
