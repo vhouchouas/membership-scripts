@@ -28,18 +28,18 @@ class MysqlConnector {
     $this->stmt = NULL;
   }
 
-  public function getOrderedListOfLastRegistrations(DateTime $until) : array {
+  public function getOrderedListOfLastRegistrations(DateTime $since) : array {
     global $loggerInstance;
     try {
       $stmtGetRegistrations = $this->dbo->prepare(
           "SELECT B.* FROM ("
           . "   SELECT email, postal_code, max(date) AS date"
           . "     FROM registration_events"
-          . "      WHERE date > :until"
+          . "      WHERE date > :since"
           . "      GROUP BY email"
           . ") A INNER JOIN registration_events B USING (email, date)");
-      $strDate = $this->dateTimeToMysqlStr($until); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
-      $stmtGetRegistrations->bindParam(':until', $strDate);
+      $strDate = $this->dateTimeToMysqlStr($since); // This variable can't be inlined: it would yield an "Only variables should be passed by reference" error
+      $stmtGetRegistrations->bindParam(':since', $strDate);
       $stmtGetRegistrations->execute();
       $ret = array();
       while($row = $stmtGetRegistrations->fetch()){
