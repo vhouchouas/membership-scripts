@@ -10,10 +10,12 @@ require_once(ZWP_TOOLS . 'lib/logging.php');
 
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
+require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 require_once(ZWP_TOOLS . 'lib/util.php');
 
-$from = new DateTime($_REQUEST["from"]);
-$to   = new DateTime($_REQUEST["to"]);
+$dateUtil = new RegistrationDateUtil(new DateTime());
+$from = isset($_REQUEST["from"]) ? new DateTime($_REQUEST["from"]) : $dateUtil->getDateAfterWhichMembershipIsConsideredValid();
+$to   = isset($_REQUEST["to"])   ? new DateTime($_REQUEST["to"])   : new DateTime();
 $loggerInstance->log_info("from=" . dateToStr($from) . " -> to=" . dateToStr($to));
 
 // Retrieve subscriptions from HelloAsso
