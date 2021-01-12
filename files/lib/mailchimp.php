@@ -26,16 +26,6 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     // TODO This address field is actually not taken into account by mailchimp, and we don't know why yet
     $merge_fields["ADDRESS"] = $event->address;
 
-    // Legacy stuff here: we used to have a field "do you want to be a volunteer?" set to either "Oui" or "Non"
-    // We removed it a long time ago (now, every member is considered as a volunteer) but mailchimpd is still
-    // configured to send welcome emails only to new members who said "oui".
-    // TL;DR: until we change the config of the mailchimp campaign (in order to send mail to everyone) we need
-    // to explicitely set this to "Oui"
-    // (btw: I don't know why we ended up having this field twice in mailchimp... ¯\_(ツ)_/¯)
-    $merge_fields["MMERGE10"] = "Oui";
-    $merge_fields["MMERGE7"]  = "Oui";
-
-
     $payload = array();
     $payload["email_address"] = $event->email;
     $payload["status"]        = "subscribed";
