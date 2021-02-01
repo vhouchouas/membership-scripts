@@ -17,6 +17,16 @@ class MysqlConnector {
       $this->dbo = new PDO($cnxString, DB_USER, DB_PASSWORD);
       $this->dbo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $this->stmt  = $this->dbo->prepare("INSERT INTO registration_events (id_HelloAsso, date, amount, first_name, last_name, email, phone, birth_date, address, postal_code, city, is_zwf_adherent, is_zw_professional, how_did_you_know_zwp, want_to_do, is_mzd_volunteer, is_already_member_since) VALUES (:id_HelloAsso, :date, :amount, :first_name, :last_name, :email, :phone, :birth_date, :address, :postal_code, :city, :is_zwf_adherent, :is_zw_professional, :how_did_you_know_zwp, :want_to_do, :is_mzd_volunteer, :is_already_member_since)");
+
+      /**
+       * set wait_timeout in order to avoid having queries failing with
+       *    PDOStatement::execute(): MySQL server has gone away
+       * when the whole script is taking a long time to execute.
+       * (it can be the case in particular when we delete old member: the whole script
+       *  take a few minutes to run, and may otherwise fail when trying to update the ending date)
+       * if we still encounter this error, we might try to reconnect instead (ie: build a new PDO object)
+       */
+      $this->dbo->query("SET wait_timeout=1200;");
     } catch(PDOException $e){
       $loggerInstance->log_error("Failed to connect to mysql: " . $e->getMessage());
       die();
