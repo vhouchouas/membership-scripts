@@ -42,7 +42,7 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
             } else if ($reason === "notFound"){
               $loggerInstance->log_error("Error 'not found'. Perhaps the email adress $email is invalid?");
             } else {
-              $loggerInstance->log_error("Unknow error: " . $e);
+              $loggerInstance->log_error("Unknown error for email $email:" . $e);
               die();
             }
           }
@@ -68,7 +68,7 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
             if($e->getErrors()[0]["message"] === "Resource Not Found: memberKey"){
               $loggerInstance->log_info("This email wasn't in the group already");
             } else {
-              $loggerInstance->log_error("Unknown error: " . $e);
+              $loggerInstance->log_error("Unknown error for email $email: " . $e);
               die();
             }
           }
