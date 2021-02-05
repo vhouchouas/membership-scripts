@@ -23,7 +23,7 @@ $helloAssoConnector = new HelloAssoConnector();
 $subscriptions = $helloAssoConnector->getAllHelloAssoSubscriptions($from, $to);
 
 // Find out the ones absent from mysql
-$mysqlConnector = new MysqlConnector(true); // We only need a Read-only connector
+$mysqlConnector = new MysqlConnector();
 $missingSubscriptions = array();
 foreach($subscriptions as $subscription){
   if (!$mysqlConnector->existsRegistrationWithId($subscription->helloasso_event_id)){

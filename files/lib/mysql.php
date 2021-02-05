@@ -9,7 +9,11 @@ class MysqlConnector {
   const OPTION_LASTSUCCESSFULRUN_KEY = "last_successful_run_date";
   private $debug;
 
-  public function __construct(bool $debug){
+  /**
+   * @param $debug When set to TRUE, only read operations will be performed. The write ones
+   *               will be ignored
+   */
+  public function __construct(bool $debug=true){
     global $loggerInstance;
     $this->debug = $debug;
     try {

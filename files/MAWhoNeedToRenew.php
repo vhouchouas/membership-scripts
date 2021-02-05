@@ -17,8 +17,7 @@ if (is_null($since)){
   $since = $registrationDateUtil->getDateAfterWhichMembershipIsConsideredValid();
 }
 
-$debug = true; // This page isn't suppose to write anything in db, so let's pretend we're in debug mode
-$mysqlConnector = new MysqlConnector($debug);
+$mysqlConnector = new MysqlConnector();
 $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistrations($since);
 
 ?>
