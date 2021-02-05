@@ -3,7 +3,6 @@ define('ZWP_TOOLS', dirname(__FILE__).'/');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 
-$unused = array();
 $dateUtil = new RegistrationDateUtil(new DateTime());
 $mysql = new MysqlConnector();
 
