@@ -21,11 +21,12 @@ $loggerInstance->log_info("Run triggered by " . getRunRequester());
 $now            = new DateTime();
 $mysqlConnector = new MysqlConnector($debug);
 $lastSuccessfulRunDate = $mysqlConnector->readLastSuccessfulRunStartDate();
-$loggerInstance->log_info("Last successful run was at " . dateToStr($lastSuccessfulRunDate) . ". Starting now at " . dateToStr($now) . ".");
+$dateBeforeWhichAllRegistrationsHaveBeenHandled = RegistrationDateUtil::getDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
+$loggerInstance->log_info("Last successful run was at " . dateToStr($lastSuccessfulRunDate) . ". Starting now at " . dateToStr($now) . ". We handle registrations that occur after " . dateToStr($dateBeforeWhichAllRegistrationsHaveBeenHandled));
 
 // retrieve data from HelloAsso
 $helloAssoConnector = new HelloAssoConnector();
-$subscriptions = $helloAssoConnector->getAllHelloAssoSubscriptions($lastSuccessfulRunDate, $now);
+$subscriptions = $helloAssoConnector->getAllHelloAssoSubscriptions($dateBeforeWhichAllRegistrationsHaveBeenHandled, $now);
 $loggerInstance->log_info("retrieved data from HelloAsso. Got " . count($subscriptions) . " action(s)");
 
 // Look for old members who weren't registered anymore, and tell admins so that can re-enable their Slack account.

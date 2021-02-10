@@ -68,4 +68,10 @@ final class Test_RegistrationDateUtil extends TestCase {
     $this->assertEquals($expected, $sut->needToSendNotificationAboutLatestRegistrations($lastRun), $explanation);
   }
 
+  public function test_getDateBeforeWhichAllRegistrationsHaveBeenHandled() {
+    $lastSuccesfulRun = new DateTime("2021-02-10T19:16:00Z");
+    $enoughInThePast = new DateTime("2021-02-10T18:16:00Z");
+    $this->assertEquals($enoughInThePast, RegistrationDateUtil::getDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccesfulRun));
+    $this->assertEquals(new DateTime("2021-02-10T19:16:00Z"), $lastSuccesfulRun, "the input parameter shouldn't be mutated");
+  }
 }

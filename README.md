@@ -117,7 +117,6 @@ You also probably want to adapt the workflow by editing the main entry point (wh
 
 TODO
 ====
-- retrieve HelloAso registrations starting from "lastSuccessfulRun minus 1h" to avoid losing registrations because of the delay of their API
 - enhance use of composer:
 -- don't require a manual step: let the deploy script do that
 -- retrieve phpunit from composer archives

@@ -67,6 +67,24 @@ class RegistrationDateUtil {
     return $this->now >= $nextDeadline;
   }
 
+  /**
+   * We noticed that when
+   * - a registration R1 is done on Helloasso at "t0"
+   * - the scripts run at "t0 + 10 seconds"
+   * then the registration may not be available yet through mailchimp API (ie: the call to their API will return
+   * all the registrations except R1)
+   * To ensure we don't miss for good some registration, we query Helloass with a start date equal to the date
+   * of the previous run minus some delay (so if R1 is missed by the run just after the registration has been performed,
+   * it will be handled by a subsequent run).
+   * Note that it works because the rest of the script is idempotent (ie: if a given registration is handled by several runs,
+   * it doesn't matter, because we assume the rest of the code won't do double-registration anywhere (assumption which is
+   * correct at the time of writing this comment)
+   */
+  public static function getDateBeforeWhichAllRegistrationsHaveBeenHandled(DateTime $lastSuccessfulRun) : DateTime {
+    $deepCopy = clone $lastSuccessfulRun;
+    return $deepCopy->sub(new DateInterval("PT1H"));
+  }
+
   private static function isAWednesday(DateTime $date) : bool {
     return date('w', $date->getTimestamp()) === "3";
   }
