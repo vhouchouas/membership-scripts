@@ -42,9 +42,28 @@ final class Test_Util extends TestCase {
     // No assertions since expectations are already set on the mocks
   }
 
-  private function buildRegistrationEvent($helloassoId){
+  public function test_keepOnlyActualRegistrations(){
+    // Setup
+    $actualRegistration1 = $this->buildRegistrationEvent(1, "pouet@gmail.com");
+    $testRegistration2   = $this->buildRegistrationEvent(2, "guillaume.turri+test20210214@gmail.com");
+    $actualRegistration3 = $this->buildRegistrationEvent(3, "donald@yahoo.com");
+    $registrations = array($actualRegistration1,  $testRegistration2, $actualRegistration3);
+
+    // Perform the test
+    $filteredRegistrations = keepOnlyActualRegistrations($registrations);
+
+    // Assertion
+    $this->assertEquals(2, count($filteredRegistrations));
+    $this->assertContains($actualRegistration1, $filteredRegistrations);
+    $this->assertNotContains($testRegistration2, $filteredRegistrations);
+    $this->assertContains($actualRegistration3, $filteredRegistrations);
+
+  }
+
+  private function buildRegistrationEvent($helloassoId, $email="toto@toto.fr"){
     $result = new RegistrationEvent();
     $result->helloasso_event_id = $helloassoId;
+    $result->email = $email;
     // the other fields don't matters for the tests
     return $result;
   }
