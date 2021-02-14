@@ -121,5 +121,4 @@ TODO
 -- don't require a manual step: let the deploy script do that
 -- retrieve phpunit from composer archives
 -- replace some of code with 3rd parties (eg: logging (potentially with logrotate-ish),  sending email)
-- make it possible to filter patterns of test registration on read-only endpoints
 - use the field "since when are you a member" added on helloasso to send mails about returning members
