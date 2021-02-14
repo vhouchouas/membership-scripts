@@ -2,7 +2,9 @@
 define('ZWP_TOOLS', dirname(__FILE__).'/');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
+require_once(ZWP_TOOLS . 'lib/util.php');
 
+// Find out the value of $since
 $since = null;
 if (isset($_GET["since"])){
   try {
@@ -17,8 +19,16 @@ if (is_null($since)){
   $since = $registrationDateUtil->getDateAfterWhichMembershipIsConsideredValid();
 }
 
+// Find out the value of $keepTests
+$keepTests = isset($_GET["keepTests"]);
+
+
+// Retrieve the data
 $mysqlConnector = new MysqlConnector();
 $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistrations($since);
+if(!$keepTests){
+  $simplifiedRegistrationEvents = keepOnlyActualRegistrations($simplifiedRegistrationEvents);
+}
 
 ?>
 <html>
@@ -28,7 +38,8 @@ $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistratio
 </head>
 <body>
   <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="get" >
-    Remonter jusqu'à <input name="since" type="date" value="<?php echo $since->format("Y-m-d"); ?>" />
+    Remonter jusqu'à <input name="since" type="date" value="<?php echo $since->format("Y-m-d"); ?>" /><br />
+    Afficher les inscriptions de test <input type="checkbox" name="keepTests" <?php echo ($keepTests ? "checked" : ""); ?> /></br>
     <input type="submit" value="Rafraichir" />
   </form>
 
