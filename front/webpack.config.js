@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  entry: "./src/MATable.js",
+  entry: "./src/MATableApp.js",
   mode: "development",
   module: {
     rules: [

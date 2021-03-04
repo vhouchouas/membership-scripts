@@ -6,7 +6,7 @@ class MATable extends Component{
   constructor(props) {
     super(props);
     this.state = {
-      data: JSON.parse(window.ma_items).map(this.toFrontItem);
+      data: JSON.parse(window.ma_items).map(this.toFrontItem)
     }
   }
 
