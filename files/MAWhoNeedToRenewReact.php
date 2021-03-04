@@ -33,7 +33,7 @@ $json = json_encode($simplifiedRegistrationEvents);
 window.ma_items = '<?php echo $json; ?>';
  </script>
 
-<div id="root" />
+<div id="root"></div>
 
  <!-- Load our React component. -->
  <script src="bundle.js"></script>

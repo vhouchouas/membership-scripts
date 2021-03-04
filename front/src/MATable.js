@@ -1,4 +1,6 @@
-import React, { Component} from "react";
+window.React = require('react');
+import { render } from 'react-dom';
+import React, { Component, PropTypes } from 'react';
 import SortableTable from 'react-sortable-table';
 //import "./App.css";
 
@@ -39,11 +41,17 @@ class MATable extends Component{
         key: 'postal_code'
       }
     ];
+    const iconStyle = {
+      color: '#aaa',
+      paddingLeft: '5px',
+      paddingRight: '5px'
+    };
 
     return(
       <SortableTable
         data={this.state.data}
-        columns={columns} />
+        columns={columns}
+        iconStyle={iconStyle} />
     );
   }
 }
