@@ -75,7 +75,7 @@ If we ever want to recreate the database, here is the schema:
     CREATE TABLE `registration_events` (
       `id_HelloAsso` varchar(12) NOT NULL,
       `date` datetime NOT NULL,
-      `amount` decimal(7,2) NOT NULL,
+      `amount` int(11) NOT NULL,
       `first_name` varchar(30) NOT NULL,
       `last_name` varchar(30) NOT NULL,
       `email` varchar(100) NOT NULL,

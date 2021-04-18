@@ -4,8 +4,10 @@ if(!defined('ZWP_TOOLS')){  die(); }
 //Copy this file to config.php and remplace the values
 
 //Conf for helloasso
-define("HA_REGISTRATIONS_CAMPAIGN_ID", "TO_FILL");
-define("HA_AUTHENTICATION_TOKEN", "TO_FILL");
+define("HA_CLIENT_ID", "TO_FILL");
+define("HA_CLIENT_SECRET", "TO_FILL");
+define("HA_REGISTRATION_FORM_SLUG", "TO_FILL");
+define("HA_ORGANIZATION_SLUG", "TO_FILL");
 
 //Conf for mailchimp
 define("MC_LIST_URL", "TO_FILL");
