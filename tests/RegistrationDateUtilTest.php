@@ -1,11 +1,13 @@
 <?php
 declare(strict_types=1);
-define('ZWP_TOOLS', __DIR__ . '/../files/');
+if (!defined('ZWP_TOOLS')){
+  define('ZWP_TOOLS', __DIR__ . '/../files/');
+}
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 
 use PHPUnit\Framework\TestCase;
 
-final class Test_RegistrationDateUtil extends TestCase {
+final class RegistrationDateUtilTest extends TestCase {
   public function test_getDateAfterWhichMembershipIsConsideredValid(){
     $expected = new DateTime("2019-01-01T00:00:00", new DateTimeZone("Europe/Paris"));
 

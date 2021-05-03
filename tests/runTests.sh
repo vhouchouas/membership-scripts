@@ -9,8 +9,10 @@ else
 fi
 SCRIPT_DIR="$(dirname "$THIS_FILE")"
 
-#"$SCRIPT_DIR/phpunit" "$SCRIPT_DIR"/*.php
-for TEST_FILE in "$SCRIPT_DIR"/*.php; do
-  echo Going to run $TEST_FILE
-  "$SCRIPT_DIR/phpunit" "$TEST_FILE"
-done
+# Install phpunit
+pushd "$SCRIPT_DIR"
+../files/google/composer.phar install
+popd
+
+# Run tests
+"$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR"

@@ -1,11 +1,13 @@
 <?php
 declare(strict_types=1);
-define('ZWP_TOOLS', __DIR__ . '/../files/');
+if (!defined('ZWP_TOOLS')){
+  define('ZWP_TOOLS', __DIR__ . '/../files/');
+}
 require_once(ZWP_TOOLS . 'lib/mysql.php');
 
 use PHPUnit\Framework\TestCase;
 
-final class Test_Mysql extends TestCase {
+final class MysqlTest extends TestCase {
   public function test_helloAssoStringDateToPhpDateWithSlashFormat(){
     $expected = new DateTime('1993-12-04 00:00:00');
     $this->assertExpectedDate($expected, '04/12/1993');
