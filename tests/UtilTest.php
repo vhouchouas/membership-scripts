@@ -5,10 +5,60 @@ if (!defined('ZWP_TOOLS')){
 }
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
+use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
 
 use PHPUnit\Framework\TestCase;
 
 final class UtilTest extends TestCase {
+  use HttpMockTrait;
+  public static function setUpBeforeClass() : void {
+    static::setUpHttpMockBeforeClass('8082', 'localhost');
+  }
+  public static function tearDownAfterClass() : void {
+    static::tearDownHttpMockAfterClass();
+  }
+  public function setUp() : void {
+      $this->setUpHttpMock();
+  }
+  public function tearDown() : void {
+      $this->tearDownHttpMock();
+  }
+
+  public function test_do_curl_query_inTheCaseWhereItWorksFine(){
+    // Setup
+    $this->http->mock
+      ->when()->pathIs('/ok')
+      ->then()->body('Success')
+      ->end();
+    $this->http->setUp();
+
+    // Act
+    $curl = curl_init("http://localhost:8082/ok");
+    $result = do_curl_query($curl);
+
+    // Assert
+    $this->assertEquals(200, $result->httpCode);
+    $this->assertEquals("Success", $result->response);
+  }
+
+  public function test_do_curl_query_inTheCaseWhereItFailsAndThenSucceeds(){
+    // Setup
+    $this->http->mock->first()->when()->pathIs('/flaky')->then()->statusCode(500);
+    $this->http->mock->second()->when()->pathIs('/flaky')->then()->statusCode(500);
+    $this->http->mock->nth(3)->when()->pathIs('/flaky')->then()->statusCode(200)->body('Success');
+    $this->http->setUp();
+
+    // Act
+    $curl = curl_init("http://localhost:8082/flaky");
+    $nbMaxRetry=3;
+    $sleepBetweenRetry=0;
+    $result = do_curl_query($curl, $nbMaxRetry, $sleepBetweenRetry);
+
+    // Assert
+    $this->assertEquals(200, $result->httpCode);
+    $this->assertEquals("Success", $result->response);
+  }
+
   public function test_sendWeeklyNotification_usesCorrectWorkflow(){
     // Setup
     $mysql = $this->createMock(MysqlConnector::class);

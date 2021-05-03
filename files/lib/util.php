@@ -6,18 +6,38 @@ require_once ZWP_TOOLS . 'lib/emailSender.php';
 require_once ZWP_TOOLS . 'lib/logging.php';
 require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
 
-function do_curl_query($curl){
+function do_curl_query($curl, $nbMaxRetryOn500=0, $microSecondSleepBetweenRetry=3 * 1000000){
   global $loggerInstance;
   $ret = new CurlResult();
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-  $ret->response = curl_exec($curl);
 
-  if ( $ret->response === false ){
-    $err_msg = "Failed curl query: [" . curl_errno($curl) . "]: " . curl_error($curl);
-    $loggerInstance->log_error($err_msg);
-    die($err_msg);
+  $succeded = false;
+  while (!$succeded){
+    $ret->response = curl_exec($curl);
+    if ($ret->response === false){
+      $err_msg = "Failed curl query: [" . curl_errno($curl) . "]: " . curl_error($curl);
+    } else {
+      $ret->httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+      if ($ret->httpCode === 500){
+        $err_msg = "Failed curl query: got 500 from the server";
+      } else {
+        $succeded = true;
+      }
+    }
+    if ($succeded){
+      break;
+    } else {
+      $loggerInstance->log_info($err_msg . ". Still $nbMaxRetryOn500 attempts left");
+      if ($nbMaxRetryOn500 > 0){
+        $nbMaxRetryOn500--;
+        usleep($microSecondSleepBetweenRetry);
+      } else {
+        $final_err_msg = $err_msg .  ". (failed all allowed attempts)";
+        $loggerInstance->log_error($final_err_msg);
+        die($final_err_msg);
+      }
+    }
   }
-  $ret->httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
   curl_close($curl);
   return $ret;
