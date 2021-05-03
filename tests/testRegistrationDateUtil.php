@@ -48,6 +48,7 @@ final class Test_RegistrationDateUtil extends TestCase {
   }
 
   public function test_needToSendNotificationAboutLatestRegistrations(){
+    date_default_timezone_set("Europe/Paris");
     $now = new DateTime("2020-08-08T00:00:00", new DateTimeZone("Europe/Paris")); // Saturday
     $sut = new RegistrationDateUtil($now);
 
