@@ -12,4 +12,5 @@ From your Google Suite admin account (be sure to use this account!):
    (click on _Enable the directory API_)
 2. Download the `credientials.json` that are generated after this and save them at the root
    of this folder
-3. Generate the token by running `php generate_token.php`
+3. Install the dependencies by running scripts/installDependencies.sh
+4. Generate the token by running `php generate_token.php`

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 # Find out directory of current script
 # to make it possible to run this script from any location
@@ -8,11 +8,8 @@ else
   THIS_FILE="$0"
 fi
 SCRIPT_DIR="$(dirname "$THIS_FILE")"
+FILES_DIR="$SCRIPT_DIR/../files"
 
-# Install phpunit
-pushd "$SCRIPT_DIR"
-../scripts/composer.phar install
+pushd "$FILES_DIR"/google
+../../scripts/composer.phar install
 popd
-
-# Run tests
-"$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR"

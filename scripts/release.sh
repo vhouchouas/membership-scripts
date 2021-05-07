@@ -44,10 +44,7 @@ testFileOrDie "$LOCAL_CONF_FILE"
 testFileOrDie "$FILES_DIR"/google/credentials.json
 testFileOrDie "$FILES_DIR"/google/token.json
 
-if [ ! -d "$FILES_DIR"/google/vendor ]; then
-  echo phar libraries hasn\'t been installed. See README for more info
-  exit 1
-fi
+"$SCRIPT_DIR"/installDependencies.sh
 
 # Warn if debug statements may have been left
 if grep -r var_dump "$FILES_DIR" | grep -v "google/vendor\|Binary" ; then

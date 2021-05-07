@@ -52,7 +52,6 @@ Those steps must be done by everyone who wants to be able to release those scrip
    1. `vim scripts/config.sh`
    1. `cp files/config.template.php files/config.php`
    1. `vim files/config.php`
-1. Install the phar archive: `cd files/google && ./composer.phar install`
 1. Setup the credentials for Google. See `files/google/README.md` for more information
 1. Retrieve the `.htaccess` file (put it in the `files` directory). Its main purpose is to add http authentication to prevent that anyone could use those scripts
 
