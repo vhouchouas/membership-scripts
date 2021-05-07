@@ -20,7 +20,7 @@ class HelloAssoConnector {
     // According to Helloasso doc:
     // > you MUST obtain a new access_token using the refresh_token issued to you,
     // > and MUST NOT obtain a new access_token by using the client
-    if (file_exists(HELLOASSOV5_TOKENS_PATH)){
+    if ($this->isValidTokensFile()){
       $this->refreshTokens();
     } else {
       $this->getTokensFromScratch();
@@ -73,7 +73,7 @@ class HelloAssoConnector {
       $logger->log_info("Got 401 when trying to use helloasso refresh token. We try to get brand new ones");
       $this->getTokensFromScratch();
     } else {
-      $loggerInstance->log_info("Successfully got new helloasso tokens");
+      $loggerInstance->log_info("Got new helloasso tokens (http: " . $response->httpCode . ")");
       $this->writeTokensFile($response->response);
     }
   }
@@ -88,12 +88,52 @@ class HelloAssoConnector {
   }
 
   private function writeTokensFile($content){
+    global $loggerInstance;
+    if (!$this->isValidTokensJson($content)){
+      $loggerInstance->log_error("received invalid tokens from helloasso so we don't overwrite the existing file. Received: $content");
+      return;
+    }
+
     if (!file_exists(dirname(HELLOASSOV5_TOKENS_PATH))) {
         mkdir(dirname(HELLOASSOV5_TOKENS_PATH), 0700, true);
     }
     file_put_contents(HELLOASSOV5_TOKENS_PATH, $content);
   }
 
+  private function isValidTokensFile(){
+    global $loggerInstance;
+    if (!file_exists(HELLOASSOV5_TOKENS_PATH)){
+      $loggerInstance->log_info("The tokens file doesn't exist");
+      return false;
+    }
+
+    $content = file_get_contents(HELLOASSOV5_TOKENS_PATH);
+    if ($this->isValidTokensJson($content)){
+      $loggerInstance->log_info("Local tokens file seems ok");
+      return true;
+    } else {
+      $loggerInstance->log_error("Local tokens file seems not ok. We delete it. Was: $content");
+      unlink(HELLOASSOV5_TOKENS_PATH);
+      return false;
+    }
+  }
+
+  private function isValidTokensJson(string $content){
+    global $loggerInstance;
+    $tokens = json_decode($content, true);
+    $reasonNotOk = "";
+    if (is_null($tokens)){
+      $loggerInstance->log_info("The content doesn't look like valid json");
+      return false;
+    } else if (!array_key_exists("access_token", $tokens)){
+      $loggerInstance->log_info("The content is missing access_token");
+      return false;
+    } else if (!array_key_exists("refresh_token", $tokens)){
+      $loggerInstance->log_info("The content is missing refresh_token");
+      return false;
+    }
+    return true;
+  }
 
   public function getAllHelloAssoSubscriptions(DateTime $from, DateTime $to){
     global $loggerInstance;
