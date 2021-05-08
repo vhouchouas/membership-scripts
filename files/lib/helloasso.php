@@ -89,7 +89,7 @@ class HelloAssoConnector {
 
   private function writeTokensFile($content){
     global $loggerInstance;
-    if (!$this->isValidTokensJson($content)){
+    if (!self::isValidTokensJson($content)){
       $loggerInstance->log_error("received invalid tokens from helloasso so we don't overwrite the existing file. Received: $content");
       return;
     }
@@ -108,7 +108,7 @@ class HelloAssoConnector {
     }
 
     $content = file_get_contents(HELLOASSOV5_TOKENS_PATH);
-    if ($this->isValidTokensJson($content)){
+    if (self::isValidTokensJson($content)){
       $loggerInstance->log_info("Local tokens file seems ok");
       return true;
     } else {
@@ -118,7 +118,7 @@ class HelloAssoConnector {
     }
   }
 
-  private function isValidTokensJson(string $content){
+  public static function isValidTokensJson(string $content){
     global $loggerInstance;
     $tokens = json_decode($content, true);
     $reasonNotOk = "";
