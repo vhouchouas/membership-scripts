@@ -15,4 +15,4 @@ pushd "$SCRIPT_DIR"
 popd
 
 # Run tests
-"$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR"
+"$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR/src"

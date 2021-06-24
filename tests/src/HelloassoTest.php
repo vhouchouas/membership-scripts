@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 if (!defined('ZWP_TOOLS')){
-  define('ZWP_TOOLS', __DIR__ . '/../files/');
+  define('ZWP_TOOLS', __DIR__ . '/../../files/');
 }
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
 
 use PHPUnit\Framework\TestCase;
 
-final class HelloassTest extends TestCase {
+final class HelloassoTest extends TestCase {
   public function test_validateOkTokens(){
     $okString = '{"access_token":"eyJhbxxx.eyJqdyyy.vl9ALzzz","token_type":"bearer","expires_in":1799,"refresh_token":"Alxyz"}';
     $this->assertTrue(HelloAssoConnector::isValidTokensJson($okString));
