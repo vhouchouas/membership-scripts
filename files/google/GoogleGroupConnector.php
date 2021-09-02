@@ -41,6 +41,8 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
               $loggerInstance->log_info("This member already exists");
             } else if ($reason === "notFound"){
               $loggerInstance->log_error("Error 'not found'. Perhaps the email adress $email is invalid?");
+            } else if ($reason === "invalid") {
+              $loggerInstance->log_error("Error 'invalid input': email $email seems invalid");
             } else {
               $loggerInstance->log_error("Unknown error for email $email:" . $e);
               die();
