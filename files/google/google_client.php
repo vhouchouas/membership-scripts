@@ -16,7 +16,8 @@ function getClient()
     $client->setApplicationName('G Suite Directory API PHP Quickstart');
     $client->setScopes(array(
         Google_Service_Directory::ADMIN_DIRECTORY_USER_READONLY,
-        Google_Service_Directory::ADMIN_DIRECTORY_GROUP
+        Google_Service_Directory::ADMIN_DIRECTORY_GROUP,
+        Google_Service_Calendar::CALENDAR_EVENTS,
     ));
     $client->setAuthConfig(__DIR__ . '/credentials.json');
     $client->setAccessType('offline');
