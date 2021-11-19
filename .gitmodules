@@ -1,0 +1,3 @@
+[submodule "slack-agenda-app"]
+	path = slack-agenda-app
+	url = https://github.com/Zero-Waste-Paris/slack-agenda-app/
