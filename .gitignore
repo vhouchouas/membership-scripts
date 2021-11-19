@@ -8,6 +8,9 @@ config.php
 token.json
 credentials.json
 
+# temporary release directory
+temp_for_release
+
 # php unit cache file
 tests/.phpunit.result.cache
 file.html

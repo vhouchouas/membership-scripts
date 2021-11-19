@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Find out directory of current script
 # to make it possible to run this script from any location
@@ -7,8 +7,16 @@ if [ -L "$0" ] && [ -x $(which readlink) ]; then
 else
   THIS_FILE="$0"
 fi
-SCRIPT_DIR="$(dirname "$THIS_FILE")"
+SCRIPT_DIR="$(realpath "$(dirname "$THIS_FILE")")"
 FILES_DIR="$SCRIPT_DIR/../files"
+ROOT_DIR="$SCRIPT_DIR/.."
+TEMPORARY_RELEASE_DIR="$ROOT_DIR/temp_for_release"
+
+# Ensure the submodule is initialized
+pushd $ROOT_DIR
+git submodule init
+git submodule update
+popd
 
 # Load conf
 LOCAL_CONF_FILE="$SCRIPT_DIR"/config.sh
@@ -65,8 +73,17 @@ if ! "$SCRIPT_DIR/runTests.sh"; then
   fi
 fi
 
+# Copy the files in the temporary release dir
+pushd "$ROOT_DIR/slack-agenda-app"
+"$SCRIPT_DIR"/composer.phar install --no-dev
+popd
+rm -rf "$TEMPORARY_RELEASE_DIR"
+cp -ar "$FILES_DIR" "$TEMPORARY_RELEASE_DIR"
+cp -ar "$ROOT_DIR"/slack-agenda-app "$TEMPORARY_RELEASE_DIR"
+rm -rf "$TEMPORARY_RELEASE_DIR"/slack-agenda-app/{.git*,tests}
+
 # Releasing
 echo "All good, we're going to perform the release"
-rsync -avz --delete "$FILES_DIR/" "$RSYNC_DESTINATION"
+rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_DESTINATION"
 
 echo DONE
