@@ -8,8 +8,9 @@ else
   THIS_FILE="$0"
 fi
 SCRIPT_DIR="$(realpath "$(dirname "$THIS_FILE")")"
-FILES_DIR="$SCRIPT_DIR/../files"
 ROOT_DIR="$SCRIPT_DIR/.."
+FILES_DIR="$ROOT_DIR/files"
+SLACK_APP_DIR="$ROOT_DIR/slack-agenda-app"
 TEMPORARY_RELEASE_DIR="$ROOT_DIR/temp_for_release"
 
 # Ensure the submodule is initialized
@@ -51,6 +52,7 @@ testFileOrDie "$FILES_DIR"/config.php
 testFileOrDie "$LOCAL_CONF_FILE"
 testFileOrDie "$FILES_DIR"/google/credentials.json
 testFileOrDie "$FILES_DIR"/google/token.json
+testFileOrDie "$SLACK_APP_DIR"/config.json
 
 "$SCRIPT_DIR"/installDependencies.sh
 
@@ -74,12 +76,12 @@ if ! "$SCRIPT_DIR/runTests.sh"; then
 fi
 
 # Copy the files in the temporary release dir
-pushd "$ROOT_DIR/slack-agenda-app"
+pushd "$SLACK_APP_DIR"
 "$SCRIPT_DIR"/composer.phar install --no-dev
 popd
 rm -rf "$TEMPORARY_RELEASE_DIR"
 cp -ar "$FILES_DIR" "$TEMPORARY_RELEASE_DIR"
-cp -ar "$ROOT_DIR"/slack-agenda-app "$TEMPORARY_RELEASE_DIR"
+cp -ar "$SLACK_APP_DIR" "$TEMPORARY_RELEASE_DIR"
 rm -rf "$TEMPORARY_RELEASE_DIR"/slack-agenda-app/{.git*,tests}
 
 # Releasing
