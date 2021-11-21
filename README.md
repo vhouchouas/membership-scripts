@@ -116,8 +116,5 @@ You also probably want to adapt the workflow by editing the main entry point (wh
 
 TODO
 ====
-- enhance use of composer:
--- don't require a manual step: let the deploy script do that
--- retrieve phpunit from composer archives
 -- replace some of code with 3rd parties (eg: logging (potentially with logrotate-ish),  sending email)
 - use the field "since when are you a member" added on helloasso to send mails about returning members
