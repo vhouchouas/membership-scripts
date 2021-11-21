@@ -38,7 +38,9 @@ An image is worth a thousand words, here is what is done:
                                                   +-----------+
 
 
-Those scripts are written in PHP in order to be used from our web hosting. 
+Those scripts are written in PHP in order to be used from our web hosting.
+
+This repo also contains as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) the [slack-agenda-app](https://github.com/Zero-Waste-Paris/slack-agenda-app/)
 
 How to use this repo if you are from Zero Waste Paris
 =====================================================
@@ -101,6 +103,7 @@ What the repo looks like
 * The `files` directory contains the files which will end up on the server
 * The `tests` directory contains the non regression tests.
 * The `scripts` directory contains the scripts to perform a release
+* The `slack-agenda-app` directory is a git submodule. See its [README](https://github.com/Zero-Waste-Paris/slack-agenda-app/blob/main/README.md) for more info
 
 How to adapt this code if you are from another NGO
 ==================================================
@@ -113,6 +116,17 @@ We've configured the registration form to get the data we need from new members.
 * the maichimp schema from `files/mailchimp.php`
 
 You also probably want to adapt the workflow by editing the main entry point (which is `files/helloAssoToMailchimp.php`)
+
+How to update the slack-agenda-app
+==================================
+
+From the root of this repo:
+
+    pushd slack-agenda-app
+    git pull
+    popd
+    git add slack-agenda-app # no trailing '/' !
+    git commit -m "Update slack-agenda-app"
 
 TODO
 ====
