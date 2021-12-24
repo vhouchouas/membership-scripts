@@ -14,5 +14,10 @@ pushd "$SCRIPT_DIR"
 ../scripts/composer.phar install
 popd
 
+CONFIG_FILE="$SCRIPT_DIR"/../files/config.php
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  cp "$SCRIPT_DIR"/../files/config.template.php "$CONFIG_FILE"
+fi
+
 # Run tests
 "$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR/src"
