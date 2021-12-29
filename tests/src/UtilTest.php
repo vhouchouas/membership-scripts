@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 if (!defined('ZWP_TOOLS')){
-  define('ZWP_TOOLS', __DIR__ . '/../../files/');
+  define('ZWP_TOOLS', __DIR__ . '/../temp-src-copy/');
 }
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/mysql.php');

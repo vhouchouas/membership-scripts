@@ -14,10 +14,15 @@ pushd "$SCRIPT_DIR"
 ../scripts/composer.phar install
 popd
 
-CONFIG_FILE="$SCRIPT_DIR"/../files/config.php
-if [[ ! -f "$CONFIG_FILE" ]]; then
-  cp "$SCRIPT_DIR"/../files/config.template.php "$CONFIG_FILE"
-fi
+# Copy the files in a temporary directory (in order to override the config file without messing with the actual one)
+TEMP_DIR="$SCRIPT_DIR"/temp-src-copy
+rm -rf "$TEMP_DIR"
+mkdir "$TEMP_DIR"
+cp -r "$SCRIPT_DIR"/../files/* "$TEMP_DIR"
+cp "$SCRIPT_DIR"/../files/config.template.php "$TEMP_DIR"/config.php
 
 # Run tests
 "$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR/src"
+
+# cleanup
+rm -rf "$TEMP_DIR"
