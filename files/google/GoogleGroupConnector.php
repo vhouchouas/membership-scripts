@@ -20,7 +20,13 @@ class GoogleGroupConnector implements GroupWithDeletableUsers {
 
     function registerEvent(RegistrationEvent $event){
         global $loggerInstance;
-        $this->registerEmailToGroup($event->email);
+        if ($event->email === "" || $event->email === NULL){
+            // Something is probably wrong with the registration form (already seen when a form is badly configured).
+            // this ensures we don't block all upcoming registrations.
+            $loggerInstance->log_error("No email for " . print_r($event, true));
+        } else {
+            $this->registerEmailToGroup($event->email);
+        }
     }
 
     function registerEmailToGroup($email){

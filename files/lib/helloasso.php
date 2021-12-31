@@ -186,6 +186,7 @@ class HelloAssoConnector {
   }
 
   private function parseJsonRegistration($jsonRegistration){
+    global $loggerInstance;
     $result = new RegistrationEvent();
     $result->helloasso_event_id = $jsonRegistration["id"];
     $result->event_date = $jsonRegistration["order"]["date"];
@@ -193,6 +194,10 @@ class HelloAssoConnector {
     $result->first_name = $jsonRegistration["user"]["firstName"];
     $result->last_name = $jsonRegistration["user"]["lastName"];
 
+    if (! array_key_exists("customFields", $jsonRegistration)){
+        $loggerInstance->log_error("no 'customFields' in the registration " . print_r($jsonRegistration, true));
+        die();
+    }
     foreach($jsonRegistration["customFields"] as $customField){
       switch($customField["name"]){
         case "Email":
