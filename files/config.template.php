@@ -7,6 +7,7 @@ if(!defined('ZWP_TOOLS')){  die(); }
 define("HA_CLIENT_ID", "TO_FILL");
 define("HA_CLIENT_SECRET", "TO_FILL");
 define("HA_REGISTRATION_FORM_SLUG", "TO_FILL");
+define("HA_REGISTRATION_FORM_SLUG_2", "TO_FILL"); // Optional, set it to null if you have a single registration form
 define("HA_ORGANIZATION_SLUG", "TO_FILL");
 
 //Conf for mailchimp

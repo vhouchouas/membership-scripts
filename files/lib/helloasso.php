@@ -139,14 +139,21 @@ class HelloAssoConnector {
     global $loggerInstance;
 
     $loggerInstance->log_info("Going to get HelloAsso registrations");
-    $actions = $this->getAllHelloAssoSubscriptionsForOneCampaign($from, $to, HA_REGISTRATION_FORM_SLUG);
+    $actions1 = $this->getAllHelloAssoSubscriptionsForOneCampaign($from, $to, HA_REGISTRATION_FORM_SLUG);
+    $loggerInstance->log_info("Got " . count($actions1) . " registrations from " . HA_REGISTRATION_FORM_SLUG);
 
-    $loggerInstance->log_info("Got " . count($actions) . " registrations");
-    return $actions;
+    $actions2 = array();
+    if (!is_null(HA_REGISTRATION_FORM_SLUG_2)){
+      $actions2 = $this->getAllHelloAssoSubscriptionsForOneCampaign($from, $to, HA_REGISTRATION_FORM_SLUG_2);
+      $loggerInstance->log_info("Got " . count($actions2) . " registrations from " . HA_REGISTRATION_FORM_SLUG_2);
+    }
+
+    return array_merge($actions1, $actions2);
   }
 
   private function getAllHelloAssoSubscriptionsForOneCampaign(DateTime $from, DateTime $to, $formSlug){
     global $loggerInstance;
+    $loggerInstance->log_info("Going to fetch data from $formSlug");
     $result = array();
     $json = $this->getHelloAssoJsonSubscriptionsForOneCampaign($from, $to, $formSlug);
     $dataKey = "data";
