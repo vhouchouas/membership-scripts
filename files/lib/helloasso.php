@@ -156,10 +156,18 @@ class HelloAssoConnector {
     }
     $data = $json[$dataKey];
     foreach($data as $jsonRegistration){
-      $result[] = $this->parseJsonRegistration($jsonRegistration);
+      if ( $this->ismembership($jsonRegistration)){
+        $result[] = $this->parseJsonRegistration($jsonRegistration);
+      } else {
+        $loggerInstance->log_info("skipping a line which isn't a membership");
+      }
     }
 
     return $result;
+  }
+
+  private function isMembership($jsonRegistration){
+    return $jsonRegistration["type"] === "Membership"; // we filter out for instance "Donation"
   }
 
   private function getHelloAssoJsonSubscriptionsForOneCampaign(DateTime $from, DateTime $to, $formSlug){
