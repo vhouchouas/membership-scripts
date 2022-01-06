@@ -50,7 +50,7 @@ class EmailSender {
         $body .= "Adhésion le " . $newMember->event_date . self::$endl;
         $body .= "Réside à : " . $newMember->city . " (" . $newMember->postal_code . ")" . self::$endl;
         $body .= "A connu l'asso : " . $newMember->how_did_you_know_zwp . self::$endl;
-        $body .= "Il/Elle est motivé par : " . $newMember->want_to_do . self::$endl;
+        $body .= "Iel est motivé par : " . $newMember->want_to_do . self::$endl;
       }
 
       $body .= self::$endl;
