@@ -13,6 +13,32 @@ FILES_DIR="$ROOT_DIR/files"
 SLACK_APP_DIR="$ROOT_DIR/slack-agenda-app"
 TEMPORARY_RELEASE_DIR="$ROOT_DIR/temp_for_release"
 
+TARGET_ENVIRONMENT=preprod # default value; overridable by cli options
+
+# parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --env)
+      ENVIRONMENT="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -h|--help)
+      echo "Options:"
+      echo " --env"
+      echo "   either 'prod' or 'preprod'. Default to 'preprod'"
+      echo "   E.g.: $0 --env prod"
+      echo " -h|--help: displays this help and exits"
+      exit 0
+      ;;
+   *)
+     echo "Unknown option $1"
+     exit 1
+     ;;
+ esac
+done
+echo "Going to deploy to environment: $TARGET_ENVIRONMENT"
+
 # Ensure the submodule is initialized
 pushd $ROOT_DIR
 git submodule init
@@ -86,6 +112,16 @@ rm -rf "$TEMPORARY_RELEASE_DIR"/slack-agenda-app/{.git*,tests}
 
 # Releasing
 echo "All good, we're going to perform the release"
-rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_DESTINATION"
+if [ "x$TARGET_ENVIRONMENT" = "xpreprod" ]; then
+  echo "Going to deploy to preprod"
+  echo "/!\\/!\\ BEWARE though: preprod is still configured to use the same prod 3rd party services (database, etc...) so preprod can still impact prod! /!\\/!\\"
+  rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_PREPROD_DESTINATION"
+elif [ "x$TARGET_ENVIRONMENT" = "xprod" ]; then
+  echo "Going to deploy to prod"
+  rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_PROD_DESTINATION"
+else
+  echo "Unknown target environment: $TARGET_ENVIRONMENT"
+  exit 1
+fi
 
 echo DONE
