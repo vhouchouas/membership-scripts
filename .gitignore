@@ -4,6 +4,8 @@
 # Don't add to git files which are supposed to be customized
 config.sh
 config.php
+deploy-config.sh
+config.json
 .htaccess
 token.json
 credentials.json

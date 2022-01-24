@@ -7,22 +7,22 @@ if [ -L "$0" ] && [ -x $(which readlink) ]; then
 else
   THIS_FILE="$0"
 fi
-SCRIPT_DIR="$(dirname "$THIS_FILE")"
+TEST_RUNNER_DIR="$(dirname "$THIS_FILE")"
 
 # Install phpunit
-pushd "$SCRIPT_DIR"
+pushd "$TEST_RUNNER_DIR"
 ../scripts/composer.phar install
 popd
 
 # Copy the files in a temporary directory (in order to override the config file without messing with the actual one)
-TEMP_DIR="$SCRIPT_DIR"/temp-src-copy
+TEMP_DIR="$TEST_RUNNER_DIR"/temp-src-copy
 rm -rf "$TEMP_DIR"
 mkdir "$TEMP_DIR"
-cp -r "$SCRIPT_DIR"/../files/* "$TEMP_DIR"
-cp "$SCRIPT_DIR"/../files/config.template.php "$TEMP_DIR"/config.php
+cp -r "$TEST_RUNNER_DIR"/../files/* "$TEMP_DIR"
+cp "$TEST_RUNNER_DIR"/../scripts/preprod-config/config.template.php "$TEMP_DIR"/config.php
 
 # Run tests
-"$SCRIPT_DIR"/vendor/bin/phpunit "$SCRIPT_DIR/src"
+"$TEST_RUNNER_DIR"/vendor/bin/phpunit "$TEST_RUNNER_DIR/src"
 
 # cleanup
 rm -rf "$TEMP_DIR"

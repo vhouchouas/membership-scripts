@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Options:"
       echo " --env"
-      echo "   either 'prod' or 'preprod'. Default to 'preprod'"
+      echo "   either 'prod' or 'preprod' (or a custom value if you defined such config). Default to 'preprod'"
       echo "   E.g.: $0 --env prod"
       echo " -h|--help: displays this help and exits"
       exit 0
@@ -39,6 +39,9 @@ while [[ $# -gt 0 ]]; do
 done
 echo "Going to deploy to environment: $TARGET_ENVIRONMENT"
 
+CONF_DIR="$SCRIPT_DIR"/"$TARGET_ENVIRONMENT-config"
+SLACK_CONF_DIR="$CONF_DIR"/slack-config
+
 # Ensure the submodule is initialized
 pushd $ROOT_DIR
 git submodule init
@@ -46,7 +49,7 @@ git submodule update
 popd
 
 # Load conf
-LOCAL_CONF_FILE="$SCRIPT_DIR"/config.sh
+LOCAL_CONF_FILE="$CONF_DIR"/deploy-config.sh
 if [ -e "$LOCAL_CONF_FILE" ]; then
   source "$LOCAL_CONF_FILE"
 else
@@ -74,11 +77,11 @@ function testFileOrDie {
 # Here we don't juste warn, we exit, because missing files will most certainly lead
 # to breaking the prod or to add security holes
 testFileOrDie "$FILES_DIR"/.htaccess
-testFileOrDie "$FILES_DIR"/config.php
+testFileOrDie "$CONF_DIR"/config.php
 testFileOrDie "$LOCAL_CONF_FILE"
 testFileOrDie "$FILES_DIR"/google/credentials.json
 testFileOrDie "$FILES_DIR"/google/token.json
-testFileOrDie "$SLACK_APP_DIR"/config.json
+testFileOrDie "$SLACK_CONF_DIR"/config.json
 
 "$SCRIPT_DIR"/installDependencies.sh
 
@@ -110,18 +113,12 @@ cp -ar "$FILES_DIR" "$TEMPORARY_RELEASE_DIR"
 cp -ar "$SLACK_APP_DIR" "$TEMPORARY_RELEASE_DIR"
 rm -rf "$TEMPORARY_RELEASE_DIR"/slack-agenda-app/{.git*,tests}
 
+# Copy the config files
+cp "$CONF_DIR"/config.php "$TEMPORARY_RELEASE_DIR"/
+cp "$SLACK_CONF_DIR/config.json" "$TEMPORARY_RELEASE_DIR"/slack-agenda-app
+
 # Releasing
-echo "All good, we're going to perform the release"
-if [ "x$TARGET_ENVIRONMENT" = "xpreprod" ]; then
-  echo "Going to deploy to preprod"
-  echo "/!\\/!\\ BEWARE though: preprod is still configured to use the same prod 3rd party services (database, etc...) so preprod can still impact prod! /!\\/!\\"
-  rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_PREPROD_DESTINATION"
-elif [ "x$TARGET_ENVIRONMENT" = "xprod" ]; then
-  echo "Going to deploy to prod"
-  rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_PROD_DESTINATION"
-else
-  echo "Unknown target environment: $TARGET_ENVIRONMENT"
-  exit 1
-fi
+echo "All good, we're going to perform the release to $TARGET_ENVIRONMENT"
+rsync -avz --delete "$TEMPORARY_RELEASE_DIR/" "$RSYNC_DESTINATION"
 
 echo DONE

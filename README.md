@@ -50,12 +50,20 @@ Those steps must be done by everyone who wants to be able to release those scrip
 
 1. Clone this repo: `git clone https://github.com/Zero-Waste-Paris/membership-scripts`
 1. Copy the template config file and edit them to put the correct config value
-   1. `cp scripts/config.template.sh scripts/config.sh`
-   1. `vim scripts/config.sh`
-   1. `cp files/config.template.php files/config.php`
-   1. `vim files/config.php`
+   1. `cp scripts/prod-config/config.template.sh scripts/prod-config/config.sh`
+   1. `vim scripts/prod-config/config.sh`
+   1. `cp scripts/prod-config/config.template.php scripts/prod-config/config.php`
+   1. `vim scripts/prod-config/config.php`
 1. Setup the credentials for Google. See `files/google/README.md` for more information
 1. Retrieve the `.htaccess` file (put it in the `files` directory). Its main purpose is to add http authentication to prevent that anyone could use those scripts
+
+Then, to release, run:
+
+    ./scripts/release.sh --env prod
+
+Nb: you can use `scripts/preprod-config/` to set up a preprod environment, and then deploy to it with
+
+    ./scripts/release.sh --env preprod
 
 Setup of the database
 ---------------------
