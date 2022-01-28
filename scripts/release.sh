@@ -19,7 +19,7 @@ TARGET_ENVIRONMENT=preprod # default value; overridable by cli options
 while [[ $# -gt 0 ]]; do
   case $1 in
     --env)
-      ENVIRONMENT="$2"
+      TARGET_ENVIRONMENT="$2"
       shift # past argument
       shift # past value
       ;;
