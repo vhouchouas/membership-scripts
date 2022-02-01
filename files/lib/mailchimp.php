@@ -87,7 +87,7 @@ class MailChimpConnector implements GroupWithDeletableUsers {
       } else if ( strpos($curl_result->response, "This list member cannot be removed") !== FALSE ){
         $loggerInstance->log_info("Couldn't archive: this email was probably already deleted");
       } else if ($curl_result->httpCode === 204){
-        $loggerInstance->log_info("The user has been successful archived");
+        $loggerInstance->log_info("The user has been successfully archived");
       } else {
         $loggerInstance->log_error("Unexpected return when trying to delete $email from mailchimp: http code: " . $curl_result->httpCode . ", response: " . $curl_result->response);
         die();
