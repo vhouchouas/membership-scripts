@@ -73,7 +73,7 @@ class MailChimpConnector implements GroupWithDeletableUsers {
   public function deleteUser(string $email): void{
     global $loggerInstance;
     $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, MC_LIST_URL . md5($email));
+    curl_setopt($curl, CURLOPT_URL, MC_LIST_URL . md5(strtolower($email)));
     curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
     curl_setopt($curl, CURLOPT_USERPWD, MC_USERPWD);
 
