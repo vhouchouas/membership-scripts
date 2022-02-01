@@ -78,7 +78,7 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     curl_setopt($curl, CURLOPT_USERPWD, MC_USERPWD);
 
     if ($this->debug){
-      $loggerInstance->log_info("Debug mode: skipping deleting user from mailchimp");
+      $loggerInstance->log_info("Debug mode: skipping deleting $email from mailchimp");
     } else {
       $loggerInstance->log_info("Going to archive from Mailchimp user " . $email);
       $curl_result = do_curl_query($curl);
