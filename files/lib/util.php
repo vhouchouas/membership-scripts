@@ -22,7 +22,7 @@ require_once ZWP_TOOLS . 'lib/emailSender.php';
 require_once ZWP_TOOLS . 'lib/logging.php';
 require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
 
-function do_curl_query($curl, $nbMaxRetryOn500=2, $microSecondSleepBetweenRetry=3 * 1000000){
+function do_curl_query($curl, $nbMaxRetryOn500=5, $microSecondSleepBetweenRetry=3 * 1000000){
   global $loggerInstance;
   $ret = new CurlResult();
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
