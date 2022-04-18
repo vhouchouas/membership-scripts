@@ -46,6 +46,10 @@ if(!$keepTests){
   $simplifiedRegistrationEvents = keepOnlyActualRegistrations($simplifiedRegistrationEvents);
 }
 
+if(isset($_GET["json"])) {
+  echo json_encode(array_values($simplifiedRegistrationEvents));
+  die();
+}
 ?>
 <html>
 <head>

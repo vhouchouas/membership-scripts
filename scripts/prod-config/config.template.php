@@ -37,3 +37,6 @@ define("EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS", "TO_FILL");
 
 //To who mails for error logs should be sent
 define("ADMIN_EMAIL_FOR_ERRORS", "TO_FILL");
+
+//To get the slack user list
+define("SLACK_BOT_TOKEN", "TO_FILL");
