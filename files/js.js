@@ -42,12 +42,12 @@ function pop() {
     $(".matched[slackID]").each(function(){
 	slack_IDS.push(($(this).attr("slackID")));
     });
-    console.log(slack_IDS);
+    
     $(".slack_container tbody").children().remove();
     slackUsers.forEach((user) => {
-	console.log(user.id);
+	
 	if(!user.deleted && !slack_IDS.includes(user.id) && !user.is_bot && ! user.is_app_user && user.id !== "USLACKBOT") {
-	    var row = $(`<tr><td>${user.id}</td><td>${userprofileName(user)}</td></tr>`).appendTo($($(".slack_container tbody")[0]));
+	    $(`<tr><td>${user.id}</td><td>${userprofileName(user)}</td></tr>`).appendTo($($(".slack_container tbody")[0]));
 	}
     });
 }
