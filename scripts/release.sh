@@ -86,13 +86,15 @@ testFileOrDie "$SLACK_CONF_DIR"/config.json
 "$SCRIPT_DIR"/installDependencies.sh
 
 # Warn if debug statements may have been left
-if grep -r var_dump "$FILES_DIR" | grep -v "google/vendor\|Binary" ; then
-  read -p "var_dump statement found in the source. Are you sure you want to deploy? [yN]" ANSWER
-  if [ "x$ANSWER" != "xy" ]; then
-    echo aborting
-    exit 1
+for F in $(git ls-files "$FILES_DIR"); do
+  if grep var_dump "$F"; then
+    read -p "var_dump statement found in $F. Are you sure you want to deploy? [yN]" ANSWER
+    if [ "x$ANSWER" != "xy" ]; then
+      echo aborting
+      exit 1
+    fi
   fi
-fi
+done
 
 # Going to run the tests
 echo "We're going to run the tests"
