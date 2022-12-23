@@ -11,5 +11,5 @@ SCRIPT_DIR="$(dirname "$THIS_FILE")"
 FILES_DIR="$SCRIPT_DIR/../files"
 
 pushd "$FILES_DIR"/google
-../../scripts/composer.phar install
+composer install
 popd

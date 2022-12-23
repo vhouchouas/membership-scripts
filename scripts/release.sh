@@ -108,7 +108,7 @@ fi
 
 # Copy the files in the temporary release dir
 pushd "$SLACK_APP_DIR"
-"$SCRIPT_DIR"/composer.phar install --no-dev
+composer install --no-dev
 popd
 rm -rf "$TEMPORARY_RELEASE_DIR"
 cp -ar "$FILES_DIR" "$TEMPORARY_RELEASE_DIR"

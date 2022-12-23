@@ -11,7 +11,7 @@ TEST_RUNNER_DIR="$(dirname "$THIS_FILE")"
 
 # Install phpunit
 pushd "$TEST_RUNNER_DIR"
-../scripts/composer.phar install
+composer install
 popd
 
 # Copy the files in a temporary directory (in order to override the config file without messing with the actual one)
