@@ -252,14 +252,8 @@ class HelloAssoConnector {
         case "Comment as-tu connu Zero Waste Paris ?":
            $result->how_did_you_know_zwp = $customField["answer"];
            break;
-        case "Sur quels projets souhaites-tu t'investir ?":
+        case "Sur quel projet souhaites-tu t'investir en priorité ?":
            $result->want_to_do = $customField["answer"];
-           break;
-        case "Es-tu déjà adhérent⋅e à Zero Waste France ?":
-           $result->is_zwf_adherent = $customField["answer"];
-           break;
-        case "Es-tu bénévole à la Maison du Zéro Déchet ?":
-           $result->is_mzd_volunteer = $customField["answer"];
            break;
         case "Portes-tu un projet professionnel autour du zéro déchet ?":
            $result->is_zw_professional = $customField["answer"];

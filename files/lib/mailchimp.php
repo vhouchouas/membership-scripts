@@ -33,7 +33,6 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     $merge_fields["LNAME"]   = $event->last_name;
     $merge_fields["MMERGE6"] = $event->city;
     $merge_fields["MMERGE5"] = $event->postal_code;
-    $merge_fields["MMERGE9"] = $event->is_zwf_adherent;
     if ( ! is_null($event->phone) ){
       $merge_fields["PHONE"] = $event->phone;
     }
