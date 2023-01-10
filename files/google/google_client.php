@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 if(!defined('ZWP_TOOLS')){  die(); }
 
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 const TOKEN_JSON_PATH = __DIR__ . "/token.json";
 

@@ -20,7 +20,7 @@ if(!defined('ZWP_TOOLS')){  die(); }
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'config.php');
 
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 include "google_client.php";
 
 class GoogleGroupConnector implements GroupWithDeletableUsers {
