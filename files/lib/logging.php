@@ -17,17 +17,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 if(!defined('ZWP_TOOLS')){  die(); }
 
-interface Logger {
+require_once __DIR__ . '/../vendor/autoload.php';
+use Monolog\Handler\SlackHandler;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Logger;
+
+interface ZWP_Logger {
   public function log_info(string $message): void;
   public function log_error(string $message): void;
 }
 
-class ProdLogger implements Logger {
-  private static $log_file = ZWP_TOOLS . "../HelloAsso_To_Mailchimp_glue.log";
+class ProdLogger implements ZWP_Logger {
+  private $logger;
+  private $file_logger;
+  private $slack_logger;
   private $debug;
 
-  public function __construct(bool $debug){
+  public function __construct(bool $debug, $bot_token, $channel_id){
     $this->debug = $debug;
+    $this->logger = new Logger("log");
+    $this->logger->pushHandler(new RotatingFileHandler(ZWP_TOOLS . "../HelloAsso_To_Mailchimp_glue.log", 30));
+
+    if ( !$this->debug ){
+      $this->logger->pushHandler(new SlackHandler($bot_token, $channel_id, null, true, null, LOGGER::ERROR));
+    }
+
     $this->log_info("Using prodLogger. Debug flag is: " . self::boolToStr($this->debug));
   }
 
@@ -36,31 +50,17 @@ class ProdLogger implements Logger {
   }
 
   public function log_info(string $message): void{
-    $this->log_to_console_and_file("[INF]" . $this->get_log_prefix() . $message);
+    echo $message . "\n";
+    $this->logger->info($message);
   }
 
   public function log_error(string $message): void{
-    $full_message = $this->get_log_prefix() . $message;
-    $this->log_to_console_and_file("[ERR]" . $full_message);
-    if (!$this->debug){
-      error_log($full_message, 4 /*write in apache logs*/);
-      error_log($full_message, 1 /*send an email*/, ADMIN_EMAIL_FOR_ERRORS);
-    }
-  }
-
-  private function log_to_console_and_file(string $full_message): void{
-    echo $full_message.  "\n";
-    if (!$this->debug){
-      error_log($full_message . "\n", 3 /*write to file*/, self::$log_file);
-    }
-  }
-
-  private function get_log_prefix(): string{
-    return "[" . date("o-m-d\TG:i:s", time()) . "] ";
+    echo $message . "\n";
+    $this->logger->error($message);
   }
 }
 
-class DummyLogger implements Logger {
+class DummyLogger implements ZWP_Logger {
   public function log_info(string $message): void {
     echo "[INFO] $message\n";
   }

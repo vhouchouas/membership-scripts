@@ -36,4 +36,5 @@ define("ADMIN_EMAIL_FOR_ALL_NEW_MEMBERS", "TO_FILL");
 define("EMAIL_SUBJECT_FOR_ALL_NEW_MEMBERS", "TO_FILL");
 
 //To who mails for error logs should be sent
-define("ADMIN_EMAIL_FOR_ERRORS", "TO_FILL");
+define("SLACK_LOG_BOT_TOKEN", "TO_FILL");
+define("SLACK_CHANNEL_ID", "TO_FILL");

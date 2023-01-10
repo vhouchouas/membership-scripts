@@ -20,7 +20,8 @@ define('ZWP_TOOLS', dirname(__FILE__).'/');
 $debug = !isset($_REQUEST["debug"]) || $_REQUEST["debug"] !== "false";
 
 require_once(ZWP_TOOLS . 'lib/logging.php');
-$loggerInstance = new ProdLogger($debug);
+require_once(ZWP_TOOLS . 'config.php');
+$loggerInstance = new ProdLogger($debug, SLACK_LOG_BOT_TOKEN, SLACK_CHANNEL_ID);
 
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
