@@ -9,9 +9,7 @@ jobs:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      # we can't use php8 because tests uses internations/http-mock which is not yet available for PHP8
-      # (see https://github.com/InterNations/http-mock/issues/69 )
-      - image: cimg/php:7.3
+      - image: cimg/php:8.1.13
 
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
