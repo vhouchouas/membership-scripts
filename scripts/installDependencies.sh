@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Find out directory of current script
 # to make it possible to run this script from any location
