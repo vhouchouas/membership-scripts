@@ -63,7 +63,7 @@ function match(helloasso, row) {
 	}
 	
 	if(user.profile.hasOwnProperty("email")) {
-	    score += stringSimilarity.compareTwoStrings(user.profile["email"].toLowerCase(), helloasso.last_name.toLowerCase());
+	    score += stringSimilarity.compareTwoStrings(user.profile["email"].toLowerCase(), helloasso.email.toLowerCase());
 	    count +=1;
 	}
 	
