@@ -63,7 +63,7 @@ function match(helloasso, row) {
 	}
 	
 	if(user.profile.hasOwnProperty("email")) {
-	    score += stringSimilarity.compareTwoStrings(user.profile["email"].toLowerCase(), helloasso.last_name.toLowerCase());
+	    score += stringSimilarity.compareTwoStrings(user.profile["email"].toLowerCase(), helloasso.email.toLowerCase());
 	    count +=1;
 	}
 	
@@ -103,7 +103,7 @@ function match(helloasso, row) {
     });
     
     scores.slice(0, 3).forEach((user) => {
-	var slack = $(`<div slackID="${user.id}" class='col-3 border-bottom border-2 border-dark'></div>`).appendTo(row);
+	var slack = $(`<div similarity="${user.score}" slackID="${user.id}" class='col-3 border-bottom border-2 border-dark'></div>`).appendTo(row);
 	var color = `rgba(0,255,0,${Math.pow(user.score,2)})`;
 	slack.css('background-color', color);
 	
