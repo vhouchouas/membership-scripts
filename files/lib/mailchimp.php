@@ -31,15 +31,6 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     $merge_fields = array();
     $merge_fields["FNAME"]   = $event->first_name;
     $merge_fields["LNAME"]   = $event->last_name;
-    $merge_fields["MMERGE6"] = $event->city;
-    $merge_fields["MMERGE5"] = $event->postal_code;
-    if ( ! is_null($event->phone) ){
-      $merge_fields["PHONE"] = $event->phone;
-    }
-    $merge_fields["MMERGE8"] = $event->is_zw_professional;
-
-    // TODO This address field is actually not taken into account by mailchimp, and we don't know why yet
-    $merge_fields["ADDRESS"] = $event->address;
 
     $payload = array();
     $payload["email_address"] = $event->email;
