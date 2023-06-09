@@ -5,6 +5,7 @@
         "ext-json": "*",
         "monolog/monolog": "^3.2",
         "doctrine/orm": "^2.15.2",
-        "doctrine/dbal": "^3.6.3"
+        "doctrine/dbal": "^3.6.3",
+        "symfony/cache": "^6.3.0"
     }
 }
