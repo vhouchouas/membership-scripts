@@ -9,6 +9,7 @@ config.json
 .htaccess
 token.json
 credentials.json
+*.sqlite
 
 # temporary release directory
 temp_for_release

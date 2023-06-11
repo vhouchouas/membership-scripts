@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+
+require __DIR__ . '/../files/lib/doctrine/bootstrap_doctrine.php';
+
+ConsoleRunner::run(
+    new SingleManagerProvider($entityManager)
+);
