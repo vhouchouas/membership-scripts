@@ -23,6 +23,7 @@ use Doctrine\ORM\ORMSetup;
 
 require_once ZWP_TOOLS . "vendor/autoload.php";
 require_once ZWP_TOOLS . "config.php";
+require_once ZWP_TOOLS . "lib/logging.php";
 
 $config = ORMSetup::createAttributeMetadataConfiguration(
 		paths: array(__DIR__),
@@ -30,17 +31,18 @@ $config = ORMSetup::createAttributeMetadataConfiguration(
 		);
 
 // configuring the database connection
-$useSqliteConnection = true;
-$connectionParams = $useSqliteConnection ? [
-		'driver' => 'pdo_sqlite',
-		'path' => __DIR__ . '/db.sqlite',
-	] : [
+$connectionParams = DOCTRINE_USE_MYSQL ? [
 		'driver' => 'pdo_mysql',
 		'dbname' => 'DB_NAME',
 		'user' => 'DB_USER',
 		'password' => 'DB_PASSWORD',
 		'host' => 'DB_HOST',
+	] : [
+		'driver' => 'pdo_sqlite',
+		'path' => __DIR__ . '/db.sqlite',
 	];
+
+$loggerInstance->log_info("Using driver " . $connectionParams['driver'] . " for doctrine");
 
 $conn = DriverManager::getConnection($connectionParams);
 
