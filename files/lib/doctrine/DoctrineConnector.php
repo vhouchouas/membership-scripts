@@ -99,11 +99,17 @@ class DoctrineConnector {
 	}
 
 	public function getOrderedListOfLastRegistrations(DateTime $since) : array {
-		//$this->entityManager->getRepository('MemberDTO')->
+		$query = $this->entityManager->createQuery(
+			'SELECT m
+			FROM MemberDTO m
+			WHERE m.lastRegistrationDate > :since
+			ORDER BY m.lastRegistrationDate ASC'
+		)->setParameter('since', $since);
+
+		return $query->getResult();
 	}
 
 	// TODO: 
-	// - getOrderedListOfLastRegistration(DateTime $since)
 	// - existsRegistrationWithHelloAssoId(string $helloAssoEventId)
   // - findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array
 
