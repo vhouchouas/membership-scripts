@@ -64,7 +64,7 @@ class DoctrineConnector {
 		global $loggerInstance;
 		$loggerInstance->log_info("Going to register in db user " . $event->first_name . " " . $event->last_name);
 
-		$member = $this->entityManager->getRepository('MemberDTO')->findOneBy(['firstName' => $event->first_name, 'lastName' => $event->last_name]);
+		$member = $this->getMemberMatchingRegistration($event);
 
 		if ($member != null) {
 			$loggerInstance->log_info("Member already known. We update it");
@@ -125,6 +125,10 @@ class DoctrineConnector {
 			$this->entityManager->remove($member);
 		}
 		$this->entityManager->flush();
+	}
+
+	public function getMemberMatchingRegistration(RegistrationEvent $event) : ?MemberDTO {
+		return $this->entityManager->getRepository('MemberDTO')->findOneBy(['firstName' => $event->first_name, 'lastName' => $event->last_name]);
 	}
 
 	// TODO: 
