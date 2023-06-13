@@ -6,8 +6,9 @@ use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 
 define('ZWP_TOOLS', __DIR__ . '/../files/');
 
-require __DIR__ . '/../files/lib/doctrine/bootstrap_doctrine.php';
+require ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php';
 
+$entityManager = DoctrineConnector::getEntityManager();
 ConsoleRunner::run(
     new SingleManagerProvider($entityManager)
 );
