@@ -109,12 +109,27 @@ class DoctrineConnector {
 		return $query->getResult();
 	}
 
+	public function getListOfRegistrationsOlderThan(DateTime $upTo) : array {
+		$query = $this->entityManager->createQuery(
+			'SELECT m
+			FROM MemberDTO m
+			WHERE m.lastRegistrationDate < :upTo
+			ORDER BY m.lastRegistrationDate ASC'
+		)->setParameter('upTo', $upTo);
+
+		return $query->getResult();
+	}
+
+	public function deleteRegistrationsOlderThan(DateTime $upTo) {
+		foreach ($this->getListOfRegistrationsOlderThan($upTo) as $member) {
+			$this->entityManager->remove($member);
+		}
+		$this->entityManager->flush();
+	}
+
 	// TODO: 
 	// - existsRegistrationWithHelloAssoId(string $helloAssoEventId)
-  // - findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array
-
-  //public function deleteRegistrationsOlderThan(DateTime $upTo) {
-	// addOrUpdateMember
+	// - findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array
 	// getRegistrationsForWhichNoNotificationHasBeenSentToAdmins
 	// updateRegistrtionsForWhichNotificationsHasBeenSentToAdmins
 
