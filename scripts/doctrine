@@ -4,6 +4,8 @@
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 
+define('ZWP_TOOLS', __DIR__ . '/../files/');
+
 require __DIR__ . '/../files/lib/doctrine/bootstrap_doctrine.php';
 
 ConsoleRunner::run(
