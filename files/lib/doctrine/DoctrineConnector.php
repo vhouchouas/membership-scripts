@@ -131,9 +131,33 @@ class DoctrineConnector {
 		return $this->entityManager->getRepository('MemberDTO')->findOneBy(['firstName' => $event->first_name, 'lastName' => $event->last_name]);
 	}
 
+  /**
+   * This method is supposed to be called with the emails of the last members who registered, and it
+   * returns information about those of them who were members in the past and who have been deactivated.
+   * Currently it's used to send a notification to admins, because the accounts of returning members need
+   * to be manually reactivated on some of our tools.
+   * @param string[] $membersEmail A list of mail of people who just registered
+   * @param DateTime $registeredBefore The date after which we expect users haven't registered
+   * @return SimplifiedRegistrationEvent[] data about members in $membersEmail who already registered
+   *                                       but who never registered after $registeredBefore
+   */
+	public function findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array {
+    if ( count($membersEmail) == 0 ){
+      return array();
+    }
+
+		$query = $this->entityManager->createQuery(
+			'SELECT m
+			FROM MemberDTO m
+			WHERE m.lastRegistrationDate < :upTo
+			 AND m.email IN (:emails)'
+		)->setParameter('upTo', $registeredBefore)
+		->setParameter('emails', $membersEmail);
+
+		return $query->getResult();
+	}
+
 	// TODO: 
-	// - existsRegistrationWithHelloAssoId(string $helloAssoEventId)
-	// - findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array
 	// getRegistrationsForWhichNoNotificationHasBeenSentToAdmins
 	// updateRegistrtionsForWhichNotificationsHasBeenSentToAdmins
 
