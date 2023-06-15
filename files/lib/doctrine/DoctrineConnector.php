@@ -157,8 +157,15 @@ class DoctrineConnector {
 		return $query->getResult();
 	}
 
-	// TODO: 
-	// getRegistrationsForWhichNoNotificationHasBeenSentToAdmins
-	// updateRegistrtionsForWhichNotificationsHasBeenSentToAdmins
+	public function getMembersForWhichNoNotificationHasBeenSentToAdmins() : array {
+		return $this->entityManager->getRepository('MemberDTO')->findBy(['notificationSentToAdmin' => false]);
+	}
 
+	public function updateMembersForWhichNotificationHasBeenSentoToAdmins(array $members) : void {
+		foreach($members as $member) {
+			$member->notificationSentToAdmin = true;
+			$this->entityManager->persist($member);
+		}
+		$this->entityManager->flush();
+	}
 }
