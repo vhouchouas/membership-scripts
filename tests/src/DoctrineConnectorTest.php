@@ -125,8 +125,28 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertExpectedMember($bobRegistrationDate, $bobUpdateDate, "bob", "dylan", "bob-new@email.com",
 				$sut->getMemberMatchingRegistration($registrationBob),
 				"even if we search with an old RegistrationEvent we should find the latest information (behavior useful for the offlineIntegrityComparator ");
+	}
 
+	public function test_findMembersInArrayWhoDoNotRegisteredAfterGivenDate() {
+		// Setup
+		$sut = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$aliceRegistrationDate = "1865-11-01";
+		$registrationAlice = $this->buildHelloassoEvent($aliceRegistrationDate, "alice", "wonderland", "al@ice.com");
+		$charlesRegistrationDate = "2020-09-08";
+		$registrationCharles = $this->buildHelloassoEvent($charlesRegistrationDate, "Charles", "Edouard", "charles@something.com");
 
+		$sut->addOrUpdateMember($registrationBob);
+		$sut->addOrUpdateMember($registrationAlice);
+		$sut->addOrUpdateMember($registrationCharles);
+
+		$this->assertEquals(3, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "Pre-condition: all 3 members should be in database");
+
+		// Act & assert
+		$members = $sut->findMembersInArrayWhoDoNotRegisteredAfterGivenDate(['bob@dylan.com', 'al@ice.com'], new DateTime("1900-01-01"));
+		$this->assertEquals(1, count($members), "Only alice matches: bob registered after the date, and charles is not in the array");
+		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
 	}
 
 	private $lastHelloAssoEventId = 0;
