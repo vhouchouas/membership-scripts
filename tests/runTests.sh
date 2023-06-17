@@ -23,6 +23,3 @@ cp "$TEST_RUNNER_DIR"/../scripts/preprod-config/config.template.php "$TEMP_DIR"/
 
 # Run tests
 XDEBUG_MODE=coverage "$TEST_RUNNER_DIR"/vendor/bin/phpunit --coverage-html coverage "$TEST_RUNNER_DIR/src"
-
-# cleanup
-rm -rf "$TEMP_DIR"
