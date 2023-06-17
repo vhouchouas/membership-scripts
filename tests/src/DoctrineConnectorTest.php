@@ -147,6 +147,10 @@ final class DoctrineConnectorTest extends TestCase {
 		$members = $sut->findMembersInArrayWhoDoNotRegisteredAfterGivenDate(['bob@dylan.com', 'al@ice.com'], new DateTime("1900-01-01"));
 		$this->assertEquals(1, count($members), "Only alice matches: bob registered after the date, and charles is not in the array");
 		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+
+		// Act & assert: make sure the corner case with empty array is well supported
+		$this->assertEquals(0, count($sut->findMembersInArrayWhoDoNotRegisteredAfterGivenDate([], new DateTime("1900-01-01"))));
+
 	}
 
 	public function test_notificationHasBeenSentStatus() {
