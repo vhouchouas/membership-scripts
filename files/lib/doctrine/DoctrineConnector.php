@@ -89,7 +89,7 @@ class DoctrineConnector {
 	private function fillMemberWithFieldsCommonForCreateAndUpdate(MemberDTO $member, RegistrationEvent $event) {
 		$member->email = $event->email;
 		$member->postalCode = $event->postal_code;
-		$member->helloAssoLastRegistreationEventId = $event->helloasso_event_id;
+		$member->helloAssoLastRegistrationEventId = $event->helloasso_event_id;
 		$member->city = $event->city;
 		$member->howDidYouKnowZwp = $event->how_did_you_know_zwp;
 		$member->wantToDo = $event->want_to_do;
