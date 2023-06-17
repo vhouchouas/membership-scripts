@@ -19,6 +19,7 @@ define("DB_NAME", 'TO_FILL');
 define("DB_USER", 'TO_FILL');
 define("DB_PASSWORD", 'TO_FILL');
 define("DB_HOST", 'TO_FILL');
+define("DOCTRINE_USE_MYSQL", true); // "true" to use mysql, "false" to use sqlite
 
 //Conf for google
 define("G_GROUP_NAME",  "TO_FILL");

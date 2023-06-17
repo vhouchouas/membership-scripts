@@ -9,9 +9,13 @@ config.json
 .htaccess
 token.json
 credentials.json
+*.sqlite
 
 # temporary release directory
 temp_for_release
+
+# temporary directory for tests
+temp-src-copy/
 
 # php unit cache file
 tests/.phpunit.result.cache

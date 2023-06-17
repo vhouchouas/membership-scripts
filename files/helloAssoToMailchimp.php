@@ -27,6 +27,7 @@ require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
 require_once(ZWP_TOOLS . 'lib/mailchimp.php');
 require_once(ZWP_TOOLS . 'lib/mysql.php');
+require_once(ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php');
 require_once(ZWP_TOOLS . 'lib/outdatedMemberManager.php');
 require_once(ZWP_TOOLS . 'google/GoogleGroupConnector.php');
 require_once ZWP_TOOLS . 'lib/emailSender.php';
@@ -50,6 +51,7 @@ $loggerInstance->log_info("retrieved data from HelloAsso. Got " . count($subscri
 // This has to be done before we actually register members, otherwise we'll consider they are still registered
 $mailchimpConnector = new MailChimpConnector($debug);
 $googleGroupConnector = new GoogleGroupConnector($debug);
+$doctrineConnector = new DoctrineConnector($debug);
 $emailSender = new EmailSender($debug);
 $outdatedManager = new OutdatedMemberManager($now, array($mailchimpConnector, $googleGroupConnector));
 $outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $mysqlConnector, $emailSender);
@@ -59,6 +61,7 @@ foreach($subscriptions as $subscription){
   $mysqlConnector->registerEvent($subscription);
   $mailchimpConnector->registerEvent($subscription);
   $googleGroupConnector->registerEvent($subscription);
+  $doctrineConnector->addOrUpdateMember($subscription);
 }
 
 // Send weekly notification about new members if needed

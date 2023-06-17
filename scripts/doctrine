@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+
+define('ZWP_TOOLS', __DIR__ . '/../files/');
+
+require ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php';
+
+$entityManager = DoctrineConnector::getEntityManager();
+ConsoleRunner::run(
+    new SingleManagerProvider($entityManager)
+);
