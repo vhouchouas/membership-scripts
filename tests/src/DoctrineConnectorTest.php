@@ -78,6 +78,26 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertEquals(1, count($sut->getListOfRegistrationsOlderThan(new DateTime("2025-01-01"))), "The last registration of Bob is now after that date so we should have only alice registration");
 	}
 
+	public function test_deleteRegistrationsOlderThan() {
+		// Setup
+		$sut = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$aliceRegistrationDate = "1865-11-01";
+		$registrationAlice = $this->buildHelloassoEvent($aliceRegistrationDate, "alice", "wonderland", "al@ice.com");
+
+		$sut->addOrUpdateMember($registrationBob);
+		$sut->addOrUpdateMember($registrationAlice);
+
+		$this->assertEquals(2, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "Pre-condition: we should have 2 registrations at this stage");
+
+		// Act
+		$sut->deleteRegistrationsOlderThan(new DateTime("1900-01-01"));
+
+		// Assert
+		$this->assertEquals(1, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "1 (and only 1) registration should have been deleted, leaving only 1");
+	}
+
 	private $lastHelloAssoEventId = 0;
 	private function buildHelloassoEvent($event_date, $first_name, $last_name, $email): RegistrationEvent {
 		$ret = new RegistrationEvent();
