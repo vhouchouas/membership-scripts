@@ -58,7 +58,7 @@ $doctrineConnector = new DoctrineConnector();
 $missingSubscriptions = array();
 foreach($subscriptions as $subscription){
 	$member = $doctrineConnector->getMemberMatchingRegistration($subscription);
-	if ($member == null || $member->lastRegistrationDate < $subscription->date){
+	if ($member == null || $member->lastRegistrationDate < $subscription->event_date){
 		$missingSubscriptions[] = $subscription;
 	}
 }

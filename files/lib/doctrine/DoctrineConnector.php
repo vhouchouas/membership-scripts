@@ -43,10 +43,10 @@ class DoctrineConnector {
 
 		$connectionParams = DOCTRINE_USE_MYSQL ? [
 			'driver' => 'pdo_mysql',
-			'dbname' => 'DB_NAME',
-			'user' => 'DB_USER',
-			'password' => 'DB_PASSWORD',
-			'host' => 'DB_HOST',
+			'dbname' => DB_NAME,
+			'user' => DB_USER,
+			'password' => DB_PASSWORD,
+			'host' => DB_HOST,
 		] : [
 			'driver' => 'pdo_sqlite',
 		'path' => __DIR__ . '/db.sqlite',
@@ -78,7 +78,7 @@ class DoctrineConnector {
 		$this->fillMemberWithFieldsCommonForCreateAndUpdate($member, $event);
 
 		if ($this->debug) {
-			$loggerInstance->log_info("Non persisting this member in db because we're in debug mode");
+			$loggerInstance->log_info("Not persisting this member in db because we're in debug mode");
 		} else {
 			$this->entityManager->persist($member);
 			$this->entityManager->flush();
