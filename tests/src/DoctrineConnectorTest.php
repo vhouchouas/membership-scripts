@@ -149,6 +149,39 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
 	}
 
+	public function test_notificationHasBeenSentStatus() {
+		// Setup
+		$sut = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$aliceRegistrationDate = "1865-11-01";
+		$registrationAlice = $this->buildHelloassoEvent($aliceRegistrationDate, "alice", "wonderland", "al@ice.com");
+
+		$sut->addOrUpdateMember($registrationBob);
+		$sut->addOrUpdateMember($registrationAlice);
+
+		// Act & assert: case 1: just after registration we haven't send a notification about anyone
+		$members = $sut->getMembersForWhichNoNotificationHasBeenSentToAdmins();
+		$this->assertEquals(2, count($members));
+
+		// Act & assert: case 2: we consider that notifications where sent for a member
+		$bob = $sut->getMemberMatchingRegistration($registrationBob);
+		$sut->updateMembersForWhichNotificationHasBeenSentoToAdmins([$bob]);
+
+		$members = $sut->getMembersForWhichNoNotificationHasBeenSentToAdmins();
+		$this->assertEquals(1, count($members), "now, we did not sent notification about Alice only");
+		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+
+		//  Act & assert: case 3: if bob registers again we should not send a new notification about him
+		$bobUpdateDate = "2020-09-08";
+		$updateBob = $this->buildHelloassoEvent($bobUpdateDate, "bob", "dylan", "bob-new@email.com");
+		$sut->addOrUpdateMember($updateBob);
+
+		$this->assertEquals(1, count($members), "now, we did not sent notification about Alice only");
+		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+
+	}
+
 	private $lastHelloAssoEventId = 0;
 	private function buildHelloassoEvent($event_date, $first_name, $last_name, $email): RegistrationEvent {
 		$ret = new RegistrationEvent();
