@@ -22,7 +22,7 @@ cp -r "$TEST_RUNNER_DIR"/../files/* "$TEMP_DIR"
 cp "$TEST_RUNNER_DIR"/../scripts/preprod-config/config.template.php "$TEMP_DIR"/config.php
 
 # Run tests
-"$TEST_RUNNER_DIR"/vendor/bin/phpunit "$TEST_RUNNER_DIR/src"
+XDEBUG_MODE=coverage "$TEST_RUNNER_DIR"/vendor/bin/phpunit --coverage-html coverage "$TEST_RUNNER_DIR/src"
 
 # cleanup
 rm -rf "$TEMP_DIR"

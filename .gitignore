@@ -17,9 +17,10 @@ temp_for_release
 # temporary directory for tests
 temp-src-copy/
 
-# php unit cache file
+# php unit cache file and coverage
 tests/.phpunit.result.cache
 file.html
+coverage
 
 # phar files
 vendor
