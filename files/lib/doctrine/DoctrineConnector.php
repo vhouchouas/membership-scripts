@@ -122,7 +122,9 @@ class DoctrineConnector {
 
 	public function deleteRegistrationsOlderThan(DateTime $upTo) {
 		foreach ($this->getListOfRegistrationsOlderThan($upTo) as $member) {
-			$this->entityManager->remove($member);
+			if (!$this->debug) {
+				$this->entityManager->remove($member);
+			}
 		}
 		$this->entityManager->flush();
 	}
@@ -164,7 +166,9 @@ class DoctrineConnector {
 	public function updateMembersForWhichNotificationHasBeenSentoToAdmins(array $members) : void {
 		foreach($members as $member) {
 			$member->notificationSentToAdmin = true;
-			$this->entityManager->persist($member);
+			if (!$this->debug) {
+				$this->entityManager->persist($member);
+			}
 		}
 		$this->entityManager->flush();
 	}
