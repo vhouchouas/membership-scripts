@@ -98,6 +98,37 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertEquals(1, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "1 (and only 1) registration should have been deleted, leaving only 1");
 	}
 
+	public function test_getMemberMatchingRegistration() {
+		// Setup
+		$sut = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$aliceRegistrationDate = "1865-11-01";
+		$registrationAlice = $this->buildHelloassoEvent($aliceRegistrationDate, "alice", "wonderland", "al@ice.com");
+
+		$sut->addOrUpdateMember($registrationBob);
+		$sut->addOrUpdateMember($registrationAlice);
+
+		// Act & assert
+		$this->assertExpectedMember($bobRegistrationDate, $bobRegistrationDate, "bob", "dylan", "bob@dylan.com",
+				$sut->getMemberMatchingRegistration($registrationBob));
+
+		$this->assertEquals(null,
+				$sut->getMemberMatchingRegistration($this->buildHelloassoEvent("2020-01-01", "someone", "else", "somone@oneelse.com")),
+				"we should get null when we look for an unknown member");
+
+		// Act & assert when a member has an updated registration
+		$bobUpdateDate = "2020-09-08";
+		$updateBob = $this->buildHelloassoEvent($bobUpdateDate, "bob", "dylan", "bob-new@email.com");
+		$sut->addOrUpdateMember($updateBob);
+
+		$this->assertExpectedMember($bobRegistrationDate, $bobUpdateDate, "bob", "dylan", "bob-new@email.com",
+				$sut->getMemberMatchingRegistration($registrationBob),
+				"even if we search with an old RegistrationEvent we should find the latest information (behavior useful for the offlineIntegrityComparator ");
+
+
+	}
+
 	private $lastHelloAssoEventId = 0;
 	private function buildHelloassoEvent($event_date, $first_name, $last_name, $email): RegistrationEvent {
 		$ret = new RegistrationEvent();
