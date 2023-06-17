@@ -121,8 +121,11 @@ class DoctrineConnector {
 	}
 
 	public function deleteRegistrationsOlderThan(DateTime $upTo) {
+		global $loggerInstance;
 		foreach ($this->getListOfRegistrationsOlderThan($upTo) as $member) {
-			if (!$this->debug) {
+			if ($this->debug) {
+				$loggerInstance->log_info("We're in debug mode so we don't delete anything");
+			} else {
 				$this->entityManager->remove($member);
 			}
 		}
@@ -164,12 +167,15 @@ class DoctrineConnector {
 	}
 
 	public function updateMembersForWhichNotificationHasBeenSentoToAdmins(array $members) : void {
+		global $loggerInstance;
 		foreach($members as $member) {
 			$member->notificationSentToAdmin = true;
-			if (!$this->debug) {
-				$this->entityManager->persist($member);
-			}
 		}
-		$this->entityManager->flush();
+
+		if ($this->debug) {
+			$loggerInstance->log_info("We're in debug mode so we don't update anything");
+		} else {
+			$this->entityManager->flush();
+		}
 	}
 }

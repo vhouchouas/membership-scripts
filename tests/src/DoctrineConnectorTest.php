@@ -179,6 +179,39 @@ final class DoctrineConnectorTest extends TestCase {
 
 		$this->assertEquals(1, count($members), "now, we did not sent notification about Alice only");
 		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+	}
+
+	public function test_debugModeDoesNotWrite() {
+		// Setup
+		$writer = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$aliceRegistrationDate = "1865-11-01";
+		$registrationAlice = $this->buildHelloassoEvent($aliceRegistrationDate, "alice", "wonderland", "al@ice.com");
+
+		$writer->addOrUpdateMember($registrationBob);
+		$writer->addOrUpdateMember($registrationAlice);
+
+		// Act & Assert 1: can read
+		$sut = new DoctrineConnector(true);
+		$this->assertEquals(2, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "A debug connector should be able to read the existing members");
+
+		// Act & Assert 2: can't insert or update
+		$charlesRegistrationDate = "2020-09-08";
+		$registrationCharles = $this->buildHelloassoEvent($charlesRegistrationDate, "Charles", "Edouard", "charles@something.com");
+		$sut->addOrUpdateMember($registrationCharles);
+		$this->assertEquals(2, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "We should still have only 2 members because the last one was not persisted to db because of debug mode");
+
+		// Act & Assert 3: can't delete
+		$sut->deleteRegistrationsOlderThan(new DateTime("1900-01-01"));
+		$this->assertEquals(2, count($sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"))), "We should still have only 2 members because we did not delete anything");
+
+		// Act & Assert 4: can't update 'notification sent' status
+		$this->assertEquals(2, count($sut->getMembersForWhichNoNotificationHasBeenSentToAdmins()), "Precondition");
+		$bob = $sut->getMemberMatchingRegistration($registrationBob);
+		$sut->updateMembersForWhichNotificationHasBeenSentoToAdmins([$bob]);
+		$this->assertEquals(2, count($sut->getMembersForWhichNoNotificationHasBeenSentToAdmins()), "We should still consider we haven't sent notifications for 2 members because we didn't update any status");
+
 
 	}
 
