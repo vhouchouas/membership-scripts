@@ -50,6 +50,9 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
 		$this->assertExpectedMember($bobRegistrationDate, $bobUpdateDate, "bob", "dylan", "bob-new@email.com", $members[1]);
 
+		// Leverage the setup to assert on getOrderedListOfLastRegistrations behavior
+		$members = $sut->getOrderedListOfLastRegistrations(new DateTime("1900-01-01"));
+		$this->assertEquals(1, count($members), "There should be a single registration after the 'since' date passed");
 	}
 
 	private $lastHelloAssoEventId = 0;
