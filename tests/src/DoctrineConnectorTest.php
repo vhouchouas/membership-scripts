@@ -55,6 +55,29 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertEquals(1, count($members), "There should be a single registration after the 'since' date passed");
 	}
 
+	public function test_getListOfRegistrationsOlderThan() {
+		// Setup
+		$sut = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$aliceRegistrationDate = "1865-11-01";
+		$registrationAlice = $this->buildHelloassoEvent($aliceRegistrationDate, "alice", "wonderland", "al@ice.com");
+
+		// Act
+		$sut->addOrUpdateMember($registrationBob);
+		$sut->addOrUpdateMember($registrationAlice);
+
+		// Assert
+		$this->assertEquals(1, count($sut->getListOfRegistrationsOlderThan(new DateTime("1900-01-01"))), "only 1 member registered before that date");
+		$this->assertEquals(2, count($sut->getListOfRegistrationsOlderThan(new DateTime("2025-01-01"))), "all 2 members registered before that date");
+
+		// Act & assert again to make sure the last registration date is taken into account
+		$bobUpdateDate = "2030-09-08";
+		$updateBob = $this->buildHelloassoEvent($bobUpdateDate, "bob", "dylan", "bob-new@email.com");
+		$sut->addOrUpdateMember($updateBob);
+		$this->assertEquals(1, count($sut->getListOfRegistrationsOlderThan(new DateTime("2025-01-01"))), "The last registration of Bob is now after that date so we should have only alice registration");
+	}
+
 	private $lastHelloAssoEventId = 0;
 	private function buildHelloassoEvent($event_date, $first_name, $last_name, $email): RegistrationEvent {
 		$ret = new RegistrationEvent();
