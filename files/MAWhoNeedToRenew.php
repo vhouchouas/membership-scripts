@@ -16,9 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 define('ZWP_TOOLS', dirname(__FILE__).'/');
-require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 require_once(ZWP_TOOLS . 'lib/util.php');
+require_once(ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php');
+
+$loggerInstance = new NoopLogger(); // to avoid having technical log sent to the browser
 
 // Find out the value of $since
 $since = null;
@@ -40,14 +42,14 @@ $keepTests = isset($_GET["keepTests"]);
 
 
 // Retrieve the data
-$mysqlConnector = new MysqlConnector();
-$simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistrations($since);
+$doctrineConnector = new DoctrineConnector();
+$members = $doctrineConnector->getOrderedListOfLastRegistrations($since);
 if(!$keepTests){
-  $simplifiedRegistrationEvents = keepOnlyActualMembers($simplifiedRegistrationEvents);
+  $members = keepOnlyActualMembers($members);
 }
 
 if(isset($_GET["json"])) {
-  echo json_encode(array_values($simplifiedRegistrationEvents));
+  echo json_encode(array_values($members));
   die();
 }
 ?>
@@ -66,8 +68,8 @@ if(isset($_GET["json"])) {
   <table>
     <tr><th>Dernière date d'adhésion</th><th>Nom</th><th>Mail</th><th>Code Postal</th></tr>
 <?php
-  foreach($simplifiedRegistrationEvents as $event){
-    echo "<tr><td>" . $event->event_date . "</td><td>" . $event->first_name . " " . $event->last_name . "</td><td>" . $event->email . '</td><td>' . $event->postal_code . '</td></tr>';
+  foreach($members as $member){
+    echo "<tr><td>" . dateToStr($member->lastRegistrationDate) . "</td><td>" . $member->firstName . " " . $member->lastName . "</td><td>" . $member->email . '</td><td>' . $member->postalCode . '</td></tr>';
   }
 ?>
   </table>
