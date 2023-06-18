@@ -20,6 +20,7 @@ if(!defined('ZWP_TOOLS')){  die(); }
 require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
 require_once ZWP_TOOLS . 'lib/logging.php';
 require_once ZWP_TOOLS . 'lib/util.php';
+require_once ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php';
 
 class OutdatedMemberManager {
   private $dateUtil;
@@ -30,19 +31,18 @@ class OutdatedMemberManager {
     $this->groups = $groupsWithDeletableUsers;
   }
 
-  public function deleteOutdatedMembersIfNeeded(DateTime $lastSuccessfulRun, MysqlConnector $mysql) : void {
+  public function deleteOutdatedMembersIfNeeded(DateTime $lastSuccessfulRun, DoctrineConnector $doctrine) : void {
     global $loggerInstance;
     if ( ! $this->dateUtil->needToDeleteOutdatedMembers($lastSuccessfulRun) ){
       $loggerInstance->log_info("No need to delete outdated members");
       return;
     }
 
-    $loggerInstance->log_info("We're going to delete outdated registration events");
-    $mysql->deleteRegistrationsOlderThan($this->dateUtil->getMaxDateBeforeWhichRegistrationsInfoShouldBeDiscarded());
-
     $loggerInstance->log_info("We're going to delete outdated members");
-    $usersToKeep = $mysql->getOrderedListOfLastRegistrations($this->dateUtil->getDateAfterWhichMembershipIsConsideredValid());
-    $mailsToKeep = array_map(function($event){return $event->email;}, $usersToKeep);
+    $doctrine->deleteRegistrationsOlderThan($this->dateUtil->getMaxDateBeforeWhichRegistrationsInfoShouldBeDiscarded());
+
+    $usersToKeep = $doctrine->getOrderedListOfLastRegistrations($this->dateUtil->getDateAfterWhichMembershipIsConsideredValid());
+    $mailsToKeep = array_map(function(MemberDTO $member){return $member->email;}, $usersToKeep);
 
     foreach($this->groups as $group){
       $currentUsers = $group->getUsers();
@@ -59,18 +59,18 @@ class OutdatedMemberManager {
    * @param RegistrationEvent[] $events The list of members
    * @return SimplifiedRegistrationEvent[]
    */
-  public function findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently(array $events, MysqlConnector $mysql) : array {
+  public function findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently(array $events, DoctrineConnector $doctrine) : array {
     $emails = array_map(function($event){return $event->email;}, $events);
-    return $mysql->findMembersInArrayWhoDoNotRegisteredAfterGivenDate($emails, $this->dateUtil->getDateAfterWhichMembershipIsConsideredValid());
+    return $doctrine->findMembersInArrayWhoDoNotRegisteredAfterGivenDate($emails, $this->dateUtil->getDateAfterWhichMembershipIsConsideredValid());
   }
 
   /**
    * @param RegistrationEvent[] $subscriptions
    * @param EmailSender $emailSender
    */
-  function tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate(array $subscriptions, MysqlConnector $mysql, EmailSender $emailSender) : void {
+  function tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate(array $subscriptions, DoctrineConnector $doctrine, EmailSender $emailSender) : void {
   global $loggerInstance;
-    $returningMembers = $this->findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently($subscriptions, $mysql);
+    $returningMembers = $this->findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently($subscriptions, $doctrine);
     if (count($returningMembers) > 0){
       $loggerInstance->log_info("Got " . count($returningMembers) . " returning members. Going to send a notification");
       $emailSender->sendMailToWarnAboutReturningMembers($returningMembers);

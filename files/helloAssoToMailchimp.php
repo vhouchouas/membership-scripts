@@ -54,7 +54,7 @@ $googleGroupConnector = new GoogleGroupConnector($debug);
 $doctrineConnector = new DoctrineConnector($debug);
 $emailSender = new EmailSender($debug);
 $outdatedManager = new OutdatedMemberManager($now, array($mailchimpConnector, $googleGroupConnector));
-$outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $mysqlConnector, $emailSender);
+$outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $doctrineConnector, $emailSender);
 
 // Register new members
 foreach($subscriptions as $subscription){
@@ -68,7 +68,7 @@ foreach($subscriptions as $subscription){
 sendEmailNotificationForAdminsAboutNewcomersIfneeded($emailSender, $doctrineConnector, $lastSuccessfulRunDate, $now);
 
 // Remove outdated members if needed
-$outdatedManager->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $mysqlConnector);
+$outdatedManager->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $doctrineConnector);
 
 // cleanup maintenance
 $mysqlConnector->writeLastSuccessfulRunStartDate($now);
