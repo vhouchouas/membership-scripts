@@ -80,28 +80,9 @@ If we ever want to recreate the database, here is the schema:
     INSERT INTO `script_options` (`key`, `value`) VALUES
     ('last_successful_run_date', 'O:8:\"DateTime\":3:{s:4:\"date\";s:26:\"2019-11-19 12:00:00.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:13:\"Europe/Zurich\";}');
 
-    -- The table in which we user data about memberships   
-    CREATE TABLE `registration_events` (
-      `id_HelloAsso` varchar(12) NOT NULL,
-      `date` datetime NOT NULL,
-      `amount` int(11) NOT NULL,
-      `first_name` varchar(30) NOT NULL,
-      `last_name` varchar(30) NOT NULL,
-      `email` varchar(100) NOT NULL,
-      `phone` varchar(30) DEFAULT NULL,
-      `birth_date` date DEFAULT NULL,
-      `address` varchar(100) DEFAULT NULL,
-      `postal_code` varchar(10) DEFAULT NULL,
-      `city` varchar(30) DEFAULT NULL,
-      `is_zw_professional` tinyint(1) NOT NULL,
-      `is_already_member_since` smallint DEFAULT NULL,
-      `want_to_do` varchar(1000) DEFAULT NULL,
-      `how_did_you_know_zwp` varchar(1000) DEFAULT NULL,
-      `notification_sent_to_admins` tinyint(1) NOT NULL DEFAULT 0
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
-    ADD UNIQUE KEY `helloasso_index` (`id_HelloAsso`);
+and also run this to create the table which stores the members
 
-
+    ./scripts/doctrine/ orm:schema-tool:create
 
 What the repo looks like
 ------------------------
@@ -110,18 +91,6 @@ What the repo looks like
 * The `tests` directory contains the non regression tests.
 * The `scripts` directory contains the scripts to perform a release
 * The `slack-agenda-app` directory is a git submodule. See its [README](https://github.com/Zero-Waste-Paris/slack-agenda-app/blob/main/README.md) for more info
-
-How to adapt this code if you are from another NGO
-==================================================
-
-We've configured the registration form to get the data we need from new members. Since you won't have the same you'll have to change:
-
-* the class `RegistrationEvent` (defined in `files/util.php`) which described the data we retrieve
-* the method in `files/helloasso.php` which parses the response from helloasso and builds a `RegistrationEvent`
-* the mysql schema in `files/mysql.php`
-* the maichimp schema from `files/mailchimp.php`
-
-You also probably want to adapt the workflow by editing the main entry point (which is `files/helloAssoToMailchimp.php`)
 
 How to update the slack-agenda-app
 ==================================
@@ -134,7 +103,3 @@ From the root of this repo:
     git add slack-agenda-app # no trailing '/' !
     git commit -m "Update slack-agenda-app"
 
-TODO
-====
--- replace some of code with 3rd parties (eg: logging (potentially with logrotate-ish),  sending email)
-- use the field "since when are you a member" added on helloasso to send mails about returning members
