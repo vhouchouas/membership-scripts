@@ -58,7 +58,6 @@ $outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate
 
 // Register new members
 foreach($subscriptions as $subscription){
-  $mysqlConnector->registerEvent($subscription);
   $mailchimpConnector->registerEvent($subscription);
   $googleGroupConnector->registerEvent($subscription);
   $doctrineConnector->addOrUpdateMember($subscription);

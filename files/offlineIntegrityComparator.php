@@ -25,7 +25,6 @@ define('ZWP_TOOLS', dirname(__FILE__).'/');
 require_once(ZWP_TOOLS . 'lib/logging.php');
 
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
-require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php');
@@ -39,21 +38,7 @@ $loggerInstance->log_info("from=" . dateToStr($from) . " -> to=" . dateToStr($to
 $helloAssoConnector = new HelloAssoConnector();
 $subscriptions = $helloAssoConnector->getAllHelloAssoSubscriptions($from, $to);
 
-// Find out the ones absent from mysql
-$mysqlConnector = new MysqlConnector();
-$missingSubscriptions = array();
-foreach($subscriptions as $subscription){
-	if (!$mysqlConnector->existsRegistrationWithId($subscription->helloasso_event_id)){
-		$missingSubscriptions[] = $subscription;
-	}
-}
-
-$loggerInstance->log_info("missing " . count($missingSubscriptions) . " subscriptions");
-foreach($missingSubscriptions as $s){
-	$loggerInstance->log_info("- [" . $s->event_date . "]: ". $s->helloasso_event_id . " (" . $s->email . ")");
-}
-
-// Find out the ones absent from the db handled by doctrine
+// Find out the ones absent from the table handled by doctrine
 $doctrineConnector = new DoctrineConnector();
 $missingSubscriptions = array();
 foreach($subscriptions as $subscription){
