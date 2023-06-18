@@ -43,7 +43,7 @@ $keepTests = isset($_GET["keepTests"]);
 $mysqlConnector = new MysqlConnector();
 $simplifiedRegistrationEvents = $mysqlConnector->getOrderedListOfLastRegistrations($since);
 if(!$keepTests){
-  $simplifiedRegistrationEvents = keepOnlyActualRegistrations($simplifiedRegistrationEvents);
+  $simplifiedRegistrationEvents = keepOnlyActualMembers($simplifiedRegistrationEvents);
 }
 
 if(isset($_GET["json"])) {

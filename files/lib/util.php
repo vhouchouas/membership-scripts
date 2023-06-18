@@ -147,17 +147,17 @@ function sendEmailNotificationForAdminsAboutNewcomersIfneeded(EmailSender $sende
   }
 }
 
-function keepOnlyActualRegistrations(array $registrations) : array {
-  return array_filter($registrations, "isActualRegistrationEvent");
+function keepOnlyActualMembers(array $members) : array {
+  return array_filter($members, "isActualMember");
 }
 
 /**
- * @returns TRUE if the registration is a real one, FALSE if it is a test one (made
+ * @returns TRUE if the member is a real one, FALSE if it is a test one (made
             on HelloAsso to test those scripts)
  */
-function isActualRegistrationEvent($registrationEvent) : bool {
+function isActualMember(MemberDTO|SimplifiedRegistrationEvent|RegistrationEvent $member) : bool {
   // This is currently the only kind of test registration we do
-  return strpos($registrationEvent->email, "guillaume.turri+test") === FALSE;
+  return strpos($member->email, "guillaume.turri+test") === FALSE;
 }
 
 interface GroupWithDeletableUsers {

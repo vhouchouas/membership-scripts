@@ -16,20 +16,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 define('ZWP_TOOLS', dirname(__FILE__).'/');
-require_once(ZWP_TOOLS . 'lib/mysql.php');
+require_once(ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php');
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 require_once(ZWP_TOOLS . 'lib/util.php');
 
 $dateUtil = new RegistrationDateUtil(new DateTime());
-$mysql = new MysqlConnector();
+$doctrine = new DoctrineConnector();
 
 // Get the data
-$simplifiedRegistrationEvents = keepOnlyActualRegistrations($mysql->getOrderedListOfLastRegistrations($dateUtil->getDateAfterWhichMembershipIsConsideredValid()));
+$members = keepOnlyActualMembers($doctrine->getOrderedListOfLastRegistrations($dateUtil->getDateAfterWhichMembershipIsConsideredValid()));
 
 // Aggregate
 $postalPerMembers = array();
-foreach($simplifiedRegistrationEvents as $sre){
-  $postal = $sre->postal_code;
+foreach($members as $member){
+  $postal = $member->postalCode;
   if (!array_key_exists($postal, $postalPerMembers)){
     $postalPerMembers[$postal] = 0;
   }
