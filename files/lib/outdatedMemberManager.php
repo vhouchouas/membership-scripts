@@ -57,7 +57,7 @@ class OutdatedMemberManager {
    * Currently it's used to send a notification to admins, because the accounts of returning members need
    * to be manually reactivated on some of our tools.
    * @param RegistrationEvent[] $events The list of members
-   * @return SimplifiedRegistrationEvent[]
+   * @return MemberDTO[]
    */
   public function findThoseWhoHaveAlreadyBeenMembersButWhoArentRegisteredCurrently(array $events, DoctrineConnector $doctrine) : array {
     $emails = array_map(function($event){return $event->email;}, $events);

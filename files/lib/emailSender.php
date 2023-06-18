@@ -30,7 +30,7 @@ class EmailSender {
   }
 
   /**
-   * @param SimplifiedRegistrationEvent[] $returningMembers
+   * @param MemberDTO[] $returningMembers
    */
   function sendMailToWarnAboutReturningMembers(array $returningMembers) : void {
     if (count($returningMembers) == 0){
@@ -45,9 +45,9 @@ class EmailSender {
     $body = EMAIL_BODY_INTRODUCTION_FOR_RETURNING_MEMBERS . self::$endl;
     $body .= "Name; Email; Last registration date" . self::$endl;
     foreach($returningMembers as $returningMember) {
-      $body .= $returningMember->first_name . " " . $returningMember->last_name . "; "
+      $body .= $returningMember->firstName . " " . $returningMember->lastName . "; "
         . $returningMember->email . "; "
-        . $returningMember->event_date
+        . $returningMember->lastRegistrationDate
         . self::$endl;
     }
     return $body;
@@ -62,11 +62,11 @@ class EmailSender {
       $body .= "(Attention : ce mail contient des données personnelles, ne le transférez pas, et pensez à le supprimer à terme.) " . self::$endl;
       foreach($newMembers as $newMember) {
         $body .= self::$endl;
-        $body .= $newMember->first_name . " " . $newMember->last_name . " (" . $newMember->email . ")" . self::$endl;
-        $body .= "Adhésion le " . $newMember->event_date . self::$endl;
-        $body .= "Réside à : " . $newMember->city . " (" . $newMember->postal_code . ")" . self::$endl;
-        $body .= "A connu l'asso : " . $newMember->how_did_you_know_zwp . self::$endl;
-        $body .= "Iel est motivé par : " . $newMember->want_to_do . self::$endl;
+        $body .= $newMember->firstName . " " . $newMember->lastName . " (" . $newMember->email . ")" . self::$endl;
+        $body .= "Adhésion le " . $newMember->lastRegistrationDate . self::$endl;
+        $body .= "Réside à : " . $newMember->city . " (" . $newMember->postalCode . ")" . self::$endl;
+        $body .= "A connu l'asso : " . $newMember->howDidYouKnowZwp . self::$endl;
+        $body .= "Iel est motivé par : " . $newMember->wantToDo . self::$endl;
       }
 
       $body .= self::$endl;

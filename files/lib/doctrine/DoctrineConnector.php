@@ -154,7 +154,7 @@ class DoctrineConnector {
    * to be manually reactivated on some of our tools.
    * @param string[] $membersEmail A list of mail of people who just registered
    * @param DateTime $registeredBefore The date after which we expect users haven't registered
-   * @return SimplifiedRegistrationEvent[] data about members in $membersEmail who already registered
+   * @return MemberDTO[] data about members in $membersEmail who already registered
    *                                       but who never registered after $registeredBefore
    */
 	public function findMembersInArrayWhoDoNotRegisteredAfterGivenDate(array $membersEmail, DateTime $registeredBefore) : array {
