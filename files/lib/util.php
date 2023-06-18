@@ -119,22 +119,6 @@ class RegistrationEvent {
   public $want_to_do;
 }
 
-class SimplifiedRegistrationEvent {
-  public $first_name;
-  public $last_name;
-  public $event_date;
-  public $email;
-  public $postal_code;
-
-  public function __construct($first_name, $last_name, $email, $postal_code, $event_date){
-    $this->first_name = $first_name;
-    $this->last_name = $last_name;
-    $this->email = $email;
-    $this->event_date = $event_date;
-    $this->postal_code = $postal_code;
-  }
-}
-
 function sendEmailNotificationForAdminsAboutNewcomersIfneeded(EmailSender $sender, DoctrineConnector $doctrine, DateTime $lastSuccessfulRun, DateTime $now) {
   global $loggerInstance;
   $dateUtil = new RegistrationDateUtil($now);
@@ -156,7 +140,7 @@ function keepOnlyActualMembers(array $members) : array {
  * @returns TRUE if the member is a real one, FALSE if it is a test one (made
             on HelloAsso to test those scripts)
  */
-function isActualMember(MemberDTO|SimplifiedRegistrationEvent|RegistrationEvent $member) : bool {
+function isActualMember(MemberDTO|RegistrationEvent $member) : bool {
   // This is currently the only kind of test registration we do
   return strpos($member->email, "guillaume.turri+test") === FALSE;
 }
