@@ -65,17 +65,28 @@ class DoctrineConnector {
 		$loggerInstance->log_info("Going to register in db user " . $event->first_name . " " . $event->last_name);
 
 		$member = $this->getMemberMatchingRegistration($event);
+		$eventDateTime = new DateTime($event->event_date);
 
 		if ($member != null) {
-			$loggerInstance->log_info("Member already known. We update it");
+			if ($member->lastRegistrationDate < $eventDateTime) {
+				$loggerInstance->log_info("Member already known, from a previous registration. We update it.");
+				$this->fillMemberWithFieldsCommonForCreateAndUpdate($member, $event);
+			} else {
+				if ($member->firstRegistrationDate > $eventDateTime) {
+					$loggerInstance->log_info("Member already known from a more recent registration. We update date of first registration");
+					$member->firstRegistrationDate = $eventDateTime;
+				} else {
+					$loggerInstance->log_info("Member already known from both a more recent and an older registration. Nothing to do");
+				}
+			}
 		} else {
 			$loggerInstance->log_info("Member unknown, we create it");
 			$member = new MemberDTO();
 			$member->firstName = $event->first_name;
 			$member->lastName = $event->last_name;
-			$member->firstRegistrationDate = new DateTime($event->event_date);
+			$member->firstRegistrationDate = $eventDateTime;
+			$this->fillMemberWithFieldsCommonForCreateAndUpdate($member, $event);
 		}
-		$this->fillMemberWithFieldsCommonForCreateAndUpdate($member, $event);
 
 		if ($this->debug) {
 			$loggerInstance->log_info("Not persisting this member in db because we're in debug mode");

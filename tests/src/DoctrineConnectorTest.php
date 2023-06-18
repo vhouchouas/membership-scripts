@@ -55,6 +55,37 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertEquals(1, count($members), "There should be a single registration after the 'since' date passed");
 	}
 
+	public function test_noUpdateIsPerformedIfTheRegistrationHandledLastIsOlderThanTheCurrentData() {
+		// Setup
+		$sut = new DoctrineConnector(false);
+		$bobRegistrationDate = "1985-04-03";
+		$registrationBob = $this->buildHelloassoEvent($bobRegistrationDate, "bob", "dylan", "bob@dylan.com");
+		$sut->addOrUpdateMember($registrationBob);
+
+		// // Precondition check
+		$members = $sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"));
+		$this->assertExpectedMember($bobRegistrationDate, $bobRegistrationDate, "bob", "dylan", "bob@dylan.com", $members[0]);
+
+		// Act 1: add a previous registration
+		$bobPreviousRegistrationDate = "1985-01-01";
+		$otherRegistrationBob = $this->buildHelloassoEvent($bobPreviousRegistrationDate, "bob", "dylan", "bob-old-email@dylan.com");
+		$sut->addOrUpdateMember($otherRegistrationBob);
+
+		// Assert 1
+		$members = $sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"));
+		$this->assertExpectedMember($bobPreviousRegistrationDate, $bobRegistrationDate, "bob", "dylan", "bob@dylan.com", $members[0]);
+
+		// Act 2: add a registration in between
+		$bobInBetweenRegistrationDate = "1985-02-01";
+		$inBetweenRegistrationBob = $this->buildHelloassoEvent($bobInBetweenRegistrationDate, "bob", "dylan", "bob-in-between-email@dylan.com");
+		$sut->addOrUpdateMember($inBetweenRegistrationBob);
+
+		// Assert 2
+		$members = $sut->getOrderedListOfLastRegistrations(new DateTime("1800-01-01"));
+		$this->assertExpectedMember($bobPreviousRegistrationDate, $bobRegistrationDate, "bob", "dylan", "bob@dylan.com", $members[0]);
+
+	}
+
 	public function test_getListOfRegistrationsOlderThan() {
 		// Setup
 		$sut = new DoctrineConnector(false);
@@ -215,8 +246,6 @@ final class DoctrineConnectorTest extends TestCase {
 		$bob = $sut->getMemberMatchingRegistration($registrationBob);
 		$sut->updateMembersForWhichNotificationHasBeenSentoToAdmins([$bob]);
 		$this->assertEquals(2, count($sut->getMembersForWhichNoNotificationHasBeenSentToAdmins()), "We should still consider we haven't sent notifications for 2 members because we didn't update any status");
-
-
 	}
 
 	private $lastHelloAssoEventId = 0;
