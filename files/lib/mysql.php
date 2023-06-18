@@ -254,62 +254,6 @@ class MysqlConnector {
     }
   }
 
-  public function getRegistrationsForWhichNoNotificationHasBeenSentToAdmins() : array {
-    global $loggerInstance;
-    try {
-      $stmt = $this->dbo->prepare("SELECT * FROM registration_events WHERE NOT notification_sent_to_admin");
-      $stmt->execute();
-      $ret = array();
-      while($row = $stmt->fetch()){
-        $registration = new RegistrationEvent();
-        $registration->helloasso_event_id = $row["id_HelloAsso"];
-        $registration->event_date = $row["date"];
-        $registration->amount = $row["amount"];
-        $registration->first_name = $row["first_name"];
-        $registration->last_name = $row["last_name"];
-        $registration->email = $row["email"];
-        $registration->phone = $row["phone"];
-        $registration->address = $row["address"];
-        $registration->postal_code = $row["postal_code"];
-        $registration->birth_date = $row["birth_date"];
-        $registration->city = $row["city"];
-        $registration->is_zw_professional = $this->toHelloassoBoolString($row["is_zw_professional"]);
-        $registration->how_did_you_know_zwp = $row["how_did_you_know_zwp"];
-        $registration->want_to_do = $row["want_to_do"];
-        $ret[] = $registration;
-      }
-      return $ret;
-    } catch(PDOException $e){
-      $loggerInstance->log_error("Failed to get regitrations for which no notification has been sent to admins. Error: " . $e->getMessage());
-      throw $e;
-    }
-  }
-
-  public function updateRegistrationsForWhichNotificationHasBeenSentoToAdmins(array $registrations) : void {
-    if (empty($registrations)) {
-      // so the code afterwards doesn't have to handle this corner case
-      return;
-    }
-
-    global $loggerInstance;
-    try {
-      $in = str_repeat('?,', count($registrations)-1) . '?';
-      $stmt = $this->dbo->prepare("UPDATE registration_events SET notification_sent_to_admin=true WHERE id_HelloAsso IN ($in)");
-      $params = array();
-      foreach($registrations as $registration) {
-        $params[] = $registration->helloasso_event_id;
-      }
-      if($this->debug){
-        $loggerInstance->log_info("debug mode: we don't update registrations for which notification has been sent to admin");
-      } else {
-        $stmt->execute($params);
-      }
-    } catch(PDOException $e) {
-      $loggerInstance->log_error("Failed to update registrations for which notification has been sent to admins because of error " . $e->getMessage());
-      throw $e;
-    }
-  }
-
   /**
    * Boolean fields received from helloasso have value "Oui" or "Non" (not sure if it's because of helloasso
    * or because of the way we set up our registration form)

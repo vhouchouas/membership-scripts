@@ -65,7 +65,7 @@ foreach($subscriptions as $subscription){
 }
 
 // Send weekly notification about new members if needed
-sendEmailNotificationForAdminsAboutNewcomersIfneeded($emailSender, $mysqlConnector, $lastSuccessfulRunDate, $now);
+sendEmailNotificationForAdminsAboutNewcomersIfneeded($emailSender, $doctrineConnector, $lastSuccessfulRunDate, $now);
 
 // Remove outdated members if needed
 $outdatedManager->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $mysqlConnector);

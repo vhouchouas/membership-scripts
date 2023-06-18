@@ -21,6 +21,7 @@ register_shutdown_function( "fatal_handler" );
 require_once ZWP_TOOLS . 'lib/emailSender.php';
 require_once ZWP_TOOLS . 'lib/logging.php';
 require_once ZWP_TOOLS . 'lib/registrationDateUtil.php';
+require_once ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php';
 
 function do_curl_query($curl, $nbMaxRetryOn500=5, $microSecondSleepBetweenRetry=3 * 1000000){
   global $loggerInstance;
@@ -134,14 +135,14 @@ class SimplifiedRegistrationEvent {
   }
 }
 
-function sendEmailNotificationForAdminsAboutNewcomersIfneeded(EmailSender $sender, MysqlConnector $mysql, DateTime $lastSuccessfulRun, DateTime $now) {
+function sendEmailNotificationForAdminsAboutNewcomersIfneeded(EmailSender $sender, DoctrineConnector $doctrine, DateTime $lastSuccessfulRun, DateTime $now) {
   global $loggerInstance;
   $dateUtil = new RegistrationDateUtil($now);
   if ($dateUtil->needToSendNotificationAboutLatestRegistrations($lastSuccessfulRun)){
     $loggerInstance->log_info("Going to send weekly email about newcomers");
-    $newcomers = $mysql->getRegistrationsForWhichNoNotificationHasBeenSentToAdmins();
+    $newcomers = $doctrine->getMembersForWhichNoNotificationHasBeenSentToAdmins();
     $sender->sendEmailNotificationForAdminsAboutNewcomers($newcomers);
-    $mysql->updateRegistrationsForWhichNotificationHasBeenSentoToAdmins($newcomers);
+    $doctrine->updateMembersForWhichNotificationHasBeenSentoToAdmins($newcomers);
   } else {
     $loggerInstance->log_info("Now isn't the time to send the email about newcomers");
   }
