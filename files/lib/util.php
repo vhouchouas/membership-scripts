@@ -104,17 +104,13 @@ function fatal_handler() {
 class RegistrationEvent {
   public $helloasso_event_id;
   public $event_date;
-  public $amount;
   public $first_name;
   public $last_name;
   public $email;
   public $phone;
-  public $address;
   public $postal_code;
-  public $birth_date; // String with format dd/mm/yyyy
   public $city;
   public $is_zw_professional;   // Beware, this is a string with value either "Oui" or "Non"
-  public $is_already_member_since;
   public $how_did_you_know_zwp;
   public $want_to_do;
 }

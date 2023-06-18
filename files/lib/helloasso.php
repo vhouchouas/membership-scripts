@@ -221,7 +221,6 @@ class HelloAssoConnector {
     $result = new RegistrationEvent();
     $result->helloasso_event_id = $jsonRegistration["id"];
     $result->event_date = $jsonRegistration["order"]["date"];
-    $result->amount = $jsonRegistration["initialAmount"];
     $result->first_name = $jsonRegistration["user"]["firstName"];
     $result->last_name = $jsonRegistration["user"]["lastName"];
 
@@ -234,9 +233,6 @@ class HelloAssoConnector {
         case "Email":
           $result->email = $customField["answer"];
           break;
-        case "Adresse":
-          $result->address = $customField["answer"];
-          break;
         case "Ville":
           $result->city = $customField["answer"];
           break;
@@ -244,8 +240,6 @@ class HelloAssoConnector {
           $result->postal_code = $customField["answer"];
           break;
         case "Date de naissance":
-          $result->birth_date = $customField["answer"];
-          break;
         case "Numéro de téléphone":
            $result->phone = $customField["answer"];
            break;
@@ -257,9 +251,6 @@ class HelloAssoConnector {
            break;
         case "Portes-tu un projet professionnel autour du zéro déchet ?":
            $result->is_zw_professional = $customField["answer"];
-           break;
-        case "Si tu étais déjà adhérent⋅e l'an dernier, quand as-tu rejoint l'asso pour la première fois ?":
-           $result->is_already_member_since = $customField["answer"];
            break;
       }
     }
