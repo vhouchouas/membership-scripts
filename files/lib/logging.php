@@ -69,5 +69,10 @@ class DummyLogger implements ZWP_Logger {
   }
 }
 
+class NoopLogger implements ZWP_Logger {
+  public function log_info(string $message): void {}
+  public function log_error(string $message): void {}
+}
+
 // Initialize to a dummy logger so it works fine in test. Overridable in prod
 $loggerInstance = new DummyLogger();

@@ -20,6 +20,8 @@ require_once(ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php');
 require_once(ZWP_TOOLS . 'lib/registrationDateUtil.php');
 require_once(ZWP_TOOLS . 'lib/util.php');
 
+$loggerInstance = new NoopLogger(); // to avoid having technical log sent to the browser
+
 $dateUtil = new RegistrationDateUtil(new DateTime());
 $doctrine = new DoctrineConnector();
 
