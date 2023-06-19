@@ -70,19 +70,15 @@ Setup of the database
 
 If we ever want to recreate the database, here is the schema:
 
-    -- The table in which the script stores technical information
-    CREATE TABLE `script_options` (
-      `key` varchar(255) NOT NULL,
-      `value` varchar(255) NOT NULL
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-      -- insert some data the scripts will need for bootstrapping
-    INSERT INTO `script_options` (`key`, `value`) VALUES
-    ('last_successful_run_date', 'O:8:\"DateTime\":3:{s:4:\"date\";s:26:\"2019-11-19 12:00:00.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:13:\"Europe/Zurich\";}');
-
 and also run this to create the table which stores the members
 
     ./scripts/doctrine/ orm:schema-tool:create
+
+and then insert some data the scripts will need for bootstrapping:
+
+    INSERT INTO `options` (`key`, `value`) VALUES
+    ('last_successful_run_date', 'O:8:"DateTime":3:{s:4:"date";s:26:"2023-06-19 21:45:07.675446";s:13:"timezone_type";i:3;s:8:"timezone";s:13:"Europe/Zurich";} ');
+
 
 What the repo looks like
 ------------------------

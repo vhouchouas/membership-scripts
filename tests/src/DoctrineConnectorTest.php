@@ -248,6 +248,27 @@ final class DoctrineConnectorTest extends TestCase {
 		$this->assertEquals(2, count($sut->getMembersForWhichNoNotificationHasBeenSentToAdmins()), "We should still consider we haven't sent notifications for 2 members because we didn't update any status");
 	}
 
+	public function test_writeAndReadStartDate() {
+		// Test date creation
+		$sut = new DoctrineConnector(false);
+		$date1 = new DateTime("1985-04-03T11:53:17");
+		$sut->writeLastSuccessfulRunStartDate($date1);
+
+		$this->assertEquals($date1, $sut->readLastSuccessfulRunStartDate());
+
+		// Test updating existing option
+		$date2 = new DateTime("1987-11-08T12:34:56");
+		$sut->writeLastSuccessfulRunStartDate($date2);
+
+		$this->assertEquals($date2, $sut->readLastSuccessfulRunStartDate());
+
+		// Test debug mode
+		$sutDebug = new DoctrineConnector(true);
+		$date3 = new DateTime("2020-09-08T06:55:47");
+		$sutDebug->writeLastSuccessfulRunStartDate($date3);
+		$this->assertEquals($date2, $sut->readLastSuccessfulRunStartDate(), "We should retrieve the previous value since the last write was in debug mode");
+	}
+
 	private $lastHelloAssoEventId = 0;
 	private function buildHelloassoEvent($event_date, $first_name, $last_name, $email): RegistrationEvent {
 		$ret = new RegistrationEvent();

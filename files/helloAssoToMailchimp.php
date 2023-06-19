@@ -26,7 +26,6 @@ $loggerInstance = new ProdLogger($debug, SLACK_LOG_BOT_TOKEN, SLACK_CHANNEL_ID);
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'lib/helloasso.php');
 require_once(ZWP_TOOLS . 'lib/mailchimp.php');
-require_once(ZWP_TOOLS . 'lib/mysql.php');
 require_once(ZWP_TOOLS . 'lib/doctrine/DoctrineConnector.php');
 require_once(ZWP_TOOLS . 'lib/outdatedMemberManager.php');
 require_once(ZWP_TOOLS . 'google/GoogleGroupConnector.php');
@@ -37,8 +36,12 @@ $loggerInstance->log_info("Run triggered by " . getRunRequester());
 
 // derive dates to use
 $now            = new DateTime();
-$mysqlConnector = new MysqlConnector($debug);
-$lastSuccessfulRunDate = $mysqlConnector->readLastSuccessfulRunStartDate();
+$doctrineConnector = new DoctrineConnector($debug);
+$lastSuccessfulRunDate = $doctrineConnector->readLastSuccessfulRunStartDate();
+if ($lastSuccessfulRunDate === null) {
+	$loggerInstance->log_error("Can't retrieve the last successful run start date, we abort");
+	die();
+}
 $dateBeforeWhichAllRegistrationsHaveBeenHandled = RegistrationDateUtil::getDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
 $loggerInstance->log_info("Last successful run was at " . dateToStr($lastSuccessfulRunDate) . ". Starting now at " . dateToStr($now) . ". We handle registrations that occur after " . dateToStr($dateBeforeWhichAllRegistrationsHaveBeenHandled));
 
@@ -51,7 +54,6 @@ $loggerInstance->log_info("retrieved data from HelloAsso. Got " . count($subscri
 // This has to be done before we actually register members, otherwise we'll consider they are still registered
 $mailchimpConnector = new MailChimpConnector($debug);
 $googleGroupConnector = new GoogleGroupConnector($debug);
-$doctrineConnector = new DoctrineConnector($debug);
 $emailSender = new EmailSender($debug);
 $outdatedManager = new OutdatedMemberManager($now, array($mailchimpConnector, $googleGroupConnector));
 $outdatedManager->tellAdminsAboutOldMembersWhoRegisteredAgainAfterBeingOutOfDate($subscriptions, $doctrineConnector, $emailSender);
@@ -70,5 +72,5 @@ sendEmailNotificationForAdminsAboutNewcomersIfneeded($emailSender, $doctrineConn
 $outdatedManager->deleteOutdatedMembersIfNeeded($lastSuccessfulRunDate, $doctrineConnector);
 
 // cleanup maintenance
-$mysqlConnector->writeLastSuccessfulRunStartDate($now);
+$doctrineConnector->writeLastSuccessfulRunStartDate($now);
 $loggerInstance->log_info("Completed successfully");

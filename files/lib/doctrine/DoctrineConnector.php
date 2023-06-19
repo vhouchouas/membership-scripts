@@ -20,6 +20,7 @@ if(!defined('ZWP_TOOLS')){  die(); }
 require_once(ZWP_TOOLS . 'lib/util.php');
 require_once(ZWP_TOOLS . 'config.php');
 require_once(__DIR__ . '/MemberDTO.php');
+require_once(__DIR__ . '/OptionDTO.php');
 
 require_once ZWP_TOOLS . "vendor/autoload.php";
 use Doctrine\DBAL\DriverManager;
@@ -188,5 +189,35 @@ class DoctrineConnector {
 		} else {
 			$this->entityManager->flush();
 		}
+	}
+
+
+  const OPTION_LASTSUCCESSFULRUN_KEY = "last_successful_run_date";
+  public function writeLastSuccessfulRunStartDate(DateTime $startDate) : void{
+		global $loggerInstance;
+		$option = $this->readOption(self::OPTION_LASTSUCCESSFULRUN_KEY);
+
+		if ($option == null) {
+			$option = new OptionDTO();
+			$option->key = self::OPTION_LASTSUCCESSFULRUN_KEY;
+		}
+		$option->value = serialize($startDate);
+
+		if ($this->debug) {
+			$loggerInstance->log_info("Not updating start date in db because we're in debug mode");
+		} else {
+			$this->entityManager->persist($option);
+			$this->entityManager->flush();
+			$loggerInstance->log_info("Start date successfully persisted in db");
+		}
+	}
+
+  public function readLastSuccessfulRunStartDate() : ?DateTime {
+		$option = $this->readOption(self::OPTION_LASTSUCCESSFULRUN_KEY);
+		return $option == null ? null : unserialize($option->value);
+	}
+
+	private function readOption(string $key) : ?OptionDTO {
+		return $this->entityManager->getRepository('OptionDTO')->findOneBy(['key' => $key]);
 	}
 }
