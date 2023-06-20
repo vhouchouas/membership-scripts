@@ -1,0 +1,89 @@
+openapi: 3.0.1
+info:
+  title: ZWP Dashboard
+  version: 0.0.1
+paths:
+  /api/trigger-import-run:
+    get: # should perhaps be a POST for semantic reasons, but has to be GET in order to be usable by our web cron
+      summary: Trigger a run to fetch the last registrations from helloasso and register them in the needed groups
+      parameters:
+        - name: debug
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+  /api/members-per-postal-code:
+    get:
+      summary: "retrieve the list of members per postal code (nb: it's anonymized data)"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - postalCode
+                    - count
+                  properties:
+                    postalCode:
+                      type: string # Not an int because this data is regularly badly provided by the member during registration
+                    count:
+                      type: integer
+  /api/members:
+    get:
+      summary: Get the list of members who registered since the date specified if any, from the beginning of the current registration period otherwise
+      parameters:
+        - name: since
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - firstName
+                    - lastName
+                    - email
+                    - postalCode
+                    - helloAssoLastRegistrationEventId
+                    - city
+                    - howDidYouKnowZwp
+                    - wantToDo
+                    - firstRegistrationDate
+                    - isZWProfessional
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                    postalCode:
+                      type: string
+                    helloAssoLastRegistrationEventId:
+                      type: integer 
+                    city:
+                      type: string
+                    howDidYouKnowZwp:
+                      type: string
+                    wantToDo:
+                      type: string
+                    firstRegistrationDate:
+                      type: string
+                      format: date
+                    isZWProfessional:
+                      type: boolean
