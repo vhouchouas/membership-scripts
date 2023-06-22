@@ -13,7 +13,7 @@ paths:
           schema:
             type: boolean
       responses:
-        "200":
+        "204":
           description: OK
   /api/members-per-postal-code:
     get:
