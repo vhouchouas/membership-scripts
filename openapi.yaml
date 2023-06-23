@@ -35,7 +35,7 @@ paths:
                       type: string # Not an int because this data is regularly badly provided by the member during registration
                     count:
                       type: integer
-  /api/members:
+  /api/members-sorted-by-last-registration-date:
     get:
       summary: Get the list of members who registered since the date specified if any, from the beginning of the current registration period otherwise
       parameters:

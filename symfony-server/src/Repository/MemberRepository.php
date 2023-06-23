@@ -16,51 +16,45 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MemberRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Member::class);
-    }
+	public function __construct(ManagerRegistry $registry)
+	{
+		parent::__construct($registry, Member::class);
+	}
 
-    public function save(Member $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
+	public function save(Member $entity, bool $flush = false): void
+	{
+		$this->getEntityManager()->persist($entity);
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
+		if ($flush) {
+			$this->getEntityManager()->flush();
+		}
+	}
 
-    public function remove(Member $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
+	public function remove(Member $entity, bool $flush = false): void
+	{
+		$this->getEntityManager()->remove($entity);
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
+		if ($flush) {
+			$this->getEntityManager()->flush();
+		}
+	}
 
-//    /**
-//     * @return Member[] Returns an array of Member objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+	public function getOrderedListOfLastRegistrations(\DateTime $since) : array {
+		return $this->createQueryBuilder('m')
+			->andWhere('m.lastRegistrationDate > :since')
+			->setParameter('since', $since)
+			->orderBy('m.lastRegistrationDate', 'ASC')
+			->getQuery()
+			->getResult();
+	}
 
-//    public function findOneBySomeField($value): ?Member
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+	//    public function findOneBySomeField($value): ?Member
+	//    {
+	//        return $this->createQueryBuilder('m')
+	//            ->andWhere('m.exampleField = :val')
+	//            ->setParameter('val', $value)
+	//            ->getQuery()
+	//            ->getOneOrNullResult()
+	//        ;
+	//    }
 }
