@@ -48,6 +48,17 @@ class MemberRepository extends ServiceEntityRepository
 			->getResult();
 	}
 
+	public function getMembersPerPostalCode(\DateTime $since) : array {
+		return $this->getEntityManager()->createQuery(
+				'SELECT m.postalCode, COUNT(m.postalCode) AS count
+				 FROM \App\Entity\Member m
+				 WHERE m.lastRegistrationDate > :since
+				 GROUP BY m.postalCode
+				 ORDER BY count DESC')
+			->setParameter('since', $since)
+			->getResult();
+	}
+
 	//    public function findOneBySomeField($value): ?Member
 	//    {
 	//        return $this->createQueryBuilder('m')

@@ -26,10 +26,12 @@ class DefaultApi implements DefaultApiInterface {
 	}
 
 	public function apiMembersPerPostalCodeGet(int &$responseCode, array &$responseHeaders): array|object|null {
-		// TODO
-		return [
-			new ApiMembersPerPostalCodeGet200ResponseInner(["postalCode" => "92100", "count" => "9"])
-		];
+		$since = new \DateTime("2017-01-01"); // TODO: should be RegistrationDateUtil->getDateAfterWhichMembershipIsConsideredValid()
+		$result = array();
+		foreach($this->memberRepository->getMembersPerPostalCode($since) as $row) {
+			$result []= new ApiMembersPerPostalCodeGet200ResponseInner($row);
+		}
+		return $result;
 	}
 
 	public function apiTriggerImportRunGet(?bool $debug, int &$responseCode, array &$responseHeaders): void {
