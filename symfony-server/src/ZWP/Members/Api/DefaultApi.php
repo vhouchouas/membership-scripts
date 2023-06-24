@@ -3,7 +3,7 @@
 namespace ZWP\Members\Api;
 
 use OpenAPI\Server\Api\DefaultApiInterface;
-use OpenAPI\Server\Model\ApiMembersGet200ResponseInner;
+use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
 
 use App\Repository\MemberRepository;
@@ -22,7 +22,13 @@ class DefaultApi implements DefaultApiInterface {
 			$since = new \DateTime("2017-01-01"); // TODO: should be RegistrationDateUtil->getDateAfterWhichMembershipIsConsideredValid()
 			$this->logger->info("getting member without specifying a start date. We use " . $since->format('Y-m-d\TH:i:s'));
 		}
-		return $this->memberRepository->getOrderedListOfLastRegistrations($since);
+
+		$result = array();
+		foreach($this->memberRepository->getOrderedListOfLastRegistrations($since) as $entity) {
+			$result []= new ApiMembersSortedByLastRegistrationDateGet200ResponseInner($entity);
+		}
+
+		return $result;
 	}
 
 	public function apiMembersPerPostalCodeGet(int &$responseCode, array &$responseHeaders): array|object|null {

@@ -45,7 +45,7 @@ class MemberRepository extends ServiceEntityRepository
 			->setParameter('since', $since)
 			->orderBy('m.lastRegistrationDate', 'ASC')
 			->getQuery()
-			->getResult();
+			->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
 	}
 
 	public function getMembersPerPostalCode(\DateTime $since) : array {

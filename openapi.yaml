@@ -58,11 +58,7 @@ paths:
                     - firstName
                     - lastName
                     - email
-                    - postalCode
                     - helloAssoLastRegistrationEventId
-                    - city
-                    - howDidYouKnowZwp
-                    - wantToDo
                     - firstRegistrationDate
                     - isZWProfessional
                   properties:
