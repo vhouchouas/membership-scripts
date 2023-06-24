@@ -5,6 +5,8 @@ namespace ZWP\Members\Api;
 use OpenAPI\Server\Api\DefaultApiInterface;
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
+use ZWP\Members\Services\RegistrationDateUtil;
+
 
 use App\Repository\MemberRepository;
 use App\Entity\Member;
@@ -12,14 +14,15 @@ use Psr\Log\LoggerInterface;
 
 class DefaultApi implements DefaultApiInterface {
 
-	public function __construct(LoggerInterface $logger, MemberRepository $memberRepository) {
+	public function __construct(LoggerInterface $logger, MemberRepository $memberRepository, RegistrationDateUtil $registrationDateUtil) {
 		$this->logger = $logger;
 		$this->memberRepository = $memberRepository;
+		$this->registrationDateUtil = $registrationDateUtil;
 	}
 
 	public function apiMembersSortedByLastRegistrationDateGet(?\DateTime $since, int &$responseCode, array &$responseHeaders): array|object|null {
 		if ($since == null) {
-			$since = new \DateTime("2017-01-01"); // TODO: should be RegistrationDateUtil->getDateAfterWhichMembershipIsConsideredValid()
+			$since = $this->registrationDateUtil->getDateAfterWhichMembershipIsConsideredValid();
 			$this->logger->info("getting member without specifying a start date. We use " . $since->format('Y-m-d\TH:i:s'));
 		}
 
@@ -32,7 +35,7 @@ class DefaultApi implements DefaultApiInterface {
 	}
 
 	public function apiMembersPerPostalCodeGet(int &$responseCode, array &$responseHeaders): array|object|null {
-		$since = new \DateTime("2017-01-01"); // TODO: should be RegistrationDateUtil->getDateAfterWhichMembershipIsConsideredValid()
+		$since = $this->registrationDateUtil->getDateAfterWhichMembershipIsConsideredValid();
 		$result = array();
 		foreach($this->memberRepository->getMembersPerPostalCode($since) as $row) {
 			$result []= new ApiMembersPerPostalCodeGet200ResponseInner($row);
