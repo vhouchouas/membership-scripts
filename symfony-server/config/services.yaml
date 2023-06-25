@@ -4,6 +4,12 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+  helloasso.clientId: '%env(HA_CLIENT_ID)%'
+  helloasso.clientSecret: '%env(HA_CLIENT_SECRET)%'
+  helloasso.registrationFormSlug: '%env(HA_REGISTRATION_FORM_SLUG)%'
+  helloasso.registrationFormSlug2: '%env(HA_REGISTRATION_FORM_SLUG_2)%'
+  helloasso.organizationSlug: '%env(HA_ORGANIZATION_SLUG)%'
+
 
 services:
     # default configuration for services in *this* file
