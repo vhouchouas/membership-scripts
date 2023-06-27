@@ -9,6 +9,7 @@ parameters:
   helloasso.registrationFormSlug: '%env(HA_REGISTRATION_FORM_SLUG)%'
   helloasso.registrationFormSlug2: '%env(HA_REGISTRATION_FORM_SLUG_2)%'
   helloasso.organizationSlug: '%env(HA_ORGANIZATION_SLUG)%'
+  slack.botToken: '%env(SLACK_BOT_TOKEN)%'
 
 
 services:
