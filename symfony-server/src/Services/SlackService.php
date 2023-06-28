@@ -1,8 +1,6 @@
 <?php
 
-namespace ZWP\Members\Services;
-
-require_once "../../../../vendor/autoload.php";
+namespace App\Services;
 
 use JoliCode\Slack\ClientFactory;
 use Psr\Log\LoggerInterface;

@@ -1,11 +1,12 @@
 <?php
 
-namespace ZWP\Members\Api;
+namespace App\Controller;
 
 use OpenAPI\Server\Api\DefaultApiInterface;
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
-use ZWP\Members\Services\RegistrationDateUtil;
+use App\Services\RegistrationDateUtil;
+use App\Services\MemberImporter;
 
 
 use App\Repository\MemberRepository;
@@ -14,10 +15,11 @@ use Psr\Log\LoggerInterface;
 
 class DefaultApi implements DefaultApiInterface {
 
-	public function __construct(LoggerInterface $logger, MemberRepository $memberRepository, RegistrationDateUtil $registrationDateUtil) {
+	public function __construct(LoggerInterface $logger, MemberRepository $memberRepository, RegistrationDateUtil $registrationDateUtil, MemberImporter $memberImporter) {
 		$this->logger = $logger;
 		$this->memberRepository = $memberRepository;
 		$this->registrationDateUtil = $registrationDateUtil;
+		$this->memberImporter = $memberImporter;
 	}
 
 	public function apiMembersSortedByLastRegistrationDateGet(?\DateTime $since, int &$responseCode, array &$responseHeaders): array|object|null {
@@ -44,6 +46,6 @@ class DefaultApi implements DefaultApiInterface {
 	}
 
 	public function apiTriggerImportRunGet(?bool $debug, int &$responseCode, array &$responseHeaders): void {
-		// TODO
+		$this->memberImporter->run($debug ?? true);
 	}
 }

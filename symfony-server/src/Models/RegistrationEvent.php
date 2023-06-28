@@ -1,6 +1,6 @@
 <?php
 
-namespace ZWP\Members\Models;
+namespace App\Models;
 
 class RegistrationEvent {
   public string $helloasso_event_id;

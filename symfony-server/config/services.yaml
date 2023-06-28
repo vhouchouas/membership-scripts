@@ -30,8 +30,6 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    ZWP\:
-        resource: '../src/ZWP'
-    ZWP\Members\Api\DefaultApi:
+    App\Controller\DefaultApi:
         tags:
             - { name: "open_api_server.api", api: "default" }

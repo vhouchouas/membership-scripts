@@ -1,6 +1,6 @@
 <?php
 
-namespace ZWP\Members\Services;
+namespace App\Services;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;

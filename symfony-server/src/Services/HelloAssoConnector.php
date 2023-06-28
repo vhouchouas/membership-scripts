@@ -1,12 +1,12 @@
 <?php
 
-namespace ZWP\Members\Services;
+namespace App\Services;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Psr\Log\LoggerInterface;
-use ZWP\Members\Models\RegistrationEvent;
-use ZWP\Members\Services\HelloAssoAuthenticator;
+use App\Models\RegistrationEvent;
+use App\Services\HelloAssoAuthenticator;
 
 class HelloAssoConnector {
 	public function __construct(
