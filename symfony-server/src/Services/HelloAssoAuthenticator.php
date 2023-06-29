@@ -5,13 +5,14 @@ namespace App\Services;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Psr\Log\LoggerInterface;
+use App\Models\HelloAssoTokens;
 
 class HelloAssoAuthenticator {
 	const OAUTH_URL =  "https://api.helloasso.com/oauth2/token";
 	const HTTP_HEADER = ['Content-type' => 'application/x-www-form-urlencoded'];
 
-	private bool $refreshedTokenAlready = false;
 	private string $tokensFile;
+	private ?HelloAssoTokens $latestTokens = null;
 
 	public function __construct(private LoggerInterface $logger, private HttpClientInterface $client, private ContainerBagInterface $params) {
 		$this->tokensFile = $params->get("helloasso.tokensFile");
@@ -21,43 +22,22 @@ class HelloAssoAuthenticator {
 	}
 
 	public function getAccessToken(): string {
-		if ( ! $this->refreshedTokenAlready ) {
-			$this->ensureTokensOnDiskAreUpToDate();
-			$this->refreshedTokenAlready = true;
+		if (  $this->latestTokens == null) {
+			$this->logger->info("Going to get fresh helloAsso tokens");
+			$this->getFreshTokens();
 		}
-		$tokens = $this->parseTokensAsArray();
-		return $tokens["access_token"];
+		return $this->latestTokens->getAccessToken();
 	}
 
-	private function parseTokensAsArray(){
-		return json_decode(file_get_contents($this->tokensFile), true);
-	}
-
-	private function ensureTokensOnDiskAreUpToDate(){
+	private function getFreshTokens() : void {
 		// According to Helloasso doc:
 		// > you MUST obtain a new access_token using the refresh_token issued to you,
 		// > and MUST NOT obtain a new access_token by using the client
-		if ($this->isValidTokensFile()){
+		$this->latestTokens = HelloAssoTokens::fromFile($this->tokensFile, $this->logger);
+		if ($this->latestTokens != null){
 			$this->refreshTokens();
 		} else {
 			$this->getTokensFromScratch();
-		}
-	}
-
-	private function isValidTokensFile(){
-		if (!file_exists($this->tokensFile)){
-			$this->logger->info("The tokens file " . $this->tokensFile . " doesn't exist");
-			return false;
-		}
-
-		$content = file_get_contents($this->tokensFile);
-		if (self::isValidTokensJson($content)){
-			$this->logger->info("Local tokens file seems ok");
-			return true;
-		} else {
-			$this->logger->error("Local tokens file seems not ok. We delete it. Was: $content");
-			unlink($this->tokensFile);
-			return false;
 		}
 	}
 
@@ -72,49 +52,35 @@ class HelloAssoAuthenticator {
 				'body' => [
 				"grant_type" => "refresh_token",
 				"client_id" => $this->params->get('helloasso.clientId'),
-				"refresh_token" => $this->parseRefreshToken()
+				"refresh_token" => $this->latestTokens->getRefreshToken()
 			]
 		]);
 
-		if ($response->getStatusCode() == 401) {
-			$this->logger->info("Got 401 when trying to use helloasso refresh token. We try to get brand new ones");
+		if ($response->getStatusCode() == 401 || $response->getStatusCode() == 400) {
+			$this->logger->info("Got 4xx when trying to use helloasso refresh token. We try to get brand new ones");
 			$this->getTokensFromScratch();
 		} else {
 			$this->logger->info("Got new helloasso tokens");
-			$this->writeTokensFile($response->getContent());
+			$content = $response->getContent();
+			$newTokens = HelloAssoTokens::fromContentInRam($content, $this->logger);
+			// It already occured that we received corrupted content from helloasso. We check for this case because
+			// we at least want to make sure we don't override the file on the filesystem.
+			if ($newTokens == null) {
+				$this->logger->error("received invalid tokens from helloasso so we don't overwrite the existing file and we try to get brand new ones. Received: $content");
+				$this->getTokensFromScratch();
+			} else {
+				$this->logger->info("The tokens received seem valid");
+				$this->latestTokens = $newTokens;
+				$this->writeTokensFile($content);
+			}
 		}
 	}
 
-	private function parseRefreshToken(){
-		$tokens = $this->parseTokensAsArray();
-		return $tokens["refresh_token"];
-	}
-
-	private function writeTokensFile($content){
-		if (!self::isValidTokensJson($content)){
-			$this->logger->error("received invalid tokens from helloasso so we don't overwrite the existing file. Received: $content");
-			return;
-		}
-
+	private function writeTokensFile(string $rawContent){
 		if (!file_exists(dirname($this->tokensFile))) {
 			mkdir(dirname($this->tokensFile), 0700, true);
 		}
-		file_put_contents($this->tokensFile, $content);
-	}
-
-	public static function isValidTokensJson(string $content){
-		$tokens = json_decode($content, true);
-		if (is_null($tokens)){
-			$this->logger->error("The content doesn't look like valid json");
-			return false;
-		} else if (!array_key_exists("access_token", $tokens)){
-			$this->logger->error("The content is missing access_token");
-			return false;
-		} else if (!array_key_exists("refresh_token", $tokens)){
-			$this->logger->error("The content is missing refresh_token");
-			return false;
-		}
-		return true;
+		file_put_contents($this->tokensFile, $rawContent);
 	}
 
 	private function getTokensFromScratch() {
@@ -131,6 +97,13 @@ class HelloAssoAuthenticator {
 				"client_secret" => $this->params->get('helloasso.clientSecret')
 			]
 		]);
-		$this->writeTokensFile($response->getContent());
+		$content = $response->getContent();
+		$tokensFromScratch = HelloAssoTokens::fromContentInRam($content, $this->logger);
+		if ($tokensFromScratch == null) {
+			$this->logger->error("Failed to get tokens from scratch. The rest of the run may fail");
+		} else {
+			$this->latestTokens = $tokensFromScratch;
+			$this->writeTokensFile($content);
+		}
 	}
 }
