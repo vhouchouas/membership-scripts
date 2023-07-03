@@ -52,11 +52,6 @@ class DefaultApi implements DefaultApiInterface {
 
 	public function apiSlackAccountsToReactivateGet(int &$responseCode, array &$responseHeaders): array|object|null {
 		$membersEmails = array_map(function ($member) {return $member->getEmail();}, $this->memberRepository->findAll());
-		$deactivatedMembers = $this->slackService->findDeactivatedMembers($membersEmails);
-		$result = array();
-		foreach ($deactivatedMembers as $index => $email) {
-			$result []= $email;
-		}
-		return $result;
+		return $this->slackService->findDeactivatedMembers($membersEmails);
 	}
 }

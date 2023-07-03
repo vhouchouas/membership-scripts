@@ -20,7 +20,7 @@ class SlackService {
 	 * roughly 20 call per minute.
 	 */
 	public function usersList() {
-		return $this->client->usersList();
+		return $this->client->usersList(['limit' => 500]);
 	}
 
 	/**
@@ -46,6 +46,12 @@ class SlackService {
 		}
 		$this->logger->info("Got " . count($emailsOfDeactivatedSlackUsers) . " deactivated users");
 
-		return array_intersect($membersEmail, $emailsOfDeactivatedSlackUsers);
+		$intersection = array_intersect($membersEmail, $emailsOfDeactivatedSlackUsers);
+
+		$result = array();
+		foreach ($intersection as $index => $email) {
+			$result []= $email;
+		}
+		return $result;
 	}
 }
