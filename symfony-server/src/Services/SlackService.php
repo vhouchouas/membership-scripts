@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use JoliCode\Slack\ClientFactory;
 use Psr\Log\LoggerInterface;
 

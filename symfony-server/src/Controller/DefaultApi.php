@@ -7,7 +7,7 @@ use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInn
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
 use App\Services\RegistrationDateUtil;
 use App\Services\MemberImporter;
-
+use App\Services\SlackService;
 
 use App\Repository\MemberRepository;
 use App\Entity\Member;
@@ -15,12 +15,13 @@ use Psr\Log\LoggerInterface;
 
 class DefaultApi implements DefaultApiInterface {
 
-	public function __construct(LoggerInterface $logger, MemberRepository $memberRepository, RegistrationDateUtil $registrationDateUtil, MemberImporter $memberImporter) {
-		$this->logger = $logger;
-		$this->memberRepository = $memberRepository;
-		$this->registrationDateUtil = $registrationDateUtil;
-		$this->memberImporter = $memberImporter;
-	}
+	public function __construct(
+		private LoggerInterface $logger,
+		private MemberRepository $memberRepository,
+		private RegistrationDateUtil $registrationDateUtil,
+		private MemberImporter $memberImporter,
+		private SlackService $slackService,
+	) { }
 
 	public function apiMembersSortedByLastRegistrationDateGet(?\DateTime $since, int &$responseCode, array &$responseHeaders): array|object|null {
 		if ($since == null) {
@@ -47,5 +48,15 @@ class DefaultApi implements DefaultApiInterface {
 
 	public function apiTriggerImportRunGet(?bool $debug, int &$responseCode, array &$responseHeaders): void {
 		$this->memberImporter->run($debug ?? true);
+	}
+
+	public function apiSlackAccountsToReactivateGet(int &$responseCode, array &$responseHeaders): array|object|null {
+		$membersEmails = array_map(function ($member) {return $member->getEmail();}, $this->memberRepository->findAll());
+		$deactivatedMembers = $this->slackService->findDeactivatedMembers($membersEmails);
+		$result = array();
+		foreach ($deactivatedMembers as $index => $email) {
+			$result []= $email;
+		}
+		return $result;
 	}
 }
