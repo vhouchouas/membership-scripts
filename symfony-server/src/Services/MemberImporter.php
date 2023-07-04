@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Entity\Option;
 use App\Repository\OptionRepository;
 use Psr\Log\LoggerInterface;
+use App\Repository\MemberRepository;
 use App\Services\HelloAssoConnector;
 
 
@@ -18,6 +19,7 @@ class MemberImporter {
 			private LoggerInterface $logger,
 			private OptionRepository $optionRepository,
 			private HelloAssoConnector $helloassoConnector,
+			private MemberRepository $memberRepository,
 			) {}
 
 	public function run(bool $debug) {
@@ -28,8 +30,15 @@ class MemberImporter {
 		$subscriptions = $this->helloassoConnector->getAllHelloAssoSubscriptions($dateBeforeWhichAllRegistrationsHaveBeenHandled, $now);
 		$this->logger->info("retrieved data from HelloAsso. Got " . count($subscriptions) . " action(s)");
 
+		foreach($subscriptions as $subscription) {
+		  $this->memberRepository->addOrUpdateMember($subscription, $debug);
+		  // TODO: register in mailchimp
+		  // TODO: register in google group
+		}
+
 		// TODO
 
+// TODO: check if there are Slack accounts to reactivate
 		$this->updateLastSuccessfulRunDate($now, $lastSuccessfulRunDateOption, $debug);
 		$this->logger->debug("Completed successfully");
 	}
