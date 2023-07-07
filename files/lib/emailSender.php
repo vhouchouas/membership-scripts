@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 if(!defined('ZWP_TOOLS')){  die(); }
 
 require_once ZWP_TOOLS . 'lib/logging.php';
+require_once ZWP_TOOLS . 'lib/util.php';
 require_once ZWP_TOOLS . 'config.php';
 
 class EmailSender {
@@ -63,7 +64,7 @@ class EmailSender {
       foreach($newMembers as $newMember) {
         $body .= self::$endl;
         $body .= $newMember->firstName . " " . $newMember->lastName . " (" . $newMember->email . ")" . self::$endl;
-        $body .= "Adhésion le " . $newMember->lastRegistrationDate . self::$endl;
+        $body .= "Adhésion le " .dateToStr($newMember->lastRegistrationDate) . self::$endl;
         $body .= "Réside à : " . $newMember->city . " (" . $newMember->postalCode . ")" . self::$endl;
         $body .= "A connu l'asso : " . $newMember->howDidYouKnowZwp . self::$endl;
         $body .= "Iel est motivé par : " . $newMember->wantToDo . self::$endl;
