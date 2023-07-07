@@ -32,6 +32,13 @@ class MailChimpConnector implements GroupWithDeletableUsers {
     $merge_fields["FNAME"]   = $event->first_name;
     $merge_fields["LNAME"]   = $event->last_name;
 
+    // Legacy fields that should still be filled to be importable
+    $merge_fields["MMERGE6"] = "placeholder";
+    $merge_fields["MMERGE5"] = "placeholder";
+    $merge_fields["PHONE"]   = "placeholder";
+    $merge_fields["MMERGE8"] = "Oui";
+    $merge_fields["ADDRESS"] = "placeholder";
+
     $payload = array();
     $payload["email_address"] = $event->email;
     $payload["status"]        = "subscribed";
