@@ -7,6 +7,7 @@ use App\Repository\OptionRepository;
 use Psr\Log\LoggerInterface;
 use App\Repository\MemberRepository;
 use App\Services\HelloAssoConnector;
+use App\Services\MailchimpConnector;
 
 
 // TODO:
@@ -19,6 +20,7 @@ class MemberImporter {
 			private OptionRepository $optionRepository,
 			private HelloAssoConnector $helloassoConnector,
 			private MemberRepository $memberRepository,
+			private MailchimpConnector $mailchimpConnector,
 			) {}
 
 	public function run(bool $debug) {
@@ -30,7 +32,8 @@ class MemberImporter {
 		$this->logger->info("retrieved data from HelloAsso. Got " . count($subscriptions) . " action(s)");
 
 		foreach($subscriptions as $subscription) {
-		  $this->memberRepository->addOrUpdateMember($subscription, $debug);
+			$this->memberRepository->addOrUpdateMember($subscription, $debug);
+			$this->mailchimpConnector->registerEvent($subscription, $debug);
 		  // TODO: register in mailchimp
 		  // TODO: register in google group
 		}

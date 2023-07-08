@@ -11,6 +11,8 @@ parameters:
   helloasso.organizationSlug: '%env(HA_ORGANIZATION_SLUG)%'
   helloasso.tokensFile: '%kernel.project_dir%/var/helloassoV5_tokens.json'
   slack.botToken: '%env(SLACK_BOT_TOKEN)%'
+  mailchimp.listUrl: '%env(MC_LIST_URL)%'
+  mailchimp.userPassword: '%env(MC_USERPWD)%'
 
 
 services:
