@@ -21,6 +21,7 @@ class MemberImporter {
 			private HelloAssoConnector $helloassoConnector,
 			private MemberRepository $memberRepository,
 			private MailchimpConnector $mailchimpConnector,
+			private GoogleGroupService $googleConnector
 			) {}
 
 	public function run(bool $debug) {

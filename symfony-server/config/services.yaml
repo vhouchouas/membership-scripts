@@ -13,6 +13,9 @@ parameters:
   slack.botToken: '%env(SLACK_BOT_TOKEN)%'
   mailchimp.listUrl: '%env(MC_LIST_URL)%'
   mailchimp.userPassword: '%env(MC_USERPWD)%'
+  google.groupName: '%env(GOOGLE_GROUP_NAME)%'
+  google.jsonCredentials: '%env(GOOGLE_JSON_CREDENTIALS)%'
+  google.tokenFile: '%kernel.project_dir%/var/google_tokens.json'
 
 
 services:
