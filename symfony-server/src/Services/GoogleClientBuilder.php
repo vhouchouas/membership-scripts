@@ -33,18 +33,9 @@ class GoogleClientBuilder {
 			if ($client->getRefreshToken()) {
 				$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
 			} else {
-				$authUrl = $client->createAuthUrl();
-				$this->logger->info("Open the following link in your browser: $authUrl");
-				$this->logger->info('Enter verification code: ');
-				$authCode = trim(fgets(\STDIN));
-	
-				$accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
-				$client->setAccessToken($accessToken);
-	
-				// Check to see if there was an error.
-				if (array_key_exists('error', $accessToken)) {
-					throw new Exception(join(', ', $accessToken));
-				}
+				$error = "Can't get fresh Google tokens";
+				$this->logger->error($error);
+				throw new \Exception($error);
 			}
 
 			if (!file_exists(dirname($tokenFile))) {
