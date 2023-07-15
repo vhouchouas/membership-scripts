@@ -56,4 +56,13 @@ class MemberImporter {
 	private function dateToStr(\DateTime $d) : string {
 		return $d->format('Y-m-d\TH:i:s');
 	}
+
+	private function sendEmailNotificationForAdminsAboutNewcomersIfneeded(\DateTime $lastSuccessfulRunDate, \DateTime $now) {
+		$dateUtil = new RegistrationDateUtil($now); // we do a new rather than leveraging DI because we need to inject our "now";
+		if ($dateUtil->needToSendNotificationAboutLatestRegistrations($lastSuccessfulRunDate)) {
+			$this->logger->info("Going to send weekly email about newcomers");
+			$newcomers = $this->memberRepository->getMembersForWhichNoNotificationHasBeenSentToAdmins();
+			// TODO: send the email
+		}
+	}
 }
