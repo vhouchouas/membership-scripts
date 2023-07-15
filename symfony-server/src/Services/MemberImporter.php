@@ -35,13 +35,13 @@ class MemberImporter {
 		foreach($subscriptions as $subscription) {
 			$this->memberRepository->addOrUpdateMember($subscription, $debug);
 			$this->mailchimpConnector->registerEvent($subscription, $debug);
-		  // TODO: register in mailchimp
-		  // TODO: register in google group
+			$this->googleConnector->registerEvent($subscription, $debug);
 		}
 
-		// TODO
+		// TODO: send weekly notification about newcomers
+    // TODO: send a mail if there are Slack accounts to reactivate
+    // TODO: delete outdated members if needed
 
-// TODO: check if there are Slack accounts to reactivate
 		$this->optionRepository->writeLastSuccessfulRunDate($now, $debug);
 		$this->logger->debug("Completed successfully");
 	}
