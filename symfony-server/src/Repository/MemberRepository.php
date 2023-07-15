@@ -47,7 +47,7 @@ class MemberRepository extends ServiceEntityRepository
 			$member->setFirstName($event->first_name);
 			$member->setLastName($event->last_name);
 			$member->setFirstRegistrationDate($eventDateTime);
-            $member->setNotificationSentToAdmin(false);
+			$member->setNotificationSentToAdmin(false);
 			$this->fillMemberWithFieldsCommonForCreateAndUpdate($member, $event);
 		}
 
@@ -68,6 +68,25 @@ class MemberRepository extends ServiceEntityRepository
 		$member->setWantToDo($event->want_to_do);
 		$member->setLastRegistrationDate(new \DateTime($event->event_date));
 		$member->setIsZWProfessional($event->is_zw_professional == "Oui");
+	}
+
+	public function getMembersForWhichNoNotificationHasNotBeenSentToAdmin(): array {
+		return $this->createQueryBuilder('m')
+			->where('m.notificationSentToAdmin = false')
+			->getQuery()
+			->getResult();
+	}
+
+	public function updateMembersForWhichNotificationHasBeenSentoToAdmins(array $members) : void {
+		foreach($members as $member) {
+			$member->notificationSentToAdmin = true;
+		}
+
+		if ($debug) {
+			$this->logger->info("We're in debug mode so we don't update anything");
+		} else {
+			$this->save($member, true);
+		}
 	}
 
 	public function save(Member $entity, bool $flush = false): void
