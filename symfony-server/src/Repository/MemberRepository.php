@@ -70,22 +70,22 @@ class MemberRepository extends ServiceEntityRepository
 		$member->setIsZWProfessional($event->is_zw_professional == "Oui");
 	}
 
-	public function getMembersForWhichNoNotificationHasNotBeenSentToAdmin(): array {
+	public function getMembersForWhichNoNotificationHasBeenSentToAdmins(): array {
 		return $this->createQueryBuilder('m')
-			->where('m.notificationSentToAdmin = false')
+			->andWhere('m.notificationSentToAdmin = false')
 			->getQuery()
 			->getResult();
 	}
 
-	public function updateMembersForWhichNotificationHasBeenSentoToAdmins(array $members) : void {
+	public function updateMembersForWhichNotificationHasBeenSentoToAdmins(array $members, bool $debug) : void {
 		foreach($members as $member) {
-			$member->notificationSentToAdmin = true;
+			$member->setNotificationSentToAdmin(true);
 		}
 
 		if ($debug) {
 			$this->logger->info("We're in debug mode so we don't update anything");
 		} else {
-			$this->save($member, true);
+			$this->getEntityManager()->flush();
 		}
 	}
 

@@ -66,4 +66,12 @@ class RegistrationDateUtil {
 		$nextDeadline->setTime($deadlineHour, 0);
 		return $this->now >= $nextDeadline;
 	}
+
+	private static function isAWednesday(\DateTime $date) : bool {
+		return date('w', $date->getTimestamp()) === "3";
+	}
+
+	private static function getHour(\DateTime $date) : int {
+		return date('H', $date->getTimestamp());
+	}
 }
