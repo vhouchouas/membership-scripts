@@ -11,6 +11,7 @@ use App\Services\HelloAssoConnector;
 use App\Services\MailchimpConnector;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
 // TODO:
@@ -27,6 +28,8 @@ class MemberImporter {
 			private GoogleGroupService $googleConnector,
 			private ContainerBagInterface $params,
 			private MailerInterface $mailer,
+			private SlackService $slack,
+			private UrlGeneratorInterface $router,
 			) {}
 
 	public function run(bool $debug) {
@@ -44,8 +47,7 @@ class MemberImporter {
 		}
 
 		$this->sendEmailNotificationForAdminsAboutNewcomersIfneeded($lastSuccessfulRunDate, $now, $debug);
-
-    // TODO: send a mail if there are Slack accounts to reactivate
+		$this->sendEmailAboutSlackmembersToReactivate($debug);
     // TODO: delete outdated members if needed
 
 		$this->optionRepository->writeLastSuccessfulRunDate($now, $debug);
@@ -76,7 +78,7 @@ class MemberImporter {
 		}
 	}
 
-	private function sendNotificationForAdminsAboutNewcomers(array $newcomers, bool $debug) {
+	private function sendNotificationForAdminsAboutNewcomers(array $newcomers, bool $debug): void {
 		$body = "";
 		if (empty($newcomers)) {
 			$body = "Oh non, il n'y a pas eu de nouveaux membres cette semaine ! :(";
@@ -97,12 +99,41 @@ class MemberImporter {
 		}
 
 		$email = (new Email())
-			->from($this->params->get('admin.fromEmailForNewcomers'))
-			->to($this->params->get('admin.toEmailForNewcomers'))
-			->subject($this->params->get('admin.subjectEmailForNewcomers'))
+			->from($this->params->get('notification.fromEmail'))
+			->to($this->params->get('notification.newcomersEmail.to'))
+			->subject($this->params->get('notification.newcomersEmail.subject'))
 			->text($body);
 
-		$this->mailer->send($email);
-		$this->logger->info("email sent");
+		if (!$debug) {
+			$this->mailer->send($email);
+			$this->logger->info("email sent");
+		} else {
+			$this->logger->info("email about newcomers not sent because we're in debug mode");
+		}
 	}
+
+	private function sendEmailAboutSlackMembersToReactivate($debug): void {
+		$membersToReactivate = $this->slack->findDeactivatedMembers();
+		if (empty($membersToReactivate)) {
+			$this->logger->info("no member to reactivate on Slack");
+		} else {
+			$this->logger->info("there are " . count($membersToReactivate) . " members to reactivate on Slack");
+			$body = "Il y a " . count($membersToReactivate) . " membres à réactiver sur Slack : \r\n"
+				. "La liste est disponible via: " . $this->router->generate('open_api_server_default_apislackaccountstoreactivateget', [], UrlGeneratorInterface::ABSOLUTE_URL) . " (use curl)\r\n";
+
+			$email = (new Email())
+				->from($this->params->get('notification.fromEmail'))
+				->to($this->params->get('notification.memberToReactivate.to'))
+				->subject($this->params->get('notification.memberToReactivate.subject'))
+				->text($body);
+
+			if (!$debug) {
+				$this->mailer->send($email);
+				$this->logger->info("email sent");
+			} else {
+				$this->logger->info("email about members to reactivate not sent because we're in debug mode");
+			}
+		}
+	}
+
 }
