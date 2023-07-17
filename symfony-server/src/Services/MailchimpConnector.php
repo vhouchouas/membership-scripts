@@ -81,4 +81,29 @@ class MailchimpConnector {
 			}
 		}
 	}
+
+	public function getUsers(): array {
+		$users = array();
+		$nb_items_to_retrieve = 1; // whatever, it will be initialized after the 1st query. Just make sure it's greater than 0
+		$page = 0;
+		while(count($users) < $nb_items_to_retrieve){
+			$response = $this->getPageOfUsers($page);
+			$page += 1;
+			$nb_items_to_retrieve = $response->total_items;
+			foreach($response->members as $member){
+				$users[] = $member->email_address;
+			}
+		}
+		return $users;
+	}
+
+	private function getPageOfUsers($page){
+		$result_per_page = 500;
+
+		$this->logger->info("Going to get page $page of users registered in mailchimp");
+		$response = $this->client->request('GET', $this->params->get('mailchimp.listUrl') . '?offset=' . $result_per_page*$page . "&count=$result_per_page", [
+			'auth_basic' => $this->params->get('mailchimp.userPassword'),
+		]);
+		return json_decode($response->getContent());
+	}
 }
