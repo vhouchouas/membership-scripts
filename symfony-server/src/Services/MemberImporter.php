@@ -34,6 +34,7 @@ class MemberImporter {
 
 	public function run(bool $debug) {
 		$now = new \DateTime();
+		$dateUtil = new RegistrationDateUtil($now); // we do a "new" rather than leveraging DI because we need to inject our "now";
 		$lastSuccessfulRunDate = $this->optionRepository->getLastSuccessfulRunDate();
 		$dateBeforeWhichAllRegistrationsHaveBeenHandled = $this->computeDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
 
@@ -45,10 +46,10 @@ class MemberImporter {
 			$this->mailchimpConnector->registerEvent($subscription, $debug);
 			$this->googleConnector->registerEvent($subscription, $debug);
 		}
+		$this->deleteOutdatedMembersIfNeeded($dateUtil, $lastSuccessfulRunDate, $debug);
 
-		$this->sendEmailNotificationForAdminsAboutNewcomersIfneeded($lastSuccessfulRunDate, $now, $debug);
+		$this->sendEmailNotificationForAdminsAboutNewcomersIfneeded($dateUtil, $lastSuccessfulRunDate, $now, $debug);
 		$this->sendEmailAboutSlackmembersToReactivate($debug);
-    // TODO: delete outdated members if needed
 
 		$this->optionRepository->writeLastSuccessfulRunDate($now, $debug);
 		$this->logger->debug("Completed successfully");
@@ -65,8 +66,7 @@ class MemberImporter {
 		return $d->format('Y-m-d\TH:i:s');
 	}
 
-	private function sendEmailNotificationForAdminsAboutNewcomersIfneeded(\DateTime $lastSuccessfulRunDate, \DateTime $now, bool $debug) {
-		$dateUtil = new RegistrationDateUtil($now); // we do a new rather than leveraging DI because we need to inject our "now";
+	private function sendEmailNotificationForAdminsAboutNewcomersIfneeded(RegistrationDateUtil $dateUtil, \DateTime $lastSuccessfulRunDate, \DateTime $now, bool $debug) {
 		if ($dateUtil->needToSendNotificationAboutLatestRegistrations($lastSuccessfulRunDate)) {
 			$this->logger->info("Going to send weekly email about newcomers");
 
@@ -136,4 +136,16 @@ class MemberImporter {
 		}
 	}
 
+	private function deleteOutdatedMembersIfNeeded(RegistrationDateUtil $dateUtil, \DateTime $lastSuccessfulRunStartDate, bool $debug): void {
+		if ( !$dateUtil->needToDeleteOutdatedMembers($lastSuccessfulRunStartDate) ) {
+			$this->logger->info("not the time to delete outdated members");
+			return;
+		}
+
+		$upTo = $dateUtil->getMaxDateBeforeWhichRegistrationsInfoShouldBeDiscarded();
+		$this->logger->info("We're going to delete outdated members with no registration after " . $upTo->format("Y-m-d"));
+		$this->memberRepository->deleteMembersOlderThan($upTo, $debug);
+
+	  // TODO: delete from google group and from mailchimp
+	}
 }

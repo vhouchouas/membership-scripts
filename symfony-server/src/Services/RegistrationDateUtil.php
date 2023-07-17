@@ -46,6 +46,10 @@ class RegistrationDateUtil {
 		return $deepCopy->sub(new \DateInterval("PT1H"));
 	}
 
+	public function needToDeleteOutdatedMembers(\DateTime $lastSuccessfulRun) : bool {
+		return $this->now >= $this->februaryFirstThisYear && $lastSuccessfulRun < $this->februaryFirstThisYear;
+	}
+
 	/**
 	 * We want to send a weekly mail to draw the attention of admins on the latest registrations.
 	 * This mail should be received on Thursday morning in order to be received and handled
@@ -72,6 +76,22 @@ class RegistrationDateUtil {
 	}
 
 	private static function getHour(\DateTime $date) : int {
-		return date('H', $date->getTimestamp());
+	  return date('H', $date->getTimestamp());
+	}
+
+	/**
+	 * To be compliant with GDPR we delete data about registration which expired a year ago.
+	 * (The duration of "1 year" is defined on our privacy page).
+	 * Since registrations expire on 31st December it means we have to delete registrations
+	 * which occured before 1st January of the previous year.
+	 *
+	 * For instance: if someone registers on 2018-06-01, then this registration expire on 2018-12-31 so
+	 * this data can be kept all of 2019. But when we delete data in 2020 we have to delete it.
+	 * So when we call this method in 2020 it should tell us to delete registrations older than 2019-01-01
+	 */
+	public function getMaxDateBeforeWhichRegistrationsInfoShouldBeDiscarded(): \DateTime {
+		// TODO: this whole method could probably be replaced with getDateAfterWhichMembershipIsConsideredValid
+		//       but only after it takes into account the last week of December
+		return new \DateTime(($this->thisYear-1) . "-01-01", $this->timeZone);
 	}
 }

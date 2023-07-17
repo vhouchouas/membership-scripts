@@ -127,13 +127,23 @@ class MemberRepository extends ServiceEntityRepository
 			->getResult();
 	}
 
-	//    public function findOneBySomeField($value): ?Member
-	//    {
-	//        return $this->createQueryBuilder('m')
-	//            ->andWhere('m.exampleField = :val')
-	//            ->setParameter('val', $value)
-	//            ->getQuery()
-	//            ->getOneOrNullResult()
-	//        ;
-	//    }
+	public function getListOfRegistrationsOlderThan(\DateTime $upTo) : array {
+		return $this->createQueryBuilder('m')
+			->andWhere('m.lastRegistrationDate < :upTo')
+			->setParameter('upTo', $upTo)
+			->getQuery()
+			->getResult();
+	}
+
+	public function deleteMembersOlderThan(\DateTime $upTo, bool $debug) : void {
+		foreach ($this->getListOfRegistrationsOlderThan($upTo) as $member) {
+			if ($debug) {
+				$this->logger->info("Would delete {$member->getEmail()} bu we're in debug mode.");
+			} else {
+				$this->getEntityManager()->remove($member);
+				$this->logger->info("About to delete old member from db: {$member->getEmail()}");
+			}
+		}
+		$this->getEntityManager()->flush();
+	}
 }
