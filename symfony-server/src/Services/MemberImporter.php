@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entity\Option;
 use App\Repository\OptionRepository;
+use App\Models\GroupWithDeletableUsers;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use App\Repository\MemberRepository;
@@ -12,6 +13,7 @@ use App\Services\MailchimpConnector;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Entity\Member;
 
 
 // TODO:
@@ -146,6 +148,17 @@ class MemberImporter {
 		$this->logger->info("We're going to delete outdated members with no registration after " . $upTo->format("Y-m-d"));
 		$this->memberRepository->deleteMembersOlderThan($upTo, $debug);
 
-	  // TODO: delete from google group and from mailchimp
+		$membersToKeep = $this->memberRepository->findAll();
+		$emailsToKeep = array_map(function(Member $member) { return strtolower($member->getEmail()); }, $membersToKeep);
+		$this->deleteOutdatedMembersFromGroup($this->googleConnector, $emailsToKeep, $debug);
+		$this->deleteOutdatedMembersFromGroup($this->mailchimpConnector, $emailsToKeep, $debug);
+	}
+
+	private function deleteOutdatedMembersFromGroup(GroupWithDeletableUsers $group, array $emailsToKeep, bool $debug): void {
+		$currentUsers = array_map(function(string $s) { return strtolower($s); }, $group->getUsers());
+		$usersToDelete = array_diff($currentUsers, $emailsToKeep);
+		$usersToDelete = array("toto1@tata.fr", "zozo@hotmail.fr");
+		$this->logger->info("Going to delete ". count($usersToDelete) . " users from group " . $group->groupName());
+		$group->deleteUsers($usersToDelete, $debug);
 	}
 }

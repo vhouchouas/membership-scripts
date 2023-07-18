@@ -6,14 +6,19 @@ use App\Models\RegistrationEvent;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use App\Models\GroupWithDeletableUsers;
 
-class MailchimpConnector {
+class MailchimpConnector implements GroupWithDeletableUsers {
 
 	public function __construct(
 		private LoggerInterface $logger,
 		private ContainerBagInterface $params,
 		private HttpClientInterface $client,
 		) {}
+
+	function groupName(): string {
+		return "MailChimp";
+	}
 
 	public function registerEvent(RegistrationEvent $event, bool $debug): void {
 		$payload_str = $this->registrationEventToJsonPayload($event);
@@ -55,7 +60,7 @@ class MailchimpConnector {
 
 	public function deleteUsers(array $emails, bool $debug): void {
 		foreach($emails as $email) {
-			$this->deleteUser($email);
+			$this->deleteUser($email, $debug);
 		}
 	}
 

@@ -5,8 +5,9 @@ namespace App\Services;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use App\Models\RegistrationEvent;
 use Psr\Log\LoggerInterface;
+use App\Models\GroupWithDeletableUsers;
 
-class GoogleGroupService {
+class GoogleGroupService implements GroupWithDeletableUsers {
 	public function __construct(
 		private LoggerInterface $logger,
 		private ContainerBagInterface $params,
@@ -14,6 +15,10 @@ class GoogleGroupService {
 	) {
 		$this->service = new \Google_Service_Directory($clientBuilder->getClient());
 		$this->groupName = $this->params->get('google.groupName');
+	}
+
+	function groupName(): string {
+		return "Google";
 	}
 
 	function registerEvent(RegistrationEvent $event, bool $debug): void{
@@ -59,7 +64,7 @@ class GoogleGroupService {
 		}
 	}
 
-	function deleteUser(string $email, $debug): void{
+	function deleteUser(string $email, bool $debug): void{
 		$this->logger->info("Going to delete from " . $this->groupName . " the email " . $email);
 		if ($debug) {
 			$this->logger->info("Debug mode: skipping deletion from Google");
