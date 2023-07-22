@@ -2,7 +2,7 @@
 
 After having generated the php bundle, run from this directory:
 
-    composer require zero-waste-paris/membership-scripts:dev-master
+    composer install
 
 
 ====== Setup a local conf ======
@@ -36,3 +36,9 @@ access tokens is to retrieve them from prod.
 Here is some doc to fix this:
 - The migration doc: https://developers.google.com/identity/protocols/oauth2/resources/oob-migration
 - What seems to be a generic doc: https://developers.google.com/workspace/guides/get-started
+
+====== Starting the local dev server======
+See [Symfony's doc](https://symfony.com/doc/current/setup/symfony_server.html) for more info, but basically,
+after installing the [symfony binary](https://symfony.com/download), you can run:
+
+    symfony server:start --no-tls
