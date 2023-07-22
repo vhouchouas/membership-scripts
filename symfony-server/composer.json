@@ -66,12 +66,16 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
     },
     "conflict": {
         "symfony/symfony": "*"
     },
     "extra": {
+        "google/apiclient-services": [
+            "Directory"
+        ],
         "symfony": {
             "allow-contrib": false,
             "require": "6.3.*",
