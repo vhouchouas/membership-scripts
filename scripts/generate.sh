@@ -11,6 +11,7 @@ OAG_VERSION=6.6.0
 OAS_FILE="$THIS_DIR/../openapi.yaml"
 GIT_USER_ID=zero-waste-paris
 GIT_PROJECT=membership-scripts
+PHP_OUT="$THIS_DIR/../generated/php-server-bundle"
 
 mkdir -p "$BIN_DIR"
 
@@ -20,4 +21,9 @@ if [ ! -e "$OAG_JAR" ]; then
 fi
 
 echo "Generating the server module"
-java -jar "$OAG_JAR" generate --git-user-id "$GIT_USER_ID" --git-repo-id "$GIT_PROJECT" -i "$OAS_FILE" -g php-symfony -o "$THIS_DIR/../generated/php-server-bundle"
+java -jar "$OAG_JAR" generate --git-user-id "$GIT_USER_ID" --git-repo-id "$GIT_PROJECT" -i "$OAS_FILE" -g php-symfony -o "$PHP_OUT"
+# rm generated tests files because
+# - we don't need it
+# - it would generate errors like "does not comply with psr-4 autoloading standard"
+rm -r "$PHP_OUT"/Tests # rm test files
+

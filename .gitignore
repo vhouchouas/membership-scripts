@@ -9,6 +9,10 @@ config.json
 .htaccess
 token.json
 credentials.json
+deploysymfony-config.sh
+google_tokens.json
+htaccess
+symfony.conf
 
 #Misc
 *.sqlite

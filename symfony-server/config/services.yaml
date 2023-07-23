@@ -44,3 +44,5 @@ services:
     App\Controller\DefaultApi:
         tags:
             - { name: "open_api_server.api", api: "default" }
+
+    Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
