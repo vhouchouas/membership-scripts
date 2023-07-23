@@ -15,10 +15,6 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Entity\Member;
 
-
-// TODO:
-// - configure lock to ensure we don't run concurrently?
-// - configure logger to have those logs in a separated file?
 class MemberImporter {
 
 	public function __construct(
@@ -149,6 +145,7 @@ class MemberImporter {
 		$this->memberRepository->deleteMembersOlderThan($upTo, $debug);
 
 		$membersToKeep = $this->memberRepository->findAll();
+		// TODO: understand if we could get rid of this strtolower, and its impact if we keep it
 		$emailsToKeep = array_map(function(Member $member) { return strtolower($member->getEmail()); }, $membersToKeep);
 		$this->deleteOutdatedMembersFromGroup($this->googleConnector, $emailsToKeep, $debug);
 		$this->deleteOutdatedMembersFromGroup($this->mailchimpConnector, $emailsToKeep, $debug);
