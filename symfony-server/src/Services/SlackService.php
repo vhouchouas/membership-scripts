@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use JoliCode\Slack\ClientFactory;
 use App\Repository\MemberRepository;
 use Psr\Log\LoggerInterface;
+use JoliCode\Slack\Api\Model\ObjsUser;
 
 class SlackService {
 
@@ -15,6 +16,7 @@ class SlackService {
 		private MemberRepository $memberRepository,
 	) {
 		$this->client = ClientFactory::create($params->get('slack.botToken'));
+		$this->allowListedDomain = $params->get('slack.allowListedDomain');
 	}
 
 	/**
@@ -31,18 +33,15 @@ class SlackService {
 	 *         and for which we need to manually reactivate the slack account
 	 */
 	public function findDeactivatedMembers(): array {
-		$membersEmail = array_map(function ($member) {return $member->getEmail();}, $this->memberRepository->findAll());
+		$membersEmail = $this->getEmailOfAllUpToDateMembers();
 		$allSlackUsers = $this->usersList()->getMembers(); // array of ObjsUser
 		$this->logger->info("Got " . count($allSlackUsers) . " slack users");
 		$emailsOfDeactivatedSlackUsers = array();
 		foreach($allSlackUsers as $slackUser) {
 			if ($slackUser->getDeleted()) {
-				$profile = $slackUser->getProfile(); // ObjsUserProfile
-				if ($profile != null ) { // Not sure if it's possible that it's null but better safe than sorry
-					$email = $profile->getEmail();
-					if ( $email != null ) { // May be null for some app
-						$emailsOfDeactivatedSlackUsers []= $email;
-					}
+				$slackEmail = $this->extractUserEmail($slackUser);
+				if ($slackEmail !== null) {
+					$emailsOfDeactivatedSlackUsers []= $slackEmail;
 				}
 			}
 		}
@@ -55,5 +54,29 @@ class SlackService {
 			$result []= $email;
 		}
 		return $result;
+	}
+
+	public function findUsersToDeactivate(): array {
+		$membersEmail = $this->getEmailOfAllUpToDateMembers();
+		$membersEmail = array_map(function($email) {return strtolower($email);}, $this->getEmailOfAllUpToDateMembers());
+		$allSlackUsers = $this->usersList()->getMembers(); // array of ObjsUser
+		$allActiveSlackUsers = array_filter($allSlackUsers, function($objUser) {return !$objUser->getDeleted();});
+		$allSlackUsersEmail = array_filter(array_map(function($objUser) {return $this->extractUserEmail($objUser);}, $allActiveSlackUsers));
+		$allLowerCasedSlackUsersEmail = array_map(function($email) {return strtolower($email);}, $allSlackUsersEmail);
+
+		$emailOfNonMembers = array_diff($allLowerCasedSlackUsersEmail, $membersEmail);
+		return array_filter($emailOfNonMembers, function($email) {return explode('@', $email)[1] !== $this->allowListedDomain;});
+	}
+
+	private function extractUserEmail(ObjsUser $user): ?string {
+		$profile = $user->getProfile(); // ObjsUserProfile
+		if ($profile != null) { // Not sure if it's possible that it's null but better safe than sorry
+			return $profile->getEmail(); // Note that it may be null for some app
+		}
+		return null;
+	}
+
+	private function getEmailOfAllUpToDateMembers(): array {
+		return array_map(function ($member) {return $member->getEmail();}, $this->memberRepository->findAll());
 	}
 }
