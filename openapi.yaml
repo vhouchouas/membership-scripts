@@ -48,6 +48,19 @@ paths:
                 items:
                   type: string
                   format: email
+  /api/slack-accounts-to-deactivate:
+    get:
+      summary: "Return the email that match an active Slack account but not an up to date member"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: email
   /api/members-sorted-by-last-registration-date:
     get:
       summary: Get the list of members who registered since the date specified if any, from the beginning of the current registration period otherwise
