@@ -27,3 +27,5 @@ java -jar "$OAG_JAR" generate --git-user-id "$GIT_USER_ID" --git-repo-id "$GIT_P
 # - it would generate errors like "does not comply with psr-4 autoloading standard"
 rm -r "$PHP_OUT"/Tests # rm test files
 
+echo "Generating a bash client"
+java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g bash -o "$THIS_DIR/../generated/bash-client"
