@@ -38,7 +38,7 @@ class MemberRepository extends ServiceEntityRepository
 					$this->logger->info("Member already known from a more recent registration. We update date of first registration");
 					$member->setFirstRegistrationDate($eventDateTime);
 				} else {
-				$this->logger->info("Member already known from both a more recent and an older registration. Nothing to do");
+					$this->logger->info("Member already known from both a more recent and an older registration. Nothing to do");
 				}
 			}
 		} else {
