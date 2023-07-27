@@ -10,4 +10,12 @@ fi
 SCRIPT_DIR="$(dirname "$THIS_FILE")"
 
 cd "$SCRIPT_DIR"/../symfony-server/
+
+echo "Creating the test database"
+php bin/console --env=test doctrine:database:create
+echo "Dropping the schema of the test database"
+php bin/console --env=test doctrine:schema:drop --force
+echo "Creating the schema of the test database"
+php bin/console --env=test doctrine:schema:create
+
 XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage $@
