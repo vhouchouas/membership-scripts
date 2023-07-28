@@ -66,11 +66,11 @@ class OptionRepository extends ServiceEntityRepository
 			$option = new Option();
             $option->setName(self::OPTION_LASTSUCCESSFULRUN_NAME);
 		}
-		$option->setValue(serialize($startDate));
 
 		if ($debug) {
 			$this->logger->info("Not updating start date in db because we're in debug mode");
 		} else {
+			$option->setValue(serialize($startDate));
 			$this->save($option, true);
 			$this->logger->info("Start date successfully persisted in db");
 		}

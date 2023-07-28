@@ -17,5 +17,7 @@ echo "Dropping the schema of the test database"
 php bin/console --env=test doctrine:schema:drop --force
 echo "Creating the schema of the test database"
 php bin/console --env=test doctrine:schema:create
+echo "Initialize some values in the test database"
+php bin/console doctrine:database:initialize-last-successful-run-date 2022-01-01
 
 XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage $@
