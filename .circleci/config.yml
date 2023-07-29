@@ -16,6 +16,16 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "symfony-server/composer.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run: ./scripts/installDependencies.sh
+      - save_cache:
+          key: v1-dependencies-{{ checksum "symfony-server/composer.lock" }}
+          paths:
+            - ./symfony-server/vendor
       - run: chmod u+x ./scripts/runSymfonyTests.sh
       - run: ./scripts/runSymfonyTests.sh
