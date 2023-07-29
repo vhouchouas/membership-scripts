@@ -27,5 +27,4 @@ jobs:
           key: v1-dependencies-{{ checksum "symfony-server/composer.lock" }}
           paths:
             - ./symfony-server/vendor
-      - run: chmod u+x ./scripts/runSymfonyTests.sh
       - run: ./scripts/runSymfonyTests.sh
