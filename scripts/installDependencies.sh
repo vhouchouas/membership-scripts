@@ -8,7 +8,9 @@ else
   THIS_FILE="$0"
 fi
 SCRIPT_DIR="$(dirname "$THIS_FILE")"
-FILES_DIR="$SCRIPT_DIR/../files"
+FILES_DIR="$SCRIPT_DIR/../symfony-server"
+
+"$SCRIPT_DIR"/generate.sh
 
 pushd "$FILES_DIR"
 composer install

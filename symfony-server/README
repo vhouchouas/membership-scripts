@@ -1,0 +1,44 @@
+====== Install the dependencies ======
+
+After having generated the php bundle, run from this directory:
+
+    composer install
+
+
+====== Setup a local conf ======
+
+    cp .env .env.local
+
+then override the values want
+
+====== Create the database ======
+To create the database (it will be a sqlite one in debug) run from this directory:
+
+    php bin/console doctrine:database:create
+
+and then, to create the schema:
+
+    php bin/console doctrine:migrations:migrate
+
+and then, to initialize a value for the last successful run date:
+
+    php bin/console doctrine:database:initialize-last-successful-run-date 2022-01-01
+
+(or whatever date would make sense).
+
+for more info about how the database ORM and its integration works, see:
+https://symfony.com/doc/current/doctrine.html
+
+====== Setting up the Google API ======
+We're currently using a deprecated authent'. In a nutshell, the simplest way to get credentials and
+access tokens is to retrieve them from prod.
+
+Here is some doc to fix this:
+- The migration doc: https://developers.google.com/identity/protocols/oauth2/resources/oob-migration
+- What seems to be a generic doc: https://developers.google.com/workspace/guides/get-started
+
+====== Starting the local dev server======
+See [Symfony's doc](https://symfony.com/doc/current/setup/symfony_server.html) for more info, but basically,
+after installing the [symfony binary](https://symfony.com/download), you can run:
+
+    symfony server:start --no-tls

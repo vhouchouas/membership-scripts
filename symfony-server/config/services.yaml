@@ -1,0 +1,49 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+  helloasso.clientId: '%env(HA_CLIENT_ID)%'
+  helloasso.clientSecret: '%env(HA_CLIENT_SECRET)%'
+  helloasso.registrationFormSlug: '%env(HA_REGISTRATION_FORM_SLUG)%'
+  helloasso.registrationFormSlug2: '%env(HA_REGISTRATION_FORM_SLUG_2)%'
+  helloasso.organizationSlug: '%env(HA_ORGANIZATION_SLUG)%'
+  helloasso.tokensFile: '%kernel.project_dir%/var/helloassoV5_tokens.json'
+  slack.botToken: '%env(SLACK_BOT_TOKEN)%'
+  slack.logChannel: '%env(SLACK_LOG_CHANNEL)%'
+  slack.allowListedDomain: '%env(SLACK_ALLOW_LISTED_DOMAIN)%'
+  mailchimp.listUrl: '%env(MC_LIST_URL)%'
+  mailchimp.userPassword: '%env(MC_USERPWD)%'
+  google.groupName: '%env(GOOGLE_GROUP_NAME)%'
+  google.jsonCredentials: '%env(GOOGLE_JSON_CREDENTIALS)%'
+  google.tokenFile: '%kernel.project_dir%/var/google_tokens.json'
+  notification.fromEmail: '%env(NOTIFICATION_FROM_EMAIL)%'
+  notification.newcomersEmail.to: '%env(NOTIFICATION_TO_EMAIL_ABOUT_NEWCOMERS)%'
+  notification.newcomersEmail.subject: '%env(NOTIFICATION_SUBJECT_EMAIL_ABOUT_NEWCOMERS)%'
+  notification.memberToReactivate.to: '%env(NOTIFICATION_TO_EMAIL_MEMBERS_TO_REACTIVATE_ON_SLACK)%'
+  notification.memberToReactivate.subject: '%env(NOTIFICATION_SUBJECT_EMAIL_MEMBERS_TO_REACTIVATE_ON_SLACK)%'
+
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Controller\DefaultApi:
+        tags:
+            - { name: "open_api_server.api", api: "default" }
+
+    Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
