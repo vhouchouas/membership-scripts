@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Find out directory of current script
 # to make it possible to run this script from any location
@@ -12,12 +13,12 @@ SCRIPT_DIR="$(dirname "$THIS_FILE")"
 cd "$SCRIPT_DIR"/../symfony-server/
 
 echo "Creating the test database"
-php bin/console --env=test doctrine:database:create
+APP_ENV=test php bin/console --env=test doctrine:database:create
 echo "Dropping the schema of the test database"
-php bin/console --env=test doctrine:schema:drop --force
+APP_ENV=test php bin/console --env=test doctrine:schema:drop --force
 echo "Creating the schema of the test database"
-php bin/console --env=test doctrine:schema:create
+APP_ENV=test php bin/console --env=test doctrine:schema:create
 echo "Initialize some values in the test database"
-php bin/console doctrine:database:initialize-last-successful-run-date 2022-01-01
+APP_ENV=test php bin/console doctrine:database:initialize-last-successful-run-date 2022-01-01
 
-XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage $@
+APP_ENV=test XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage $@

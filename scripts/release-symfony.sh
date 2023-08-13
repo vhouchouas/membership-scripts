@@ -84,6 +84,13 @@ for F in $(git ls-files "$FILES_DIR"); do
   fi
 done
 
+# Run the tests
+pushd "$FILES_DIR"
+composer install
+"$SCRIPT_DIR"/runSymfonyTests.sh
+popd
+
+
 # Generate the OpenApi files
 "$SCRIPT_DIR"/generate.sh
 
