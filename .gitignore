@@ -13,6 +13,7 @@ deploysymfony-config.sh
 google_tokens.json
 htaccess
 symfony.conf
+favicon*
 
 #Misc
 *.sqlite
