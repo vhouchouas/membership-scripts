@@ -40,7 +40,7 @@ class MailchimpConnector implements GroupWithDeletableUsers {
 		$payload_str = $this->registrationEventToJsonPayload($event);
 
 		if ($debug) {
-			$this->info("Debug mode: we skip mailchimp registration");
+			$this->logger->info("Debug mode: we skip mailchimp registration");
 		} else {
 			$this->logger->info("Going to register on MailChimp user " . $event->first_name . " " . $event->last_name);
 			// Going to run the equivalent of: curl -XPOST -d '$payload_str' --user '" . MC_USERPWD ."' '". MC_LIST_URL . "'";

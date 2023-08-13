@@ -66,12 +66,12 @@ class MemberImporter {
 		$this->sendEmailAboutSlackmembersToReactivate($debug);
 
 		$this->optionRepository->writeLastSuccessfulRunDate($now, $debug);
-		$this->logger->debug("Completed successfully");
+		$this->logger->info("Completed successfully");
 	}
 
 	private function computeDateBeforeWhichAllRegistrationsHaveBeenHandled(\DateTime $lastSuccessfulRunDate): \DateTime {
 		$dateBeforeWhichAllRegistrationsHaveBeenHandled = RegistrationDateUtil::getDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
-		$this->logger->debug("Last successful run was at " . $this->dateToStr($lastSuccessfulRunDate) . ". We handle registrations that occur after " . $this->dateToStr($dateBeforeWhichAllRegistrationsHaveBeenHandled));
+		$this->logger->info("Last successful run was at " . $this->dateToStr($lastSuccessfulRunDate) . ". We handle registrations that occur after " . $this->dateToStr($dateBeforeWhichAllRegistrationsHaveBeenHandled));
 
 		return $dateBeforeWhichAllRegistrationsHaveBeenHandled;
 	}
@@ -120,7 +120,7 @@ class MemberImporter {
 
 		if (!$debug) {
 			$this->mailer->send($email);
-			$this->logger->info("email sent");
+			$this->logger->info("going to send the email");
 		} else {
 			$this->logger->info("email about newcomers not sent because we're in debug mode");
 		}
@@ -142,6 +142,7 @@ class MemberImporter {
 				->text($body);
 
 			if (!$debug) {
+				$this->logger->info("going to send the email");
 				$this->mailer->send($email);
 				$this->logger->info("email sent");
 			} else {
