@@ -117,6 +117,7 @@ popd
 cp -ar "$SLACK_APP_DIR" public
 rm -rf public/slack-agenda-app/{.git*,tests}
 pushd public/slack-agenda-app
+cp "$SLACK_CONF_DIR"/config.json .
 composer install --no-dev --optimize-autoloader
 popd
 
