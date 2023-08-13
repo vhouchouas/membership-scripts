@@ -40,7 +40,7 @@ class SlackService {
 	 * roughly 20 call per minute.
 	 */
 	public function usersList() {
-		return $this->client->usersList(['limit' => 500]);
+		return $this->client->usersList();
 	}
 
 	/**
