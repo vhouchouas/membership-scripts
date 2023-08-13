@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-use App\Repository\OptionRepository;
+use App\Repository\OptionsRepository;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class OptionRepositoryTest extends KernelTestCase {
-	private OptionRepository $optionRepository;
+final class OptionsRepositoryTest extends KernelTestCase {
+	private OptionsRepository $optionRepository;
 
 
 	protected function setUp(): void {
 		self::bootKernel();
 		$container = static::getContainer();
-		$this->optionRepository = $container->get(OptionRepository::class);
+		$this->optionRepository = $container->get(OptionsRepository::class);
 	}
 
 	public function test_writeAndReadStartDate() {

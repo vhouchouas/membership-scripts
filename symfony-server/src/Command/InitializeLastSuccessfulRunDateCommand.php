@@ -23,11 +23,11 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use App\Repository\OptionRepository;
+use App\Repository\OptionsRepository;
 
 #[AsCommand(name: 'doctrine:database:initialize-last-successful-run-date')]
 class InitializeLastSuccessfulRunDateCommand extends Command {
-	public function __construct(private OptionRepository $optionRepository) {
+	public function __construct(private OptionsRepository $optionRepository) {
 		parent::__construct();
 	}
 

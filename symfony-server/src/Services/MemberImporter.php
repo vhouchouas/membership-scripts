@@ -18,8 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace App\Services;
 
-use App\Entity\Option;
-use App\Repository\OptionRepository;
+use App\Entity\Options;
+use App\Repository\OptionsRepository;
 use App\Models\GroupWithDeletableUsers;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -35,7 +35,7 @@ class MemberImporter {
 
 	public function __construct(
 		private LoggerInterface $logger,
-		private OptionRepository $optionRepository,
+		private OptionsRepository $optionRepository,
 		private HelloAssoConnector $helloassoConnector,
 		private MemberRepository $memberRepository,
 		private MailchimpConnector $mailchimpConnector,

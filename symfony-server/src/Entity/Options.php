@@ -6,7 +6,7 @@ use App\Repository\OptionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OptionRepository::class)]
-class Option
+class Options
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

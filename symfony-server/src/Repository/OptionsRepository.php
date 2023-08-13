@@ -18,29 +18,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace App\Repository;
 
-use App\Entity\Option;
+use App\Entity\Options;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 
 /**
- * @extends ServiceEntityRepository<Option>
+ * @extends ServiceEntityRepository<Options>
  *
- * @method Option|null find($id, $lockMode = null, $lockVersion = null)
- * @method Option|null findOneBy(array $criteria, array $orderBy = null)
- * @method Option[]    findAll()
- * @method Option[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Options|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Options|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Options[]    findAll()
+ * @method Options[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class OptionRepository extends ServiceEntityRepository
+class OptionsRepository extends ServiceEntityRepository
 {
 	const OPTION_LASTSUCCESSFULRUN_NAME = "last_successful_run_date";
 
 	public function __construct(ManagerRegistry $registry, private LoggerInterface $logger)
 	{
-		parent::__construct($registry, Option::class);
+		parent::__construct($registry, Options::class);
 	}
 
-	public function save(Option $entity, bool $flush = false): void
+	public function save(Options $entity, bool $flush = false): void
 	{
 		$this->getEntityManager()->persist($entity);
 
@@ -49,7 +49,7 @@ class OptionRepository extends ServiceEntityRepository
 		}
 	}
 
-	public function remove(Option $entity, bool $flush = false): void
+	public function remove(Options $entity, bool $flush = false): void
 	{
 		$this->getEntityManager()->remove($entity);
 
@@ -68,7 +68,7 @@ class OptionRepository extends ServiceEntityRepository
 		return unserialize($option->getValue());
 	}
 
-	private function getLastSuccessfulRunDateOption(): ?Option {
+	private function getLastSuccessfulRunDateOption(): ?Options {
 		return $this->findOneBy(['name' => self::OPTION_LASTSUCCESSFULRUN_NAME]);
 	}
 
@@ -79,7 +79,7 @@ class OptionRepository extends ServiceEntityRepository
 	public function writeLastSuccessfulRunDate(\DateTime $startDate, bool $debug) {
 		$option = $this->getLastSuccessfulRunDateOption();
 		if ($option == null) {
-			$option = new Option();
+			$option = new Options();
             $option->setName(self::OPTION_LASTSUCCESSFULRUN_NAME);
 		}
 
