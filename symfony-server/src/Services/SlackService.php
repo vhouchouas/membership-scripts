@@ -40,7 +40,12 @@ class SlackService {
 	 * roughly 20 call per minute.
 	 */
 	public function usersList() {
-		return $this->client->usersList();
+		try {
+			return $this->client->usersList();
+		} catch (\Throwable $t) {
+			$this->logger->error("Failed to query slack because: " . $t->getMessage());
+			throw $t;
+		}
 	}
 
 	/**
