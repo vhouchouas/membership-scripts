@@ -47,26 +47,31 @@ class MemberImporter {
 		) {}
 
 	public function run(bool $debug) {
-		$now = new \DateTime();
-		$dateUtil = new RegistrationDateUtil($now); // we do a "new" rather than leveraging DI because we need to inject our "now";
-		$lastSuccessfulRunDate = $this->optionRepository->getLastSuccessfulRunDate();
-		$dateBeforeWhichAllRegistrationsHaveBeenHandled = $this->computeDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
+		try {
+			$now = new \DateTime();
+			$dateUtil = new RegistrationDateUtil($now); // we do a "new" rather than leveraging DI because we need to inject our "now";
+			$lastSuccessfulRunDate = $this->optionRepository->getLastSuccessfulRunDate();
+			$dateBeforeWhichAllRegistrationsHaveBeenHandled = $this->computeDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
 
-		$subscriptions = $this->helloassoConnector->getAllHelloAssoSubscriptions($dateBeforeWhichAllRegistrationsHaveBeenHandled, $now);
-		$this->logger->info("retrieved data from HelloAsso. Got " . count($subscriptions) . " action(s)");
+			$subscriptions = $this->helloassoConnector->getAllHelloAssoSubscriptions($dateBeforeWhichAllRegistrationsHaveBeenHandled, $now);
+			$this->logger->info("retrieved data from HelloAsso. Got " . count($subscriptions) . " action(s)");
 
-		foreach($subscriptions as $subscription) {
-			$this->memberRepository->addOrUpdateMember($subscription, $debug);
-			$this->mailchimpConnector->registerEvent($subscription, $debug);
-			$this->googleConnector->registerEvent($subscription, $debug);
+			foreach($subscriptions as $subscription) {
+				$this->memberRepository->addOrUpdateMember($subscription, $debug);
+				$this->mailchimpConnector->registerEvent($subscription, $debug);
+				$this->googleConnector->registerEvent($subscription, $debug);
+			}
+			$this->deleteOutdatedMembersIfNeeded($dateUtil, $lastSuccessfulRunDate, $debug);
+
+			$this->sendEmailNotificationForAdminsAboutNewcomersIfneeded($dateUtil, $lastSuccessfulRunDate, $now, $debug);
+			$this->sendEmailAboutSlackmembersToReactivate($debug);
+
+			$this->optionRepository->writeLastSuccessfulRunDate($now, $debug);
+			$this->logger->info("Completed successfully");
+		} catch (\Throwable $t) {
+			$this->logger->error("Failed with error:" . $t->getMessage());
+			throw $t;
 		}
-		$this->deleteOutdatedMembersIfNeeded($dateUtil, $lastSuccessfulRunDate, $debug);
-
-		$this->sendEmailNotificationForAdminsAboutNewcomersIfneeded($dateUtil, $lastSuccessfulRunDate, $now, $debug);
-		$this->sendEmailAboutSlackmembersToReactivate($debug);
-
-		$this->optionRepository->writeLastSuccessfulRunDate($now, $debug);
-		$this->logger->info("Completed successfully");
 	}
 
 	private function computeDateBeforeWhichAllRegistrationsHaveBeenHandled(\DateTime $lastSuccessfulRunDate): \DateTime {
