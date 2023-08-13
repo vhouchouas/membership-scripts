@@ -1,5 +1,4 @@
-#!/bin/bash -ex
-set -x
+#!/bin/bash
 set -e
 
 # Find out directory of current script
@@ -66,6 +65,7 @@ source "$LOCAL_CONF_FILE"
 
 # Warn if the repo isn't clean , to prevent releasing corrupted code
 if ! [ -z "$(git status --porcelain)" ]; then
+  git status
   read -p "Repo not clean. Are you sure you want to deploy? [yN]" ANSWER
   if [ "x$ANSWER" != "xy" ]; then
     echo aborting
@@ -98,8 +98,12 @@ cp "$CONF_DIR"/symfony.conf .env.local
 mkdir var
 cp "$CONF_DIR"/google_tokens.json var/
 cp "$CONF_DIR"/htaccess public/.htaccess
+cp -f "$CONF_DIR"/favicon.* public/favicon.ico
 
 composer install --optimize-autoloader
+## rm the symlink in order to have actuals files
+rm vendor/zero-waste-paris/membership-scripts
+cp -rL "$ROOT_DIR"/generated/php-server-bundle vendor/zero-waste-paris/membership-scripts
 
 composer dump-env prod
 APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
