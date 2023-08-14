@@ -100,7 +100,7 @@ cp -rL "$FILES_DIR" "$TEMPORARY_RELEASE_DIR"
 cd "$TEMPORARY_RELEASE_DIR"
 
 # Clean the files: rm potential leftovers, copy the conf files, install dependencies, warm-up the cache
-rm -rf var .env.* vendor tests
+rm -rf var .env.* vendor tests coverage
 cp "$CONF_DIR"/symfony.conf .env.local
 mkdir var
 cp "$CONF_DIR"/google_tokens.json var/
