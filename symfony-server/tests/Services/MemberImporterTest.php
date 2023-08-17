@@ -8,6 +8,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use PHPUnit\Framework\Constraint\ObjectEquals;
 
 use App\Models\RegistrationEvent;
+use App\Repository\MemberRepository;
 use App\Repository\OptionsRepository;
 use App\Services\MemberImporter;
 use App\Services\HelloAssoConnector;
@@ -21,11 +22,13 @@ final class MemberImporterTest extends KernelTestCase {
 	public function test_happyPath(): void {
 		// Setup
 		$now = \DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2020-09-08T06:30:00Z');
+		$lastSuccessfulRunDate = \DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2020-09-08T01:00:00Z');
 		$registrationEvent = $this->buildHelloassoEvent('1984-03-04T09:30:00Z', 'firstName', 'lastName', 'me@myself.com'
 		);
 
 		self::bootKernel();
-		$this->setLastSuccessfulRunDate(\DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2020-09-08T01:00:00Z'));
+		$this->setOptionsRepositoryMock($now, $lastSuccessfulRunDate);
+		$this->setMemberRepositoryMock($registrationEvent);
 		$this->setHelloAssoMock($registrationEvent);
 		$this->setMailchimpMock($registrationEvent);
 		$this->setGoogleMock($registrationEvent);
@@ -38,8 +41,21 @@ final class MemberImporterTest extends KernelTestCase {
 		$sut->runNow(false, $now);
 	}
 
-	private function setLastSuccessfulRunDate(\DateTime $now): void {
-		static::getContainer()->get(OptionsRepository::class)->writeLastSuccessfulRunDate($now, false);
+	private function setOptionsRepositoryMock(\DateTime $now, \DateTime $lastSuccessfulRunDate): void {
+		$repo = $this->createMock(OptionsRepository::class);
+		$repo->expects(self::once())->method('getLastSuccessfulRunDate')->willReturn($lastSuccessfulRunDate);
+		$repo->expects(self::once())->method('writeLastSuccessfulRunDate');
+
+		self::getContainer()->set(OptionsRepository::class, $repo);
+	}
+
+	private function setMemberRepositoryMock(RegistrationEvent $expectedRegistrationEvent): void {
+		$repo = $this->createMock(MemberRepository::class);
+		$repo->expects(self::once())->method('addOrUpdateMember')->with(new ObjectEquals($expectedRegistrationEvent));
+		$repo->expects(self::never())->method('updateMembersForWhichNotificationHasBeenSentoToAdmins');
+		$repo->expects(self::never())->method('deleteMembersOlderThan');
+
+		self::getContainer()->set(MemberRepository::class, $repo);
 	}
 
 	private function setHelloAssoMock(RegistrationEvent $registrationEvent): void {
