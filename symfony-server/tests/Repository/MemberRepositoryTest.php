@@ -1,12 +1,16 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../TestHelperTrait.php';
+
 use App\Repository\MemberRepository;
 use App\Models\RegistrationEvent;
 use App\Entity\Member;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class MemberRepositoryTest extends KernelTestCase {
+	use TestHelperTrait;
+
 	private MemberRepository $memberRepository;
 
 	protected function setUp(): void {
@@ -183,25 +187,6 @@ final class MemberRepositoryTest extends KernelTestCase {
 		$bob = $this->memberRepository->findOneBy(['email' => "bob@dylan.com"]);
 		$this->memberRepository->updateMembersForWhichNotificationHasBeenSentoToAdmins([$bob], true);
 		$this->assertEquals(2, count($this->memberRepository->getMembersForWhichNoNotificationHasBeenSentToAdmins()), "We should still consider we haven't sent notifications for 2 members because we didn't update any status");
-	}
-
-	private $lastHelloAssoEventId = 0;
-	private function buildHelloassoEvent($event_date, $first_name, $last_name, $email): RegistrationEvent {
-		$ret = new RegistrationEvent();
-		$ret->event_date = $event_date;
-		$ret->first_name = $first_name;
-		$ret->last_name = $last_name;
-		$ret->email = $email;
-		$ret->postal_code = "75000";
-		$ret->city = "Paris";
-		$ret->how_did_you_know_zwp = "";
-		$ret->want_to_do = "";
-		$ret->is_zw_professional = "Non";
-
-		$ret->helloasso_event_id = (string) $this->lastHelloAssoEventId;
-		$this->lastHelloAssoEventId++;
-
-		return $ret;
 	}
 
 	private function assertExpectedMember(string $firstRegistrationDate, string $lastRegistrationDate, string $firstName, string $lastName, string $email, array $actualMember) {

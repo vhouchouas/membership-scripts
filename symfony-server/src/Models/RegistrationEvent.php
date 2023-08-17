@@ -30,4 +30,9 @@ class RegistrationEvent {
 	public string $is_zw_professional;   // Beware, this is a string with value either "Oui" or "Non"
 	public string $how_did_you_know_zwp;
 	public string $want_to_do;
+
+	// For unit tests (to use PhpUnit "ObjectEquals" constraint)
+	public function equals(RegistrationEvent $other): bool {
+		return $this == $other;
+	}
 }

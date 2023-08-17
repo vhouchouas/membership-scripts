@@ -47,8 +47,11 @@ class MemberImporter {
 		) {}
 
 	public function run(bool $debug) {
+		$this->runNow($debug, new \DateTime());
+	}
+
+	public function runNow(bool $debug, \DateTime $now) {
 		try {
-			$now = new \DateTime();
 			$dateUtil = new RegistrationDateUtil($now); // we do a "new" rather than leveraging DI because we need to inject our "now";
 			$lastSuccessfulRunDate = $this->optionRepository->getLastSuccessfulRunDate();
 			$dateBeforeWhichAllRegistrationsHaveBeenHandled = $this->computeDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
