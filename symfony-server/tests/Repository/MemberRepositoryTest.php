@@ -159,6 +159,25 @@ final class MemberRepositoryTest extends KernelTestCase {
 		$this->assertExpectedObjectMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
 	}
 
+	public function test_getMembersPerPostalCode() {
+		// Setup
+		$this->memberRepository->addOrUpdateMember($this->buildHelloassoEvent("2020-01-01", "name1", "name1", "email1", "92100"), false); // Old one, should be ignored
+		$this->memberRepository->addOrUpdateMember($this->buildHelloassoEvent("2023-01-01", "name2", "name2", "email2", "92100"), false);
+		$this->memberRepository->addOrUpdateMember($this->buildHelloassoEvent("2023-01-01", "name3", "name3", "email3", "92100"), false);
+		$this->memberRepository->addOrUpdateMember($this->buildHelloassoEvent("2023-01-01", "name4", "name4", "email4", "92100"), false);
+		$this->memberRepository->addOrUpdateMember($this->buildHelloassoEvent("2023-01-01", "name5", "name5", "email5", "75018"), false);
+
+		// Act
+		$membersPerPostalCode = $this->memberRepository->getMembersPerPostalCode(\DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2022-01-01T00:00:00Z'));
+
+		// Assert
+		$this->assertEquals(2, count($membersPerPostalCode));
+		$this->assertEquals("92100", $membersPerPostalCode[0]["postalCode"]);
+		$this->assertEquals(3, $membersPerPostalCode[0]["count"]);
+		$this->assertEquals("75018", $membersPerPostalCode[1]["postalCode"]);
+		$this->assertEquals(1, $membersPerPostalCode[1]["count"]);
+	}
+
 	public function test_debugModeDoesNotWrite() {
 		// Setup
 		$bobRegistrationDate = "1985-04-03";

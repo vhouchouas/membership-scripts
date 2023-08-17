@@ -7,13 +7,13 @@ trait TestHelperTrait {
 
 	private $lastHelloAssoEventId = 0;
 
-	private function buildHelloassoEvent(string $event_date, string $first_name, string $last_name, string $email): RegistrationEvent {
+	private function buildHelloassoEvent(string $event_date, string $first_name, string $last_name, string $email, $postal_code = "75000"): RegistrationEvent {
 		$ret = new RegistrationEvent();
 		$ret->event_date = $event_date;
 		$ret->first_name = $first_name;
 		$ret->last_name = $last_name;
 		$ret->email = $email;
-		$ret->postal_code = "75000";
+		$ret->postal_code = $postal_code;
 		$ret->city = "Paris";
 		$ret->how_did_you_know_zwp = "";
 		$ret->want_to_do = "";
@@ -24,4 +24,5 @@ trait TestHelperTrait {
 
 		return $ret;
 	}
+
 }
