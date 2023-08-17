@@ -80,7 +80,7 @@ class OptionsRepository extends ServiceEntityRepository
 		$option = $this->getLastSuccessfulRunDateOption();
 		if ($option == null) {
 			$option = new Options();
-            $option->setName(self::OPTION_LASTSUCCESSFULRUN_NAME);
+			$option->setName(self::OPTION_LASTSUCCESSFULRUN_NAME);
 		}
 
 		if ($debug) {
