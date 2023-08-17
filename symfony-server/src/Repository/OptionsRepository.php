@@ -49,15 +49,6 @@ class OptionsRepository extends ServiceEntityRepository
 		}
 	}
 
-	public function remove(Options $entity, bool $flush = false): void
-	{
-		$this->getEntityManager()->remove($entity);
-
-		if ($flush) {
-			$this->getEntityManager()->flush();
-		}
-	}
-
 	public function getLastSuccessfulRunDate(): \DateTime {
 		$option = $this->getLastSuccessfulRunDateOption();
 		if ($option == null) {

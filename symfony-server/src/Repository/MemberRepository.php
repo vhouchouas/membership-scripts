@@ -114,15 +114,6 @@ class MemberRepository extends ServiceEntityRepository
 		}
 	}
 
-	public function remove(Member $entity, bool $flush = false): void
-	{
-		$this->getEntityManager()->remove($entity);
-
-		if ($flush) {
-			$this->getEntityManager()->flush();
-		}
-	}
-
 	public function getOrderedListOfLastRegistrations(\DateTime $since) : array {
 		return $this->createQueryBuilder('m')
 			->andWhere('m.lastRegistrationDate > :since')
