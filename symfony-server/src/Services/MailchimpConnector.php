@@ -74,12 +74,6 @@ class MailchimpConnector implements GroupWithDeletableUsers {
 		return json_encode($payload);
 	}
 
-	public function deleteUsers(array $emails, bool $debug): void {
-		foreach($emails as $email) {
-			$this->deleteUser($email, $debug);
-		}
-	}
-
 	public function deleteUser(string $email, bool $debug): void {
 		if ($debug) {
 			$this->logger->info("Debug mode: skipping deletion of $email from mailchimp");

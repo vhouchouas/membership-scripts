@@ -39,6 +39,7 @@ class MemberImporter {
 		private GoogleGroupService $googleConnector,
 		private ContainerBagInterface $params,
 		private EmailService $mail,
+		private GroupMemberDeleter $groupMemberDeleter,
 		) {}
 
 	public function run(bool $debug) {
@@ -105,17 +106,6 @@ class MemberImporter {
 		$this->logger->info("We're going to delete outdated members with no registration after " . $upTo->format("Y-m-d"));
 		$this->memberRepository->deleteMembersOlderThan($upTo, $debug);
 
-		$membersToKeep = $this->memberRepository->findAll();
-		// TODO: understand if we could get rid of this strtolower, and its impact if we keep it
-		$emailsToKeep = array_map(function(Member $member) { return strtolower($member->getEmail()); }, $membersToKeep);
-		$this->deleteOutdatedMembersFromGroup($this->googleConnector, $emailsToKeep, $debug);
-		$this->deleteOutdatedMembersFromGroup($this->mailchimpConnector, $emailsToKeep, $debug);
-	}
-
-	private function deleteOutdatedMembersFromGroup(GroupWithDeletableUsers $group, array $emailsToKeep, bool $debug): void {
-		$currentUsers = array_map(function(string $s) { return strtolower($s); }, $group->getUsers());
-		$usersToDelete = array_diff($currentUsers, $emailsToKeep);
-		$this->logger->info("Going to delete ". count($usersToDelete) . " users from group " . $group->groupName());
-		$group->deleteUsers($usersToDelete, $debug);
+		$this->groupMemberDeleter->deleteOutdatedMembersFromGroups([$this->googleConnector, $this->mailchimpConnector], $debug);
 	}
 }
