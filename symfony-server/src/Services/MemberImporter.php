@@ -115,7 +115,6 @@ class MemberImporter {
 	private function deleteOutdatedMembersFromGroup(GroupWithDeletableUsers $group, array $emailsToKeep, bool $debug): void {
 		$currentUsers = array_map(function(string $s) { return strtolower($s); }, $group->getUsers());
 		$usersToDelete = array_diff($currentUsers, $emailsToKeep);
-		$usersToDelete = array("toto1@tata.fr", "zozo@hotmail.fr");
 		$this->logger->info("Going to delete ". count($usersToDelete) . " users from group " . $group->groupName());
 		$group->deleteUsers($usersToDelete, $debug);
 	}
