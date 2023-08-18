@@ -14,7 +14,7 @@ use App\Services\MemberImporter;
 use App\Services\HelloAssoConnector;
 use App\Services\MailchimpConnector;
 use App\Services\GoogleGroupService;
-use App\Services\SlackService;
+use App\Services\EmailService;
 
 final class MemberImporterTest extends KernelTestCase {
 	use TestHelperTrait;
@@ -27,18 +27,25 @@ final class MemberImporterTest extends KernelTestCase {
 		);
 
 		self::bootKernel();
+		$this->setEmailServiceMock();
 		$this->setOptionsRepositoryMock($now, $lastSuccessfulRunDate);
 		$this->setMemberRepositoryMock($registrationEvent);
 		$this->setHelloAssoMock($registrationEvent);
 		$this->setMailchimpMock($registrationEvent);
 		$this->setGoogleMock($registrationEvent);
-		$this->setMailMock();
-		$this->setSlackMock();
 
 		$sut = self::getContainer()->get(MemberImporter::class);
 
 		// Act
 		$sut->runNow(false, $now);
+	}
+
+	private function setEmailServiceMock() {
+		$mock = $this->createMock(EmailService::class);
+		$mock->expects(self::never())->method('sendNotificationForAdminsAboutNewcomers');
+		$mock->expects(self::once())->method('sendEmailAboutSlackMembersToReactivate');
+
+		self::getContainer()->set(EmailService::class, $mock);
 	}
 
 	private function setOptionsRepositoryMock(\DateTime $now, \DateTime $lastSuccessfulRunDate): void {
@@ -64,18 +71,6 @@ final class MemberImporterTest extends KernelTestCase {
 			->method('getAllHelloAssoSubscriptions')
 			->willReturn([$registrationEvent]);
 		self::getContainer()->set(HelloAssoConnector::class, $helloAssoConnector);
-	}
-
-	private function setMailMock(): void {
-		$mailerMock = $this->createMock(MailerInterface::class);
-		$mailerMock->expects(self::never())->method('send');
-		self::getContainer()->set(MailerInterface::class, $mailerMock);
-	}
-
-	private function setSlackMock(): void {
-		$slackMock = $this->createMock(SlackService::class);
-		$slackMock->expects(self::once())->method('findDeactivatedMembers');
-		self::getContainer()->set(SlackService::class, $slackMock);
 	}
 
 	private function setMailchimpMock(RegistrationEvent $expectedRegistrationEvent): void {
