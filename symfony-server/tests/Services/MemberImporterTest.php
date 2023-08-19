@@ -19,73 +19,75 @@ use App\Services\EmailService;
 final class MemberImporterTest extends KernelTestCase {
 	use TestHelperTrait;
 
+	private EmailService $mailMock;
+	private OptionsRepository $optionRepoMock;
+	private MemberRepository $memberRepoMock;
+	private HelloAssoConnector $helloAssoMock;
+	private GoogleGroupService $googleMock;
+	private MailchimpConnector $mailchimpMock;
+
+
+	protected function setUp(): void {
+		self::bootKernel();
+
+		$this->mailMock       = $this->createMock(EmailService::class);
+		$this->optionRepoMock = $this->createMock(OptionsRepository::class);
+		$this->memberRepoMock = $this->createMock(MemberRepository::class);
+		$this->helloAssoMock  = $this->createMock(HelloAssoConnector::class);
+		$this->googleMock     = $this->createMock(GoogleGroupService::class);
+		$this->mailchimpMock  = $this->createMock(MailchimpConnector::class);
+
+		$this->mailMock->expects(self::once())->method('sendEmailAboutSlackMembersToReactivate');
+	}
+
+	private function registerAllMockInContainer(): void {
+		self::getContainer()->set(EmailService::class,       $this->mailMock);
+		self::getContainer()->set(OptionsRepository::class,  $this->optionRepoMock);
+		self::getContainer()->set(MemberRepository::class,   $this->memberRepoMock);
+		self::getContainer()->set(HelloAssoConnector::class, $this->helloAssoMock);
+		self::getContainer()->set(GooGleGroupService::class, $this->googleMock);
+		self::getContainer()->set(MailchimpConnector::class, $this->mailchimpMock);
+	}
+
 	public function test_happyPath(): void {
 		// Setup
 		$now = new \DateTime('2020-09-08T06:30:00Z');
 		$lastSuccessfulRunDate = new \DateTime('2020-09-08T01:00:00Z');
-		$registrationEvent = $this->buildHelloassoEvent('1984-03-04T09:30:00Z', 'firstName', 'lastName', 'me@myself.com'
-		);
+		$registrationEvent = $this->buildHelloassoEvent('1984-03-04T09:30:00Z', 'firstName', 'lastName', 'me@myself.com');
 
-		self::bootKernel();
-		$this->setEmailServiceMock();
+		$this->expectsEventRegistration($registrationEvent);
+		$this->expectsOldMembersAreNotDeleted();
+		$this->expectsNoNotificationsAreSentAboutNewcomers();
 		$this->setOptionsRepositoryMock($now, $lastSuccessfulRunDate);
-		$this->setMemberRepositoryMock($registrationEvent);
-		$this->setHelloAssoMock($registrationEvent);
-		$this->setMailchimpMock($registrationEvent);
-		$this->setGoogleMock($registrationEvent);
 
-		$sut = self::getContainer()->get(MemberImporter::class);
+		$this->registerAllMockInContainer();
+
 
 		// Act
+		$sut = self::getContainer()->get(MemberImporter::class);
 		$sut->runNow(false, $now);
 	}
 
-	private function setEmailServiceMock() {
-		$mock = $this->createMock(EmailService::class);
-		$mock->expects(self::never())->method('sendNotificationForAdminsAboutNewcomers');
-		$mock->expects(self::once())->method('sendEmailAboutSlackMembersToReactivate');
-
-		self::getContainer()->set(EmailService::class, $mock);
-	}
-
 	private function setOptionsRepositoryMock(\DateTime $now, \DateTime $lastSuccessfulRunDate): void {
-		$repo = $this->createMock(OptionsRepository::class);
-		$repo->expects(self::once())->method('getLastSuccessfulRunDate')->willReturn($lastSuccessfulRunDate);
-		$repo->expects(self::once())->method('writeLastSuccessfulRunDate');
-
-		self::getContainer()->set(OptionsRepository::class, $repo);
+		$this->optionRepoMock->expects(self::once())->method('getLastSuccessfulRunDate')->willReturn($lastSuccessfulRunDate);
+		$this->optionRepoMock->expects(self::once())->method('writeLastSuccessfulRunDate')->with($this->equalTo($now));
 	}
 
-	private function setMemberRepositoryMock(RegistrationEvent $expectedRegistrationEvent): void {
-		$repo = $this->createMock(MemberRepository::class);
-		$repo->expects(self::once())->method('addOrUpdateMember')->with(new ObjectEquals($expectedRegistrationEvent));
-		$repo->expects(self::never())->method('updateMembersForWhichNotificationHasBeenSentoToAdmins');
-		$repo->expects(self::never())->method('deleteMembersOlderThan');
-
-		self::getContainer()->set(MemberRepository::class, $repo);
+	private function expectsEventRegistration(RegistrationEvent $expected): void {
+		$this->helloAssoMock->expects(self::once())->method('getAllHelloAssoSubscriptions')->willReturn([$expected]);
+		$this->googleMock->expects(self::once())->method('registerEvent')->with(new ObjectEquals($expected));
+		$this->mailchimpMock->expects(self::once())->method('registerEvent')->with(new ObjectEquals($expected));
+		$this->memberRepoMock->expects(self::once())->method('addOrUpdateMember')->with(new ObjectEquals($expected));
 	}
 
-	private function setHelloAssoMock(RegistrationEvent $registrationEvent): void {
-		$helloAssoConnector = $this->createMock(HelloAssoConnector::class);
-		$helloAssoConnector->expects(self::once())
-			->method('getAllHelloAssoSubscriptions')
-			->willReturn([$registrationEvent]);
-		self::getContainer()->set(HelloAssoConnector::class, $helloAssoConnector);
+	private function expectsNoNotificationsAreSentAboutNewcomers(): void {
+		$this->mailMock->expects(self::never())->method('sendNotificationForAdminsAboutNewcomers');
+		$this->memberRepoMock->expects(self::never())->method('updateMembersForWhichNotificationHasBeenSentoToAdmins');
 	}
 
-	private function setMailchimpMock(RegistrationEvent $expectedRegistrationEvent): void {
-		$this->setGroupMock(MailchimpConnector::class, $expectedRegistrationEvent);
-	}
-
-	private function setGoogleMock(RegistrationEvent $expectedRegistrationEvent): void {
-		$this->setGroupMock(GoogleGroupService::class, $expectedRegistrationEvent);
-	}
-
-	private function setGroupMock($class, RegistrationEvent $expectedRegistrationEvent): void {
-		$mock = $this->createMock($class);
-		$mock->expects(self::once())
-			->method('registerEvent')
-			->with(new ObjectEquals($expectedRegistrationEvent));
-		self::getContainer()->set($class, $mock);
+	private function expectsOldMembersAreNotDeleted(): void {
+		$this->memberRepoMock->expects(self::never())->method('deleteMembersOlderThan');
+		$this->googleMock->expects(self::never())->method('deleteUser');
+		$this->mailchimpMock->expects(self::never())->method('deleteUser');
 	}
 }
