@@ -14,12 +14,10 @@ final class GroupMemberDeleterTest extends KernelTestCase {
 		// Setup
 		self::bootKernel();
 
-		$memberRepo = $this->createMock(MemberRepository::class);
-		$memberRepo->expects(self::once())->method('findAll')->willReturn([
-			$this->buildMember("someuserNotInTheGroup@mail.com"), // Should be kept: it does not matter he is not in the group
-			$this->buildMember("someoneWithSomeCase@mail.com"), // Should be kept: we should make case insensitive comparison
-		]);
-		self::getContainer()->set(MemberRepository::class, $memberRepo);
+		$currentMembersEmails = [
+			"someuserNotInTheGroup@mail.com", // Should be kept: it does not matter he is not in the group
+			"someoneWithSomeCase@mail.com", // Should be kept: we should make case insensitive comparison
+		];
 
 		$group = $this->createMock(GroupWithDeletableUsers::class);
 		$group->expects(self::once())->method('getUsers')->willReturn([
@@ -32,7 +30,7 @@ final class GroupMemberDeleterTest extends KernelTestCase {
 
 		// Act
 		$sut = self::getContainer()->get(GroupMemberDeleter::class);
-		$sut->deleteOutdatedMembersFromGroups([$group], false);
+		$sut->deleteOutdatedMembersFromGroups($currentMembersEmails, [$group], false);
 	}
 
 	private function buildMember($email): Member {

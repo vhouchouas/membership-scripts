@@ -16,6 +16,7 @@ use App\Services\HelloAssoConnector;
 use App\Services\MailchimpConnector;
 use App\Services\GoogleGroupService;
 use App\Services\EmailService;
+use App\Services\GroupMemberDeleter;
 
 final class MemberImporterTest extends KernelTestCase {
 	use TestHelperTrait;
@@ -27,8 +28,11 @@ final class MemberImporterTest extends KernelTestCase {
 	private GoogleGroupService $googleMock;
 	private MailchimpConnector $mailchimpMock;
 
+	private bool $useMockForMemberRepository;
+
 
 	protected function setUp(): void {
+		$this->useMockForMemberRepository = true;
 		self::bootKernel();
 
 		$this->mailMock       = $this->createMock(EmailService::class);
@@ -44,10 +48,12 @@ final class MemberImporterTest extends KernelTestCase {
 	private function registerAllMockInContainer(): void {
 		self::getContainer()->set(EmailService::class,       $this->mailMock);
 		self::getContainer()->set(OptionsRepository::class,  $this->optionRepoMock);
-		self::getContainer()->set(MemberRepository::class,   $this->memberRepoMock);
 		self::getContainer()->set(HelloAssoConnector::class, $this->helloAssoMock);
 		self::getContainer()->set(GooGleGroupService::class, $this->googleMock);
 		self::getContainer()->set(MailchimpConnector::class, $this->mailchimpMock);
+		if ($this->useMockForMemberRepository) {
+			self::getContainer()->set(MemberRepository::class, $this->memberRepoMock);
+		}
 	}
 
 	public function test_happyPath(): void {
@@ -82,6 +88,38 @@ final class MemberImporterTest extends KernelTestCase {
 		// Act
 		$sut = self::getContainer()->get(MemberImporter::class);
 		$sut->runNow(false, $now);
+	}
+
+	public function test_deleteOutdatedMembers(): void {
+		// Setup
+		$now = new DateTime("2023-02-02"); // Just after the dead line
+		$lastSuccessfulRunDate = new DateTime("2023-01-30"); // before the dead line
+
+		$this->expectsNoEventRegistration();
+		$this->setOptionsRepositoryMock($now, $lastSuccessfulRunDate);
+
+		// We'd rather use an actual db because mocks are stateless but here we rely on a dynamic behavior
+		// (eg: if the tested code deletes users from db before or after deleting them from groups, matters)
+		$this->useMockForMemberRepository = false;
+		$memberRepo = self::getContainer()->get(MemberRepository::class);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2021-12-31", "VeryOld", "Member", "veryold@member.com"), false);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2022-12-31", "Old", "Member", "old@member.com"), false);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2023-01-15", "Young", "Member", "young@member.com"), false);
+
+		// PHPUnit mock would not make it easy to assert we have all the individual deletions we expect, so mock GroupMemberDeleter directly in this test
+		$groupMemberDeleterMock = $this->createMock(GroupMemberDeleter::class);
+		$groupMemberDeleterMock->expects(self::once())->method('deleteOutdatedMembersFromGroups')->with($this->equalTo(['young@member.com']));
+		self::getContainer()->set(GroupMemberDeleter::class, $groupMemberDeleterMock);
+
+		$this->registerAllMockInContainer();
+
+		// Act
+		$sut = self::getContainer()->get(MemberImporter::class);
+		$sut->runNow(false, $now);
+
+		// Assert
+		$this->assertEquals(["old@member.com", "young@member.com"], array_map(fn(Member $m) => $m->getEmail(), $memberRepo->findAll()),
+				"We keep data up to 1 year after the end of subscription, so we delete only extremely old members");
 	}
 
 	private function setOptionsRepositoryMock(\DateTime $now, \DateTime $lastSuccessfulRunDate): void {

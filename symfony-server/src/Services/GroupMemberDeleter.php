@@ -24,18 +24,16 @@ use Psr\Log\LoggerInterface;
 use App\Entity\Member;
 
 class GroupMemberDeleter {
-	public function __construct(
-		private LoggerInterface $logger,
-		private MemberRepository $memberRepository,
-	) {}
+	public function __construct(private LoggerInterface $logger) {}
 
-
-	public function deleteOutdatedMembersFromGroups(array $groups, bool $debug): void {
-		$membersToKeep = $this->memberRepository->findAll();
-
+	/**
+	 * $membersToKeep - Array of emails (string)
+	 * $groups - Array of GroupWithDeletableUsers
+	 */
+	public function deleteOutdatedMembersFromGroups(array $membersToKeep, array $groups, bool $debug): void {
 		// Lower case because we observed that some emails end up register with another case...
 		// ... not sure why, but this makes it possible to take it into account
-		$lowercasedEmailsToKeep = array_map(fn(Member $member): string => strtolower($member->getEmail()), $membersToKeep);
+		$lowercasedEmailsToKeep = array_map(fn(string $email): string => strtolower($email), $membersToKeep);
 
 		foreach($groups as $group) {
 			$this->deleteOutdatedMembersFromGroup($lowercasedEmailsToKeep, $group, $debug);

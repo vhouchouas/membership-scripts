@@ -106,6 +106,9 @@ class MemberImporter {
 		$this->logger->info("We're going to delete outdated members with no registration after " . $upTo->format("Y-m-d"));
 		$this->memberRepository->deleteMembersOlderThan($upTo, $debug);
 
-		$this->groupMemberDeleter->deleteOutdatedMembersFromGroups([$this->googleConnector, $this->mailchimpConnector], $debug);
+		$this->groupMemberDeleter->deleteOutdatedMembersFromGroups(
+				array_map(fn(Member $m) => $m->getEmail(), $this->memberRepository->getListOfLastRegistrations($dateUtil->getDateAfterWhichMembershipIsConsideredValid())),
+				[$this->googleConnector, $this->mailchimpConnector],
+				$debug);
 	}
 }

@@ -123,6 +123,15 @@ class MemberRepository extends ServiceEntityRepository
 			->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
 	}
 
+	// TODO: remove code duplicated with getOrderedListOfLastRegistrations
+	public function getListOfLastRegistrations(\DateTime $since): array {
+		return $this->createQueryBuilder('m')
+			->andWhere('m.lastRegistrationDate > :since')
+			->setParameter('since', $since)
+			->getQuery()
+			->getResult();
+	}
+
 	public function getMembersPerPostalCode(\DateTime $since) : array {
 		return $this->getEntityManager()->createQuery(
 				'SELECT m.postalCode, COUNT(m.postalCode) AS count
