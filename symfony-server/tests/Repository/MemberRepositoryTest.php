@@ -168,7 +168,7 @@ final class MemberRepositoryTest extends KernelTestCase {
 		$this->memberRepository->addOrUpdateMember($this->buildHelloassoEvent("2023-01-01", "name5", "name5", "email5", "75018"), false);
 
 		// Act
-		$membersPerPostalCode = $this->memberRepository->getMembersPerPostalCode(\DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2022-01-01T00:00:00Z'));
+		$membersPerPostalCode = $this->memberRepository->getMembersPerPostalCode(new \DateTime('2022-01-01T00:00:00Z'));
 
 		// Assert
 		$this->assertEquals(2, count($membersPerPostalCode));

@@ -21,8 +21,8 @@ final class MemberImporterTest extends KernelTestCase {
 
 	public function test_happyPath(): void {
 		// Setup
-		$now = \DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2020-09-08T06:30:00Z');
-		$lastSuccessfulRunDate = \DateTime::createFromFormat(\DateTimeInterface::ISO8601, '2020-09-08T01:00:00Z');
+		$now = new \DateTime('2020-09-08T06:30:00Z');
+		$lastSuccessfulRunDate = new \DateTime('2020-09-08T01:00:00Z');
 		$registrationEvent = $this->buildHelloassoEvent('1984-03-04T09:30:00Z', 'firstName', 'lastName', 'me@myself.com'
 		);
 
