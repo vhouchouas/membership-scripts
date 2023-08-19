@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Mailer\MailerInterface;
 use PHPUnit\Framework\Constraint\ObjectEquals;
 
+use App\Entity\Member;
 use App\Models\RegistrationEvent;
 use App\Repository\MemberRepository;
 use App\Repository\OptionsRepository;
@@ -62,6 +63,21 @@ final class MemberImporterTest extends KernelTestCase {
 
 		$this->registerAllMockInContainer();
 
+		// Act
+		$sut = self::getContainer()->get(MemberImporter::class);
+		$sut->runNow(false, $now);
+	}
+
+	public function test_sendNotificationForAdminsAboutNewcomers(): void {
+		// Setup
+		$now = new DateTime("2020-08-08T00:00:00", new DateTimeZone("Europe/Paris")); // Saturday
+		$lastSuccessfulRunDate = new DateTime("2020-08-04"); // before the dead line
+
+		$this->expectsNoEventRegistration();
+		$this->expectsNotificationsAreSentAboutNewcomers([new Member()]);
+		$this->setOptionsRepositoryMock($now, $lastSuccessfulRunDate);
+
+		$this->registerAllMockInContainer();
 
 		// Act
 		$sut = self::getContainer()->get(MemberImporter::class);
@@ -80,9 +96,22 @@ final class MemberImporterTest extends KernelTestCase {
 		$this->memberRepoMock->expects(self::once())->method('addOrUpdateMember')->with(new ObjectEquals($expected));
 	}
 
+	private function expectsNoEventRegistration(): void {
+		$this->helloAssoMock->expects(self::once())->method('getAllHelloAssoSubscriptions')->willReturn([]);
+		$this->googleMock->expects(self::never())->method('registerEvent');
+		$this->mailchimpMock->expects(self::never())->method('registerEvent');
+		$this->memberRepoMock->expects(self::never())->method('addOrUpdateMember');
+	}
+
 	private function expectsNoNotificationsAreSentAboutNewcomers(): void {
 		$this->mailMock->expects(self::never())->method('sendNotificationForAdminsAboutNewcomers');
 		$this->memberRepoMock->expects(self::never())->method('updateMembersForWhichNotificationHasBeenSentoToAdmins');
+	}
+
+	private function expectsNotificationsAreSentAboutNewcomers(array $newcomers): void {
+		$this->memberRepoMock->expects(self::once())->method('getMembersForWhichNoNotificationHasBeenSentToAdmins')->willReturn($newcomers);
+		$this->mailMock->expects(self::once())->method('sendNotificationForAdminsAboutNewcomers')->with($this->equalTo($newcomers));
+		$this->memberRepoMock->expects(self::once())->method('updateMembersForWhichNotificationHasBeenSentoToAdmins')->with($this->equalTo($newcomers));
 	}
 
 	private function expectsOldMembersAreNotDeleted(): void {
