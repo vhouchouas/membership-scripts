@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use App\Services\RegistrationDateUtil;
+use App\Services\NowProvider;
 
 final class RegistrationDateUtilTest extends TestCase {
 	public function test_getDateAfterWhichMembershipIsConsideredValid(){
@@ -16,7 +17,7 @@ final class RegistrationDateUtilTest extends TestCase {
 	}
 
 	private function assertCorrectValidMembershipDate(DateTime $expected, DateTime $now, string $explanation): void{
-		$sut = new RegistrationDateUtil($now);
+		$sut = $this->buildRegistrationDateUtil($now);
 		$this->assertEquals($expected, $sut->getDateAfterWhichMembershipIsConsideredValid(), $explanation);
 	}
 
@@ -43,14 +44,14 @@ final class RegistrationDateUtilTest extends TestCase {
 	}
 
 	private function assertCorrectlyDetectNeedToDeleteOutdatedMember(bool $expected, DateTime $now, DateTime $lastRun, string $explanation){
-		$sut = new RegistrationDateUtil($now);
+		$sut = $this->buildRegistrationDateUtil($now);
 		$this->assertEquals($expected, $sut->needToDeleteOutdatedMembers($lastRun), $explanation);
 	}
 
 	public function test_needToSendNotificationAboutLatestRegistrations(){
 		date_default_timezone_set("Europe/Paris");
 		$now = new DateTime("2020-08-08T00:00:00", new DateTimeZone("Europe/Paris")); // Saturday
-		$sut = new RegistrationDateUtil($now);
+		$sut = $this->buildRegistrationDateUtil($now);
 
 		// Test with a few days before or after the deadline
 		$this->assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(true, $now, new DateTime("2020-08-04"), "last run occured on Tuesday so it's time to send notification");
@@ -65,7 +66,7 @@ final class RegistrationDateUtilTest extends TestCase {
 	}
 
 	private function assertCorrectlyDetectNeedToSendNotificationAboutLatestRegistrations(bool $expected, DateTime $now, DateTime $lastRun, string $explanation){
-		$sut = new RegistrationDateUtil($now);
+		$sut = $this->buildRegistrationDateUtil($now);
 		$this->assertEquals($expected, $sut->needToSendNotificationAboutLatestRegistrations($lastRun), $explanation);
 	}
 
@@ -74,5 +75,12 @@ final class RegistrationDateUtilTest extends TestCase {
 		$enoughInThePast = new DateTime("2021-02-10T18:16:00Z");
 		$this->assertEquals($enoughInThePast, RegistrationDateUtil::getDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccesfulRun));
 		$this->assertEquals(new DateTime("2021-02-10T19:16:00Z"), $lastSuccesfulRun, "the input parameter shouldn't be mutated");
+	}
+
+	private function buildRegistrationDateUtil(\DateTime $now): RegistrationDateUtil {
+		$nowProviderMock = $this->createMock(NowProvider::class);
+		$nowProviderMock->method('getNow')->willReturn($now);
+
+		return new RegistrationDateUtil($nowProviderMock);
 	}
 }

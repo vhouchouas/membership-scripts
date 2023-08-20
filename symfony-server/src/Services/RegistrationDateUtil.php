@@ -19,14 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace App\Services;
 
 class RegistrationDateUtil {
-	private \DateTime $now;
 	private \DateTime $februaryFirstThisYear;
 	private \DateTimeZone $timeZone;
 	private string $thisYear;
 
-	public function __construct(\DateTime $now = new \DateTime()){
-		$this->now = $now;
-		$this->thisYear = $this->now->format("Y");
+	public function __construct(private NowProvider $nowProvider){
+		$this->thisYear = $this->nowProvider->getNow()->format("Y");
 		$this->timeZone = new \DateTimeZone("Europe/Paris");
 		$this->februaryFirstThisYear = new \DateTime($this->thisYear . "-02-01", $this->timeZone);
 	}
@@ -37,7 +35,7 @@ class RegistrationDateUtil {
 	 * to re-new their membership, otherwise we would have 0 members on 1st January at midnight)
 	 */
 	public function getDateAfterWhichMembershipIsConsideredValid() :\DateTime {
-		if ( $this->now >= $this->februaryFirstThisYear ){
+		if ( $this->nowProvider->getNow() >= $this->februaryFirstThisYear ){
 			return new \DateTime($this->thisYear . "-01-01", $this->timeZone);
 		} else {
 			return new \DateTime(($this->thisYear-1) . "-01-01", $this->timeZone);
@@ -63,7 +61,7 @@ class RegistrationDateUtil {
 	}
 
 	public function needToDeleteOutdatedMembers(\DateTime $lastSuccessfulRun) : bool {
-		return $this->now >= $this->februaryFirstThisYear && $lastSuccessfulRun < $this->februaryFirstThisYear;
+		return $this->nowProvider->getNow() >= $this->februaryFirstThisYear && $lastSuccessfulRun < $this->februaryFirstThisYear;
 	}
 
 	/**
@@ -84,7 +82,7 @@ class RegistrationDateUtil {
 			$nextDeadline->setTimestamp(strtotime('next Wednesday', $lastSuccessfulRunDate->getTimestamp()));
 		}
 		$nextDeadline->setTime($deadlineHour, 0);
-		return $this->now >= $nextDeadline;
+		return $this->nowProvider->getNow() >= $nextDeadline;
 	}
 
 	private static function isAWednesday(\DateTime $date) : bool {
