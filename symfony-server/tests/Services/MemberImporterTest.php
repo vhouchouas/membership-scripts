@@ -46,6 +46,7 @@ final class MemberImporterTest extends KernelTestCase {
 		$this->nowProviderMock = $this->createMock(NowProvider::class);
 
 		$this->mailMock->expects(self::once())->method('sendEmailAboutSlackMembersToReactivate');
+		$this->googleMock->expects(self::once())->method('initialize');
 	}
 
 	private function registerAllMockInContainer(): void {

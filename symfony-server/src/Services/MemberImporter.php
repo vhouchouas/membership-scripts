@@ -44,6 +44,8 @@ class MemberImporter {
 
 	public function run(bool $debug) {
 		try {
+			$this->googleConnector->initialize();
+
 			$lastSuccessfulRunDate = $this->optionRepository->getLastSuccessfulRunDate();
 			$dateBeforeWhichAllRegistrationsHaveBeenHandled = $this->computeDateBeforeWhichAllRegistrationsHaveBeenHandled($lastSuccessfulRunDate);
 

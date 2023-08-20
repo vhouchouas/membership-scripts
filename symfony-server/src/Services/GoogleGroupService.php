@@ -29,8 +29,17 @@ class GoogleGroupService implements GroupWithDeletableUsers {
 		private ContainerBagInterface $params,
 		GoogleClientBuilder $clientBuilder,
 	) {
-		$this->service = new \Google_Service_Directory($clientBuilder->getClient());
 		$this->groupName = $this->params->get('google.groupName');
+	}
+
+	/**
+	 * Not done in constructor because:
+	 * - because of our usage of Symfony DI, this class is instantiated at every query received by the API
+	 * - this initialization result in performing an HTTP query to Google
+	 * So we should initialize this only when we're going to need it.
+	 */
+	public function initialize(): void {
+		$this->service = new \Google_Service_Directory($clientBuilder->getClient());
 	}
 
 	function groupName(): string {
