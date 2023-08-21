@@ -12,6 +12,7 @@ use App\Services\NowProvider;
 use App\Controller\DefaultApi;
 
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
+use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
 
 class DefaultApiTest extends KernelTestCase {
 	use \TestHelperTrait;
@@ -61,6 +62,14 @@ class DefaultApiTest extends KernelTestCase {
 		$event = $this->buildHelloassoEvent($event_date, $first_name, $last_name, $email, $postal_code);
 		$repo->addOrUpdateMember($event, false);
 		$this->members[$event_date] = $this->buildApiMembersSortedByLastRegistrationDateGet200ResponseInner($event);
+	}
+
+	public function test_apiMembersPerPostalCodeGet(): void {
+		$this->assertEquals(array(
+					new ApiMembersPerPostalCodeGet200ResponseInner(["postalCode" => "92100", "count" => 2]),
+					new ApiMembersPerPostalCodeGet200ResponseInner(["postalCode" => "75018", "count" => 1]),
+		),
+		$this->sut->apiMembersPerPostalCodeGet($this->responseCode, $this->responseHeaders));
 	}
 
 	private function buildApiMembersSortedByLastRegistrationDateGet200ResponseInner(RegistrationEvent $event): ApiMembersSortedByLastRegistrationDateGet200ResponseInner {
