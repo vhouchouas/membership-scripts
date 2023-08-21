@@ -87,6 +87,7 @@ paths:
                     - helloAssoLastRegistrationEventId
                     - firstRegistrationDate
                     - isZWProfessional
+                    - lastRegistrationDate
                   properties:
                     firstName:
                       type: string
@@ -105,6 +106,9 @@ paths:
                     wantToDo:
                       type: string
                     firstRegistrationDate:
+                      type: string
+                      format: date
+                    lastRegistrationDate:
                       type: string
                       format: date
                     isZWProfessional:

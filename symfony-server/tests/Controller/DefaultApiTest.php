@@ -75,6 +75,7 @@ class DefaultApiTest extends KernelTestCase {
 		$ret->setHowDidYouKnowZwp($event->how_did_you_know_zwp);
 		$ret->setWantToDo($event->want_to_do);
 		$ret->setFirstRegistrationDate(new \DateTime($event->event_date)); // because these tests don't make user register twice
+		$ret->setLastRegistrationDate(new \DateTime($event->event_date));
 		$ret->setIsZWProfessional(false);
 
 		return $ret;
