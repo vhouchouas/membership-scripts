@@ -9,6 +9,7 @@ use App\Entity\Member;
 use App\Models\RegistrationEvent;
 use App\Repository\MemberRepository;
 use App\Services\NowProvider;
+use App\Services\MemberImporter;
 use App\Controller\DefaultApi;
 
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
@@ -18,7 +19,6 @@ class DefaultApiTest extends KernelTestCase {
 	use \TestHelperTrait;
 
 	private array $members = array();
-	private DefaultApi $sut;
 
 	// placeholders to be passed by reference
 	private $responseCode = 0;
@@ -41,21 +41,20 @@ class DefaultApiTest extends KernelTestCase {
 		$nowProviderMock = $this->createMock(NowProvider::class);
 		$nowProviderMock->method('getNow')->willReturn(new \DateTime("2023-12-01"));
 		self::getContainer()->set(NowProvider::class, $nowProviderMock);
-
-		// Final plumbing
-		$this->sut = self::getContainer()->get(DefaultApi::class);
 	}
 
 	public function test_apiMembersSortedByLastRegistrationDateGet(): void {
+		$sut = self::getContainer()->get(DefaultApi::class);
+
 		// Test with a "since" parameter
 		$this->assertEquals(
 			array($this->members["2023-09-08"], $this->members["2023-11-08"]),
-			$this->sut->apiMembersSortedByLastRegistrationDateGet(new \DateTime("2023-04-01"), $this->responseCode, $this->responseHeaders));
+			$sut->apiMembersSortedByLastRegistrationDateGet(new \DateTime("2023-04-01"), $this->responseCode, $this->responseHeaders));
 
 		// Test without "since" parameter
 		$this->assertEquals(
 			array($this->members["2023-03-04"], $this->members["2023-09-08"], $this->members["2023-11-08"]),
-			$this->sut->apiMembersSortedByLastRegistrationDateGet(null, $this->responseCode, $this->responseHeaders));
+			$sut->apiMembersSortedByLastRegistrationDateGet(null, $this->responseCode, $this->responseHeaders));
 	}
 
 	private function buildAndRegisterMember(MemberRepository $repo, string $event_date, string $first_name, string $last_name, string $email, $postal_code): void {
@@ -65,11 +64,13 @@ class DefaultApiTest extends KernelTestCase {
 	}
 
 	public function test_apiMembersPerPostalCodeGet(): void {
+		$sut = self::getContainer()->get(DefaultApi::class);
+
 		$this->assertEquals(array(
 					new ApiMembersPerPostalCodeGet200ResponseInner(["postalCode" => "92100", "count" => 2]),
 					new ApiMembersPerPostalCodeGet200ResponseInner(["postalCode" => "75018", "count" => 1]),
 		),
-		$this->sut->apiMembersPerPostalCodeGet($this->responseCode, $this->responseHeaders));
+		$sut->apiMembersPerPostalCodeGet($this->responseCode, $this->responseHeaders));
 	}
 
 	private function buildApiMembersSortedByLastRegistrationDateGet200ResponseInner(RegistrationEvent $event): ApiMembersSortedByLastRegistrationDateGet200ResponseInner {
@@ -88,5 +89,14 @@ class DefaultApiTest extends KernelTestCase {
 		$ret->setIsZWProfessional(false);
 
 		return $ret;
+	}
+
+	public function test_apiTriggerImportRunGet_defaultTo_DebugOn_whenNoValueIsProvided(): void {
+		$memberImporterMock = $this->createMock(MemberImporter::class);
+		$memberImporterMock->expects(self::once())->method('run')->with($this->equalTo(true));
+		self::getContainer()->set(MemberImporter::class, $memberImporterMock);
+
+		$sut = self::getContainer()->get(DefaultApi::class);
+		$sut->apiTriggerImportRunGet(null, $this->responseCode, $this->responseHeaders);
 	}
 }
