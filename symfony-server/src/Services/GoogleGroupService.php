@@ -27,7 +27,7 @@ class GoogleGroupService implements GroupWithDeletableUsers {
 	public function __construct(
 		private LoggerInterface $logger,
 		private ContainerBagInterface $params,
-		GoogleClientBuilder $clientBuilder,
+		private GoogleClientBuilder $clientBuilder,
 	) {
 		$this->groupName = $this->params->get('google.groupName');
 	}
@@ -39,7 +39,7 @@ class GoogleGroupService implements GroupWithDeletableUsers {
 	 * So we should initialize this only when we're going to need it.
 	 */
 	public function initialize(): void {
-		$this->service = new \Google_Service_Directory($clientBuilder->getClient());
+		$this->service = new \Google_Service_Directory($this->clientBuilder->getClient());
 	}
 
 	function groupName(): string {
