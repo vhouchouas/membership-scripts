@@ -60,7 +60,7 @@ class HelloAssoTokens {
 
 	private static function isValidTokensJson(?array $tokens, LoggerInterface $logger){
 		if (is_null($tokens)){
-			$this->logger->error("Invalid tokens: it doesn't look like valid json");
+			$logger->error("Invalid tokens: it doesn't look like valid json");
 			return false;
 		} else if (!array_key_exists("access_token", $tokens)){
 			$logger->error("Invalid tokens: it is missing access_token");
