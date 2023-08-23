@@ -9,19 +9,22 @@ use Psr\Log\LoggerInterface;
 final class HelloAssoTokensTest extends TestCase {
 
 	private LoggerInterface $logger;
+	private string $placeholderAccessToken;
+	private string $placeholderRefreshToken;
+	private string $placeholderTokens;
 
 	protected function setUp(): void {
 		$this->logger = $this->createMock(LoggerInterface::class);
+		$this->placeholderAccessToken = "eyJhbxxx.eyJqdyyy.vl9ALzzz";
+		$this->placeholderRefreshToken = "Alxyz";
+		$this->placeholderTokens = '{"access_token":"'.$this->placeholderAccessToken.'","token_type":"bearer","expires_in":1799,"refresh_token":"'.$this->placeholderRefreshToken.'"}';
 	}
 
 	public function test_okTokens() {
-		$accessToken = "eyJhbxxx.eyJqdyyy.vl9ALzzz";
-		$refreshToken = "Alxyz";
-		$okString = '{"access_token":"'.$accessToken.'","token_type":"bearer","expires_in":1799,"refresh_token":"'.$refreshToken.'"}';
-		$tokens = HelloAssoTokens::fromContentInRam($okString, $this->logger);
+		$tokens = HelloAssoTokens::fromContentInRam($this->placeholderTokens, $this->logger);
 
-		$this->assertEquals($accessToken, $tokens->getAccessToken());
-		$this->assertEquals($refreshToken, $tokens->getRefreshToken());
+		$this->assertEquals($this->placeholderAccessToken, $tokens->getAccessToken());
+		$this->assertEquals($this->placeholderRefreshToken, $tokens->getRefreshToken());
 	}
 
 	public function test_invalidTokens_notJson() {
@@ -42,6 +45,23 @@ final class HelloAssoTokensTest extends TestCase {
 	public function test_fromFile_withFileThatDoesNotExists() {
 		$this->assertNull(HelloAssoTokens::fromFile("someFileThatDoesNotExists.json", $this->logger),
 			"This error case is currently designed to return null (instead of e.g. ");
+	}
+
+	public function test_fromFile_withValidTokens() {
+		// Setup
+		$tempTestFile = tmpfile(); // PHP will take care of deleting this file at the end (unless the process crashes ofc)
+		$this->assertNotEquals($tempTestFile, false, "pre-condition: make sure we could create the test file");
+		$tmpTestFilePath = stream_get_meta_data($tempTestFile)['uri'];
+
+		file_put_contents($tmpTestFilePath, $this->placeholderTokens);
+
+		// Act
+		$tokens = HelloAssoTokens::fromFile($tmpTestFilePath, $this->logger);
+
+		// Assert
+		$this->assertEquals($this->placeholderAccessToken, $tokens->getAccessToken());
+		$this->assertEquals($this->placeholderRefreshToken, $tokens->getRefreshToken());
+
 
 	}
 }
