@@ -38,4 +38,10 @@ final class HelloAssoTokensTest extends TestCase {
 		$missingRefreshTokenString = '{"access_token":"eyJhbxxx.eyJqdyyy.vl9ALzzz","token_type":"bearer","expires_in":1799}';
 		$this->assertNull(HelloAssoTokens::fromContentInRam($missingRefreshTokenString, $this->logger));
 	}
+
+	public function test_fromFile_withFileThatDoesNotExists() {
+		$this->assertNull(HelloAssoTokens::fromFile("someFileThatDoesNotExists.json", $this->logger),
+			"This error case is currently designed to return null (instead of e.g. ");
+
+	}
 }
