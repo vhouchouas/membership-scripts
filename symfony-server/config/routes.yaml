@@ -5,3 +5,6 @@ controllers:
     type: attribute
 open_api_server:
     resource: "@OpenAPIServerBundle/Resources/config/routing.yaml"
+app_logout:
+    path: /logout
+    methods: POST
