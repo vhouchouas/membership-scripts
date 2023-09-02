@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 if [ -L "$0" ] && [ -x "$(which readlink)" ]; then
 	THIS_FILE="$(readlink -mn "$0")"
 else
@@ -34,7 +34,7 @@ echo "Generating the angular modules"
 ANGULAR_GENERATION_ROOT="$THIS_DIR/../angular-front/src/app/generated"
 rm -rf "$ANGULAR_GENERATION_ROOT"
 java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g typescript-angular -o "$ANGULAR_GENERATION_ROOT/api"
-java -jar "$OAG_JAR" generate -i "$OAS_LOGIN_FILE" -g typescript-angular --additional-properties "serviceSuffix=LoginService" -o "$ANGULAR_GENERATION_ROOT/login"
+java -jar "$OAG_JAR" generate -i "$OAS_LOGIN_FILE" -g typescript-angular --additional-properties "apiModulePrefix=Login,serviceSuffix=LoginService" -o "$ANGULAR_GENERATION_ROOT/login"
 
 echo "Generating a bash client"
 java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g bash -o "$THIS_DIR/../generated/bash-client"
