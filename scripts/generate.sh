@@ -9,6 +9,7 @@ BIN_DIR="$THIS_DIR/../bin"
 OAG_JAR="$BIN_DIR/openapi-generator-cli.jar"
 OAG_VERSION=6.6.0
 OAS_FILE="$THIS_DIR/../openapi.yaml"
+OAS_LOGIN_FILE="$THIS_DIR/../openapi-login.yaml"
 GIT_USER_ID=zero-waste-paris
 GIT_PROJECT=membership-scripts
 PHP_OUT="$THIS_DIR/../generated/php-server-bundle"
@@ -26,6 +27,14 @@ java -jar "$OAG_JAR" generate --git-user-id "$GIT_USER_ID" --git-repo-id "$GIT_P
 # - we don't need it
 # - it would generate errors like "does not comply with psr-4 autoloading standard"
 rm -r "$PHP_OUT"/Tests # rm test files
+
+echo "Generating the angular modules"
+# For angular we generate the sources in the project because it seems to be the most convenient way
+# to make the sources available
+ANGULAR_GENERATION_ROOT="$THIS_DIR/../angular-front/src/app/generated"
+rm -rf "$ANGULAR_GENERATION_ROOT"
+java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g typescript-angular -o "$ANGULAR_GENERATION_ROOT/api"
+java -jar "$OAG_JAR" generate -i "$OAS_LOGIN_FILE" -g typescript-angular --additional-properties "serviceSuffix=LoginService" -o "$ANGULAR_GENERATION_ROOT/login"
 
 echo "Generating a bash client"
 java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g bash -o "$THIS_DIR/../generated/bash-client"
