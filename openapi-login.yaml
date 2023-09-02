@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: ZWP Dashboard - Login
+  version: 0.0.1
+paths:
+  /login:
+    post:
+      summary: logs the user in
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+       "200":
+         description: The user successfully logged in
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/User'
+       "401":
+         description: User failed to logged in (probably bad credentials)
+    get:
+      summary: Returns the name of the user if he or she is logged in
+      responses:
+       "200":
+         description: OK - the user is logged in
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/User'
+       "401":
+         description: user is not logged in
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - login
+      properties:
+        login:
+          type: string
