@@ -1,16 +1,38 @@
 import { NgModule } from '@angular/core';
+import { ApiModule } from  './generated/api/api.module';
+import { LoginApiModule } from './generated/login/api.module';
+import { Configuration, ConfigurationParameters } from './generated/api/configuration';
+import { Configuration as LoginConfiguration, ConfigurationParameters as LoginConfigurationParamters} from './generated/login/configuration';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 
+export function clientConfigFactory(): Configuration {
+	return new Configuration(buildClientsConfigParameters());
+}
+export function loginClientConfigFactory(): LoginConfiguration {
+	return new LoginConfiguration(buildClientsConfigParameters());
+}
+function buildClientsConfigParameters() {
+	let host = window.location.host;
+	let protocol = window.location.protocol;
+	return {
+		basePath: protocol + "//" + host
+	}
+}
+
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+	declarations: [
+		AppComponent
+	],
+	imports: [
+		BrowserModule,
+		HttpClientModule,
+		ApiModule.forRoot(clientConfigFactory),
+		LoginApiModule.forRoot(loginClientConfigFactory),
+	],
+	providers: [],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }
