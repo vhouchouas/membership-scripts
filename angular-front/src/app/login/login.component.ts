@@ -23,7 +23,21 @@ export class LoginComponent {
 		private loginClient: DefaultLoginService,
 		private formBuilder: FormBuilder
 	) {
-		// TODO: check if the user is already logged in
+		this.isLoggedIn();
+	}
+
+	isLoggedIn() {
+		let obs: Observable<User> = this.loginClient.loginGet();
+		let self = this;
+		obs.subscribe({
+			next(user) {
+				console.log("already logged in as " + user.login);
+				self.loginSuccessful.emit(); // TODO: shall we emit username?
+			},
+			error(err) {
+				console.log("Not logged in yet: " + JSON.stringify(err));
+			}
+		});
 	}
 
 	onSubmit(): void {
