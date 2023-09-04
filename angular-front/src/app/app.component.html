@@ -1,1 +1,5 @@
-<div>work in progress</div>
+<app-login *ngIf="!loginInitialized; else loggedIn" (loginSuccessful)="loginInitializedEventReceived()"></app-login>
+
+<ng-template #loggedIn>
+Logged in
+</ng-template>

@@ -4,9 +4,11 @@ import { LoginApiModule } from './generated/login/api.module';
 import { Configuration, ConfigurationParameters } from './generated/api/configuration';
 import { Configuration as LoginConfiguration, ConfigurationParameters as LoginConfigurationParamters} from './generated/login/configuration';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
+import { LoginComponent } from './login/login.component';
 
 export function clientConfigFactory(): Configuration {
 	return new Configuration(buildClientsConfigParameters());
@@ -24,11 +26,14 @@ function buildClientsConfigParameters() {
 
 @NgModule({
 	declarations: [
-		AppComponent
+		AppComponent,
+		LoginComponent
 	],
 	imports: [
 		BrowserModule,
 		HttpClientModule,
+		FormsModule,
+		ReactiveFormsModule,
 		ApiModule.forRoot(clientConfigFactory),
 		LoginApiModule.forRoot(loginClientConfigFactory),
 	],

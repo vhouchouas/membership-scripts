@@ -1,0 +1,13 @@
+<form [formGroup]="credentialsForm" (ngSubmit)="onSubmit()">
+	<div>
+		<label for="username">Login</label>
+		<input id="username" type="text" formControlName="username">
+	</div>
+
+	<div>
+		<label for="password">Password</label>
+		<input id="password" type="text" formControlName="password">
+	</div>
+
+	<button class="button" type="submit" [disabled]="credentialsBeingProcessed">Login</button>
+</form>
