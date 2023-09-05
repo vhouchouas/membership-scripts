@@ -4,6 +4,9 @@
 Logged in
 <button class="button" (click)="logout()" [disabled]="logoutInProgress">Logout</button>
 
+<div *ngIf="members === null; else membersLoaded">Chargement des membres en cours</div>
+
+<ng-template #membersLoaded>
 <table>
 <tr><th>Nom</th><th>Email</th><th>Localisation</th><th>Intérêt pour</th><th>Dernière adhésion</th><th>Plus ancienne adhésion connue</th><th>Pro du ZD</th><tr>
 <tr *ngFor="let member of this.members">
@@ -16,6 +19,7 @@ Logged in
 	<td>{{member.isZWProfessional}}</td>
 </tr>
 </table>
+</ng-template>
 
 
 </ng-template>
