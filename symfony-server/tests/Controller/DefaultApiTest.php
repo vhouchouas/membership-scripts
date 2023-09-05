@@ -26,6 +26,7 @@ class DefaultApiTest extends KernelTestCase {
 
 	protected function setUp(): void {
 		// Some plumbing
+		$this->responseCode = 0;
 		$this->members = array();
 		self::bootKernel();
 
@@ -97,6 +98,21 @@ class DefaultApiTest extends KernelTestCase {
 		self::getContainer()->set(MemberImporter::class, $memberImporterMock);
 
 		$sut = self::getContainer()->get(DefaultApi::class);
-		$sut->apiTriggerImportRunGet(null, $this->responseCode, $this->responseHeaders);
+		$sut->apiTriggerImportRunGet("cron-token-for-test", null, $this->responseCode, $this->responseHeaders);
+	}
+
+	public function test_apiTriggerImportRunGet_rejectRequestsWhenTokenIsInvalid(): void {
+		// Setup and an assert
+		$memberImporterMock = $this->createMock(MemberImporter::class);
+		$memberImporterMock->expects(self::never())->method('run');
+		self::getContainer()->set(MemberImporter::class, $memberImporterMock);
+		$this->responseCode = 0;
+
+		// Act
+		$sut = self::getContainer()->get(DefaultApi::class);
+		$sut->apiTriggerImportRunGet("invalid-token", null, $this->responseCode, $this->responseHeaders);
+
+		// Remaining assert
+		$this->assertEquals("403", $this->responseCode);
 	}
 }

@@ -23,6 +23,7 @@ parameters:
   notification.newcomersEmail.subject: '%env(NOTIFICATION_SUBJECT_EMAIL_ABOUT_NEWCOMERS)%'
   notification.memberToReactivate.to: '%env(NOTIFICATION_TO_EMAIL_MEMBERS_TO_REACTIVATE_ON_SLACK)%'
   notification.memberToReactivate.subject: '%env(NOTIFICATION_SUBJECT_EMAIL_MEMBERS_TO_REACTIVATE_ON_SLACK)%'
+  cron.accessToken: '%env(CRON_ACCESS_TOKEN)%'
 
 
 services:

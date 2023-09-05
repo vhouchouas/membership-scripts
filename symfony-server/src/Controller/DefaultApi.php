@@ -28,6 +28,7 @@ use App\Services\SlackService;
 use App\Repository\MemberRepository;
 use App\Entity\Member;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 class DefaultApi implements DefaultApiInterface {
 
@@ -36,6 +37,7 @@ class DefaultApi implements DefaultApiInterface {
 		private MemberRepository $memberRepository,
 		private RegistrationDateUtil $registrationDateUtil,
 		private MemberImporter $memberImporter,
+		private ContainerBagInterface $params,
 		private SlackService $slackService,
 	) { }
 
@@ -62,8 +64,14 @@ class DefaultApi implements DefaultApiInterface {
 		return $result;
 	}
 
-	public function apiTriggerImportRunGet(?bool $debug, int &$responseCode, array &$responseHeaders): void {
-		$this->memberImporter->run($debug ?? true);
+	public function apiTriggerImportRunGet(string $token, ?bool $debug, int &$responseCode, array &$responseHeaders): void {
+		if ($token !== $this->params->get("cron.accessToken")) {
+			$this->logger->info("rejecting query because the token is incorrect");
+			$responseCode = 403;
+			return;
+		} else {
+			$this->memberImporter->run($debug ?? true);
+		}
 	}
 
 	public function apiSlackAccountsToReactivateGet(int &$responseCode, array &$responseHeaders): array|object|null {
