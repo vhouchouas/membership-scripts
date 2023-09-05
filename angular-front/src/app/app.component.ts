@@ -3,6 +3,7 @@ import { DefaultService } from './generated/api/api/default.service';
 import { DefaultLoginService } from './generated/login/api/default.service';
 import { LoginPostRequest} from './generated/login/model/loginPostRequest';
 import { User } from './generated/login/model/user';
+import { ApiMembersSortedByLastRegistrationDateGet200ResponseInner } from './generated/api/model/apiMembersSortedByLastRegistrationDateGet200ResponseInner';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -13,6 +14,8 @@ import { Observable } from 'rxjs';
 export class AppComponent {
 	loggedIn = false; // TODO: also get the name somehow?
 	logoutInProgress = false;
+	members: Array<ApiMembersSortedByLastRegistrationDateGet200ResponseInner> | null = null;
+
 
 	constructor(
 		private apiClient: DefaultService,
@@ -21,6 +24,22 @@ export class AppComponent {
 
 	loginInitializedEventReceived() {
 		this.loggedIn = true;
+		this.fetchMembers();
+	}
+
+	fetchMembers() {
+		let obs: Observable<Array<ApiMembersSortedByLastRegistrationDateGet200ResponseInner>> = this.apiClient.apiMembersSortedByLastRegistrationDateGet();
+		let self = this;
+		obs.subscribe({
+			next(members) {
+				console.log("got " + members.length + " members");
+				self.members = members;
+			},
+			error(err) {
+				console.log("failed to get members: " + JSON.stringify(err));
+			}
+		});
+
 	}
 
 	logout() {
