@@ -11,13 +11,32 @@ import { Observable } from 'rxjs';
 	styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-	loginInitialized = false; // TODO: also get the name somehow?
+	loggedIn = false; // TODO: also get the name somehow?
+	logoutInProgress = false;
 
 	constructor(
 		private apiClient: DefaultService,
+		private loginClient: DefaultLoginService,
 	) {}
 
 	loginInitializedEventReceived() {
-		this.loginInitialized = true;
+		this.loggedIn = true;
+	}
+
+	logout() {
+		this.logoutInProgress = true;
+		let obs: Observable<any> = this.loginClient.logoutPost();
+		let self = this;
+		obs.subscribe({
+			next() {
+				console.log("logout successful");
+				self.loggedIn = false;
+				self.logoutInProgress = false;
+			},
+			error(err) {
+				self.logoutInProgress = false;
+				console.log("Failed to logout: " + JSON.stringify(err));
+			}
+		});
 	}
 }

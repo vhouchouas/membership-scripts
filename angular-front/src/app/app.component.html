@@ -1,5 +1,6 @@
-<app-login *ngIf="!loginInitialized; else loggedIn" (loginSuccessful)="loginInitializedEventReceived()"></app-login>
+<app-login *ngIf="!loggedIn; else isLoggedIn" (loginSuccessful)="loginInitializedEventReceived()"></app-login>
 
-<ng-template #loggedIn>
+<ng-template #isLoggedIn>
 Logged in
+<button class="button" (click)="logout()" [disabled]="logoutInProgress">Logout</button>
 </ng-template>

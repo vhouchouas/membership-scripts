@@ -39,6 +39,17 @@ paths:
                $ref: '#/components/schemas/User'
        "401":
          description: user is not logged in
+  /logout:
+    post:
+      summary: destroys the session server-side
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+
 components:
   schemas:
     User:
