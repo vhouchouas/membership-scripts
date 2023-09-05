@@ -65,7 +65,7 @@ class MemberImporter {
 			$this->optionRepository->writeLastSuccessfulRunDate($this->nowProvider->getNow(), $debug);
 			$this->logger->info("Completed successfully");
 		} catch (\Throwable $t) {
-			$this->logger->error("Failed with error:" . $t->getMessage());
+			$this->logger->error("Failed with error:" . $t->getMessage() . ". " . $t->getTraceAsString());
 			throw $t;
 		}
 	}
