@@ -35,7 +35,6 @@ class MemberImporter {
 		private MemberRepository $memberRepository,
 		private MailchimpConnector $mailchimpConnector,
 		private GoogleGroupService $googleConnector,
-		private ContainerBagInterface $params,
 		private EmailService $mail,
 		private GroupMemberDeleter $groupMemberDeleter,
 		private RegistrationDateUtil $dateUtil,
