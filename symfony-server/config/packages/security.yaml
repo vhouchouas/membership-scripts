@@ -13,6 +13,11 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        # the cron engine we use does not handle authentication so we allow unauthenticated access on it.
+        # (we still check a secret token to grant access, but it's handled by custom code)
+        cron_access:
+            pattern: ^/api/trigger-import-run
+            security: false
         main:
             lazy: true
             provider: app_user_provider
