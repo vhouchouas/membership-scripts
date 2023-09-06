@@ -8,13 +8,14 @@ Logged in
 
 <ng-template #membersLoaded>
 <table>
-<tr><th>Nom</th><th>Email</th><th>Localisation</th><th>Intérêt pour</th><th>Dernière adhésion</th><th>Plus ancienne adhésion connue</th><th>Pro du ZD</th><tr>
+<tr><th>Dernière adhésion</th><th>Nom</th><th>Email</th><th>Localisation</th><th>Intérêt pour</th><th>A connu l'asso</th><th>Plus ancienne adhésion connue</th><th>Pro du ZD</th><tr>
 <tr *ngFor="let member of this.members">
+	<td>{{member.lastRegistrationDate}}</td>
 	<td>{{member.firstName}} {{member.lastName}}</td>
 	<td>{{member.email}}</td>
 	<td>{{member.city}} {{member.postalCode}}</td>
 	<td>{{member.wantToDo}}</td>
-	<td>{{member.lastRegistrationDate}}</td>
+	<td>{{member.howDidYouKnowZwp}}</td>
 	<td>{{member.firstRegistrationDate}}</td>
 	<td>{{member.isZWProfessional}}</td>
 </tr>
