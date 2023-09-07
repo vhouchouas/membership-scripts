@@ -8,10 +8,15 @@ else
   THIS_FILE="$0"
 fi
 SCRIPT_DIR="$(dirname "$THIS_FILE")"
-FILES_DIR="$SCRIPT_DIR/../symfony-server"
+BACK_DIR="$SCRIPT_DIR/../symfony-server"
+FRONT_DIR="$SCRIPT_DIR/../angular-front/"
 
 "$SCRIPT_DIR"/generate.sh
 
-pushd "$FILES_DIR"
+pushd "$BACK_DIR"
 composer install
+popd
+
+pushd "$FRONT_DIR"
+npm install
 popd

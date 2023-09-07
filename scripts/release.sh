@@ -12,7 +12,7 @@ fi
 SCRIPT_DIR="$(realpath "$(dirname "$THIS_FILE")")"
 ROOT_DIR="$SCRIPT_DIR/.."
 TEMPORARY_RELEASE_DIR="$ROOT_DIR/temp_for_release"
-FILES_DIR="$ROOT_DIR/symfony-server"
+BACK_DIR="$ROOT_DIR/symfony-server"
 SLACK_APP_DIR="$ROOT_DIR/slack-agenda-app"
 
 # parse arguments
@@ -74,7 +74,7 @@ if ! [ -z "$(git status --porcelain)" ]; then
 fi
 
 # Warn if debug statements may have been left
-for F in $(git ls-files "$FILES_DIR"); do
+for F in $(git ls-files "$BACK_DIR"); do
   if grep var_dump "$F"; then
     read -p "var_dump statement found in $F. Are you sure you want to deploy? [yN]" ANSWER
     if [ "x$ANSWER" != "xy" ]; then
@@ -85,7 +85,7 @@ for F in $(git ls-files "$FILES_DIR"); do
 done
 
 # Run the tests
-pushd "$FILES_DIR"
+pushd "$BACK_DIR"
 composer install
 "$SCRIPT_DIR"/runSymfonyTests.sh
 popd
@@ -96,8 +96,8 @@ popd
 
 # Copy the files to a temporary directory
 rm -rf "$TEMPORARY_RELEASE_DIR"
-cp -rL "$FILES_DIR" "$TEMPORARY_RELEASE_DIR"
-cd "$TEMPORARY_RELEASE_DIR"
+cp -rL "$BACK_DIR" "$TEMPORARY_RELEASE_DIR"
+pushd "$TEMPORARY_RELEASE_DIR"
 
 # Clean the files: rm potential leftovers, copy the conf files, install dependencies, warm-up the cache
 rm -rf var .env.* vendor tests coverage
@@ -114,6 +114,19 @@ cp -rL "$ROOT_DIR"/generated/php-server-bundle vendor/zero-waste-paris/membershi
 
 composer dump-env prod
 APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+popd
+
+# Build and install the front
+FRONT_DIR="$SCRIPT_DIR/../angular-front"
+pushd "$FRONT_DIR"
+npm install
+ng build
+popd
+DIST_DIR="$FRONT_DIR/dist/angular-front"
+rm "$DIST_DIR/favicon.ico"
+SYMFONY_PUBLIC_DIR="$TEMPORARY_RELEASE_DIR/public"
+rm -f "$SYMFONY_PUBLIC_PATH"/{index.html,main.*.js,main.js,polyfills.*.js,polyfill.js,runtime.*.js,runtime.js,styles.*.css,style.css,*map,vendor.js,3rdpartylicenses.txt}
+cp "$DIST_DIR"/* "$SYMFONY_PUBLIC_DIR"
 
 # Install the slack app
 pushd $ROOT_DIR
@@ -121,6 +134,7 @@ git submodule init
 git submodule update
 popd
 
+pushd "$TEMPORARY_RELEASE_DIR"
 cp -ar "$SLACK_APP_DIR" public
 rm -rf public/slack-agenda-app/{.git*,tests}
 pushd public/slack-agenda-app
