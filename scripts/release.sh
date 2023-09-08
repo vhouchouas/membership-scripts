@@ -84,15 +84,14 @@ for F in $(git ls-files "$BACK_DIR"); do
   fi
 done
 
+# Generate the OpenApi files
+"$SCRIPT_DIR"/generate.sh
+
 # Run the tests
 pushd "$BACK_DIR"
 composer install
 "$SCRIPT_DIR"/runSymfonyTests.sh
 popd
-
-
-# Generate the OpenApi files
-"$SCRIPT_DIR"/generate.sh
 
 # Copy the files to a temporary directory
 rm -rf "$TEMPORARY_RELEASE_DIR"
