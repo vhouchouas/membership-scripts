@@ -33,7 +33,7 @@ export class AppComponent {
 		obs.subscribe({
 			next(members) {
 				console.log("got " + members.length + " members");
-				self.members = members;
+				self.members = members.reverse();
 			},
 			error(err) {
 				console.log("failed to get members: " + JSON.stringify(err));
