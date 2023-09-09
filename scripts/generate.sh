@@ -36,5 +36,3 @@ rm -rf "$ANGULAR_GENERATION_ROOT"
 java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g typescript-angular -o "$ANGULAR_GENERATION_ROOT/api"
 java -jar "$OAG_JAR" generate -i "$OAS_LOGIN_FILE" -g typescript-angular --additional-properties "apiModulePrefix=Login,serviceSuffix=LoginService" -o "$ANGULAR_GENERATION_ROOT/login"
 
-echo "Generating a bash client"
-java -jar "$OAG_JAR" generate -i "$OAS_FILE" -g bash -o "$THIS_DIR/../generated/bash-client"
