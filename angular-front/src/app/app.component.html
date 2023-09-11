@@ -1,9 +1,13 @@
 <app-login *ngIf="!loggedIn; else isLoggedIn" (loginSuccessful)="loginInitializedEventReceived()"></app-login>
 
 <ng-template #isLoggedIn>
-Logged in
-<button class="button" (click)="logout()" [disabled]="logoutInProgress">Logout</button>
+<ul class="menu">
+	<li (click)="setPage('members')" [ngClass]="{'active': this.page === 'members'}">Membres</li>
+	<li (click)="setPage('account')" [ngClass]="{'active': this.page === 'account'}">Compte</li>
+	<li (click)="logout()">Logout</li>
+</ul>
 
+<div *ngIf="this.page === 'members'">
 <div *ngIf="members === null; else membersLoaded">Chargement des membres en cours</div>
 
 <ng-template #membersLoaded>
@@ -21,6 +25,10 @@ Logged in
 </tr>
 </table>
 </ng-template>
+</div>
 
+<div *ngIf="this.page === 'account'">
+Account
+</div>
 
 </ng-template>

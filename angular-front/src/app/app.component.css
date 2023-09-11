@@ -1,0 +1,16 @@
+.menu {
+	list-style-type: none;
+	margin: 0;
+	padding: 8px;
+	background-color: #dddddd;
+}
+
+.menu li {
+	display: inline;
+	cursor: pointer;
+	padding: 8px;
+}
+
+.active {
+  background-color: #04AA6D;
+}

@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 export class AppComponent {
 	loggedIn = false; // TODO: also get the name somehow?
 	logoutInProgress = false;
+	page = "members";
 	members: Array<ApiMembersSortedByLastRegistrationDateGet200ResponseInner> | null = null;
 
 
@@ -25,6 +26,11 @@ export class AppComponent {
 	loginInitializedEventReceived() {
 		this.loggedIn = true;
 		this.fetchMembers();
+	}
+
+	setPage(page: string): void {
+		this.page = page;
+		console.log("tempGT: setPage: " + this.page);
 	}
 
 	fetchMembers() {
