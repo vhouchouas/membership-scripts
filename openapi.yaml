@@ -66,6 +66,27 @@ paths:
                 items:
                   type: string
                   format: email
+  /api/update-user-password:
+    post:
+      summary: "Make it possible for a user to change his or her password"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - newPassword
+              properties:
+                newPassword:
+                  type: string
+      responses:
+        "204":
+          description: OK
+        "401":
+          description: User is not authenticated
+        "400":
+          description: Missing new password
   /api/members-sorted-by-last-registration-date:
     get:
       summary: Get the list of members who registered since the date specified if any, from the beginning of the current registration period otherwise

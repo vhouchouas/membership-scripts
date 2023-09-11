@@ -11,9 +11,15 @@ use App\Repository\MemberRepository;
 use App\Services\NowProvider;
 use App\Services\MemberImporter;
 use App\Controller\DefaultApi;
+use App\Entity\User;
+use App\Repository\UserRepository;
 
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
+use OpenAPI\Server\Model\ApiUpdateUserPasswordPostRequest;
+
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class DefaultApiTest extends KernelTestCase {
 	use \TestHelperTrait;
@@ -21,12 +27,12 @@ class DefaultApiTest extends KernelTestCase {
 	private array $members = array();
 
 	// placeholders to be passed by reference
-	private $responseCode = 0;
+	private int $responseCode;
 	private array $responseHeaders = array();
 
 	protected function setUp(): void {
 		// Some plumbing
-		$this->responseCode = 0;
+		$this->responseCode = 200;
 		$this->members = array();
 		self::bootKernel();
 
@@ -100,13 +106,11 @@ class DefaultApiTest extends KernelTestCase {
 		$sut = self::getContainer()->get(DefaultApi::class);
 		$sut->apiTriggerImportRunGet("cron-token-for-test", null, $this->responseCode, $this->responseHeaders);
 	}
-
 	public function test_apiTriggerImportRunGet_rejectRequestsWhenTokenIsInvalid(): void {
 		// Setup and an assert
 		$memberImporterMock = $this->createMock(MemberImporter::class);
 		$memberImporterMock->expects(self::never())->method('run');
 		self::getContainer()->set(MemberImporter::class, $memberImporterMock);
-		$this->responseCode = 0;
 
 		// Act
 		$sut = self::getContainer()->get(DefaultApi::class);
@@ -114,5 +118,60 @@ class DefaultApiTest extends KernelTestCase {
 
 		// Remaining assert
 		$this->assertEquals("403", $this->responseCode);
+	}
+
+	public function test_userCanUpdateHerPassword(): void {
+		// Setup and assert
+		$user = new User();
+		$newPassword = "my-new-password";
+		$hashedNewPassword = "my-hash";
+
+		$securityMock = $this->createMock(Security::class);
+		$securityMock->expects(self::once())->method('getUser')->willReturn($user);
+		self::getContainer()->set(Security::class, $securityMock);
+
+		$hasherMock = $this->createMock(UserPasswordHasherInterface::class);
+		$hasherMock->expects(self::once())->method('hashPassword')->with($this->equalTo($user), $this->equalTo($newPassword))->willReturn($hashedNewPassword);
+		self::getContainer()->set(UserPasswordHasherInterface::class, $hasherMock);
+
+		$userRepoMock = $this->createMock(UserRepository::class);
+		$userRepoMock->expects(self::once())->method('upgradePassword')->with($this->equalTo($user), $this->equalTo($hashedNewPassword));
+		self::getContainer()->set(UserRepository::class, $userRepoMock);
+
+		// Act
+		$sut = self::getContainer()->get(DefaultApi::class);
+		$sut->apiUpdateUserPasswordPost(new ApiUpdateUserPasswordPostRequest(["newPassword" => $newPassword]), $this->responseCode, $this->responseHeaders);
+
+		// Remaining assert
+		$this->assertEquals(200, $this->responseCode);
+	}
+
+	public function test_useCannotUpdaterWithAnEmptyPassword(): void {
+		// Setup and assert
+		$userRepoMock = $this->createMock(UserRepository::class);
+		$userRepoMock->expects(self::never())->method('upgradePassword');
+		self::getContainer()->set(UserRepository::class, $userRepoMock);
+
+		// Act
+		$sut = self::getContainer()->get(DefaultApi::class);
+		$sut->apiUpdateUserPasswordPost(new ApiUpdateUserPasswordPostRequest(["newPassword" => ""]), $this->responseCode, $this->responseHeaders);
+
+		// Remaining assert
+		$this->assertEquals(400, $this->responseCode);
+	}
+
+	public function test_unauthenticatedUserCantUpdateAPassword(): void {
+		// Setup and assert
+		$userRepoMock = $this->createMock(UserRepository::class);
+		$userRepoMock->expects(self::never())->method('upgradePassword');
+		self::getContainer()->set(UserRepository::class, $userRepoMock);
+
+		// Act
+		$sut = self::getContainer()->get(DefaultApi::class);
+		$sut->apiUpdateUserPasswordPost(new ApiUpdateUserPasswordPostRequest(["newPassword" => "somePassword"]), $this->responseCode, $this->responseHeaders);
+
+		// Remaining assert
+		$this->assertEquals(401, $this->responseCode);
+
 	}
 }

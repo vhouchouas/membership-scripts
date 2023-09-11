@@ -21,14 +21,18 @@ namespace App\Controller;
 use OpenAPI\Server\Api\DefaultApiInterface;
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
+use OpenAPI\Server\Model\ApiUpdateUserPasswordPostRequest;
 use App\Services\RegistrationDateUtil;
 use App\Services\MemberImporter;
 use App\Services\SlackService;
+use App\Repository\UserRepository;
 
 use App\Repository\MemberRepository;
 use App\Entity\Member;
 use Psr\Log\LoggerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class DefaultApi implements DefaultApiInterface {
 
@@ -39,6 +43,9 @@ class DefaultApi implements DefaultApiInterface {
 		private MemberImporter $memberImporter,
 		private ContainerBagInterface $params,
 		private SlackService $slackService,
+		private UserRepository $userRepository,
+		private UserPasswordHasherInterface $passwordHasher,
+		private Security $security, // Wouldn't be needed if we extends AbstractController, but it would make the code harder to test
 	) { }
 
 	public function apiMembersSortedByLastRegistrationDateGet(?\DateTime $since, int &$responseCode, array &$responseHeaders): array|object|null {
@@ -80,5 +87,25 @@ class DefaultApi implements DefaultApiInterface {
 
 	public function apiSlackAccountsToDeactivateGet(int &$responseCode, array &$responseHeaders): array|object|null {
 		return $this->slackService->findUsersToDeactivate();
+	}
+
+	public function apiUpdateUserPasswordPost(ApiUpdateUserPasswordPostRequest $apiUpdateUserPasswordPostRequest, int &$responseCode, array &$responseHeaders): void {
+		$newPassword = $apiUpdateUserPasswordPostRequest->getNewPassword();
+
+		if ($newPassword === null || $newPassword == "") {
+			$this->logger->info("Cannot update with a new password null or empty");
+			$responseCode = 400;
+			return;
+		}
+
+		$user = $this->security->getUser();
+
+		if ($user === null) {
+			$this->logger->info("Cannot update the password of an unauthenticated user");
+			$responseCode = 401;
+			return;
+		}
+
+		$this->userRepository->upgradePassword($user, $this->passwordHasher->hashPassword($user, $newPassword));
 	}
 }
