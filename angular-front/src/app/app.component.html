@@ -27,8 +27,6 @@
 </ng-template>
 </div>
 
-<div *ngIf="this.page === 'account'">
-Account
-</div>
+<app-password-changer *ngIf="this.page === 'account'" (passwordChangedSuccessfully)="passwordChangedSuccessfullyEventReceived()"></app-password-changer>
 
 </ng-template>

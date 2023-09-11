@@ -30,7 +30,6 @@ export class AppComponent {
 
 	setPage(page: string): void {
 		this.page = page;
-		console.log("tempGT: setPage: " + this.page);
 	}
 
 	fetchMembers() {
@@ -63,5 +62,9 @@ export class AppComponent {
 				console.log("Failed to logout: " + JSON.stringify(err));
 			}
 		});
+	}
+
+	passwordChangedSuccessfullyEventReceived() {
+		this.page = "members";
 	}
 }

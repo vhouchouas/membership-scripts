@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
+import { PasswordChangerComponent } from './password-changer/password-changer.component';
 
 export function clientConfigFactory(): Configuration {
 	return new Configuration(buildClientsConfigParameters());
@@ -27,7 +28,8 @@ function buildClientsConfigParameters() {
 @NgModule({
 	declarations: [
 		AppComponent,
-		LoginComponent
+		LoginComponent,
+		PasswordChangerComponent
 	],
 	imports: [
 		BrowserModule,
