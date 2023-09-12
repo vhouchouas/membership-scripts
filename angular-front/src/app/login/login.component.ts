@@ -58,7 +58,7 @@ export class LoginComponent {
 			error(err) {
 				self.credentialsBeingProcessed = false;
 				console.log("Failed to log in: " + JSON.stringify(err));
-				// TODO: display an error to the user
+				window.alert("Authentication failed");
 			}
 		});
 	}
