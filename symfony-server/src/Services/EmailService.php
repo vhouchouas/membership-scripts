@@ -74,7 +74,7 @@ class EmailService {
 		} else {
 			$this->logger->info("there are " . count($membersToReactivate) . " members to reactivate on Slack");
 			$body = "Il y a " . count($membersToReactivate) . " membres à réactiver sur Slack : \r\n"
-				. "La liste est disponible via: " . $this->router->generate('open_api_server_default_apislackaccountstoreactivateget', [], UrlGeneratorInterface::ABSOLUTE_URL) . " (use curl)\r\n";
+				. "La liste est disponible via: " . $this->router->generate('open_api_server_default_apislackaccountstoreactivateget', [], UrlGeneratorInterface::ABSOLUTE_URL) . "\r\n";
 
 			$email = (new Email())
 				->from($this->params->get('notification.fromEmail'))
