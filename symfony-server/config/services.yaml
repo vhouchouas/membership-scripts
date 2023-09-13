@@ -47,4 +47,7 @@ services:
         tags:
             - { name: "open_api_server.api", api: "default" }
 
+    App\EventListener\ExceptionListener:
+        tags: [kernel.event_listener]
+
     Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
