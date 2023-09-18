@@ -12,5 +12,13 @@
 }
 
 .active {
-  background-color: #04AA6D;
+	background-color: #04AA6D;
+}
+
+tr:hover {
+	background-color: #D3D3D3;
+}
+
+td {
+	border-bottom: solid;
 }
