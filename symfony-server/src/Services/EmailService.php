@@ -23,6 +23,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class EmailService {
 	public function __construct(
@@ -31,6 +32,7 @@ class EmailService {
 		private ContainerBagInterface $params,
 		private LoggerInterface $logger,
 		private UrlGeneratorInterface $router,
+		private RequestStack $requestStack,
 	) {}
 
 	public function sendNotificationForAdminsAboutNewcomers(array $newcomers, bool $debug): void {
@@ -39,10 +41,9 @@ class EmailService {
 			$body = "Oh non, il n'y a pas eu de nouveaux membres cette semaine ! :(";
 		} else {
 			$body = "Voici les " . count($newcomers) . " membres qui ont rejoint l'asso cette semaine.\r\n";
-			$body .= "(Attention : ce mail contient des données personnelles, ne le transférez pas, et pensez à le supprimer à terme.)\r\n";
 			foreach($newcomers as $newcomer) {
 				$body .= "\r\n";
-				$body .= $newcomer->getFirstName() . " " . $newcomer->getLastName() . " (" . $newcomer->getEmail() . ")\r\n";
+				$body .= "Un ou une membre \r\n";
 				$body .= "Adhésion le " . $this->dateToStr($newcomer->getLastRegistrationDate()) . "\r\n";
 				$body .= "Réside à : " . $newcomer->getcity() . " (" . $newcomer->getPostalCode() . ")\r\n";
 				$body .= "A connu l'asso : " . $newcomer->getHowDidYouKnowZwp() . "\r\n";
@@ -50,6 +51,11 @@ class EmailService {
 			}
 
 			$body .= "\r\n";
+			$currentRequest = $this->requestStack->getCurrentRequest();
+			if ($currentRequest !== null) { // TODO: setup a mocked request in test (instead of checking for null here) once https://github.com/symfony/symfony/issues/51595 is fixed
+				$body .= "Plus d'infos sur " . $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost() . "\r\n";
+				$body .= "\r\n";
+			}
 			$body .= "Il y a un projet en cours qui leur correspond ? Un GT qui recherche de nouveaux membres ? C’est le moment de leur dire et/ou d’en parler à un.e référent.e ! ";
 		}
 
