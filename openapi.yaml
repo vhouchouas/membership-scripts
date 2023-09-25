@@ -76,17 +76,22 @@ paths:
             schema:
               type: object
               required:
+                - currentPassword
                 - newPassword
               properties:
                 newPassword:
                   type: string
+                currentPassword:
+                  type: string
       responses:
         "204":
           description: OK
-        "401":
-          description: User is not authenticated
         "400":
           description: Missing new password
+        "401":
+          description: User is not authenticated
+        "403":
+          description: currentPassword is incorrect
   /api/members-sorted-by-last-registration-date:
     get:
       summary: Get the list of members who registered since the date specified if any, from the beginning of the current registration period otherwise

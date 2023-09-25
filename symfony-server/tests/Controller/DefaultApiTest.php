@@ -123,6 +123,7 @@ class DefaultApiTest extends KernelTestCase {
 	public function test_userCanUpdateHerPassword(): void {
 		// Setup and assert
 		$user = new User();
+		$currentPassword = "current-password";
 		$newPassword = "my-new-password";
 		$hashedNewPassword = "my-hash";
 
@@ -132,6 +133,7 @@ class DefaultApiTest extends KernelTestCase {
 
 		$hasherMock = $this->createMock(UserPasswordHasherInterface::class);
 		$hasherMock->expects(self::once())->method('hashPassword')->with($this->equalTo($user), $this->equalTo($newPassword))->willReturn($hashedNewPassword);
+		$hasherMock->expects(self::once())->method('isPasswordValid')->with($this->equalTo($user), $this->equalTo($currentPassword))->willReturn(true);
 		self::getContainer()->set(UserPasswordHasherInterface::class, $hasherMock);
 
 		$userRepoMock = $this->createMock(UserRepository::class);
@@ -140,13 +142,40 @@ class DefaultApiTest extends KernelTestCase {
 
 		// Act
 		$sut = self::getContainer()->get(DefaultApi::class);
-		$sut->apiUpdateUserPasswordPost(new ApiUpdateUserPasswordPostRequest(["newPassword" => $newPassword]), $this->responseCode, $this->responseHeaders);
+		$sut->apiUpdateUserPasswordPost(new ApiUpdateUserPasswordPostRequest(["newPassword" => $newPassword, "currentPassword" => $currentPassword]), $this->responseCode, $this->responseHeaders);
 
 		// Remaining assert
 		$this->assertEquals(200, $this->responseCode);
 	}
 
-	public function test_useCannotUpdaterWithAnEmptyPassword(): void {
+	public function test_userCannotUpdateWithAWrongCurrentPassword(): void {
+		// Setup and assert
+		$user = new User();
+		$wrongPassword = "wrong-password";
+		$newPassword = "my-new-password";
+
+		$securityMock = $this->createMock(Security::class);
+		$securityMock->expects(self::once())->method('getUser')->willReturn($user);
+		self::getContainer()->set(Security::class, $securityMock);
+
+		$hasherMock = $this->createMock(UserPasswordHasherInterface::class);
+		$hasherMock->expects(self::never())->method('hashPassword');
+		$hasherMock->expects(self::once())->method('isPasswordValid')->with($this->equalTo($user), $this->equalTo($wrongPassword))->willReturn(false);
+		self::getContainer()->set(UserPasswordHasherInterface::class, $hasherMock);
+
+		$userRepoMock = $this->createMock(UserRepository::class);
+		$userRepoMock->expects(self::never())->method('upgradePassword');
+		self::getContainer()->set(UserRepository::class, $userRepoMock);
+
+		// Act
+		$sut = self::getContainer()->get(DefaultApi::class);
+		$sut->apiUpdateUserPasswordPost(new ApiUpdateUserPasswordPostRequest(["newPassword" => $newPassword, "currentPassword" => $wrongPassword]), $this->responseCode, $this->responseHeaders);
+
+		// Remaining assert
+		$this->assertEquals(403, $this->responseCode);
+	}
+
+	public function test_userCannotUpdaterWithAnEmptyPassword(): void {
 		// Setup and assert
 		$userRepoMock = $this->createMock(UserRepository::class);
 		$userRepoMock->expects(self::never())->method('upgradePassword');

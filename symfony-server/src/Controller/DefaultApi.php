@@ -106,6 +106,13 @@ class DefaultApi implements DefaultApiInterface {
 			return;
 		}
 
+		if (!$this->passwordHasher->isPasswordValid($user, $apiUpdateUserPasswordPostRequest->getCurrentPassword())) {
+			$this->logger->info("Don't update the password because the current password is incorrect");
+			$responseCode = 403;
+			return;
+		}
+
+		$this->logger->info("Updateing password");
 		$this->userRepository->upgradePassword($user, $this->passwordHasher->hashPassword($user, $newPassword));
 	}
 }

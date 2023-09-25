@@ -14,7 +14,8 @@ export class PasswordChangerComponent {
 	newPasswordSubmitted = false;
 
 	newPasswordForm = this.formBuilder.group({
-		newPassword: ''
+		newPassword: '',
+		currentPassword: '',
 	});
 
 	constructor(
@@ -26,6 +27,7 @@ export class PasswordChangerComponent {
 		let formValues = this.newPasswordForm.value;
 		let payload: ApiUpdateUserPasswordPostRequest = {
 			newPassword: formValues.newPassword ?? '',
+			currentPassword: formValues.currentPassword ?? '',
 		};
 
 		let self = this;
