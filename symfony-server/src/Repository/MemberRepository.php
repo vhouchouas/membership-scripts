@@ -162,4 +162,18 @@ class MemberRepository extends ServiceEntityRepository
 		}
 		$this->getEntityManager()->flush();
 	}
+
+	/**
+	 * @return TRUE if we could delete the member, FALSE if the member did not exist already
+	 */
+	public function deleteMember(string $primaryEmail): bool {
+		$member = $this->findOneBy(['email' => $primaryEmail]);
+		if ($member) {
+			$this->getEntityManager()->remove($member);
+			$this->getEntityManager()->flush();
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
