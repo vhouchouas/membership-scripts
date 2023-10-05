@@ -80,9 +80,12 @@ class DefaultApiTest extends KernelTestCase {
 		$sut->apiMembersPerPostalCodeGet($this->responseCode, $this->responseHeaders));
 	}
 
+	private int $autoIncrementedIdx = 0;
 	private function buildApiMembersSortedByLastRegistrationDateGet200ResponseInner(RegistrationEvent $event): ApiMembersSortedByLastRegistrationDateGet200ResponseInner {
+		$this->autoIncrementedIdx++;
 		$ret = new ApiMembersSortedByLastRegistrationDateGet200ResponseInner();
 
+		$ret->setUserId($this->autoIncrementedIdx);
 		$ret->setHelloAssoLastRegistrationEventId($event->helloasso_event_id);
 		$ret->setFirstName($event->first_name);
 		$ret->setLastName($event->last_name);
@@ -93,6 +96,7 @@ class DefaultApiTest extends KernelTestCase {
 		$ret->setWantToDo($event->want_to_do);
 		$ret->setFirstRegistrationDate(new \DateTime($event->event_date)); // because these tests don't make user register twice
 		$ret->setLastRegistrationDate(new \DateTime($event->event_date));
+		$ret->setAdditionalEmails(array());
 		$ret->setIsZWProfessional(false);
 
 		return $ret;

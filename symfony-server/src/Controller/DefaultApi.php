@@ -29,6 +29,7 @@ use App\Repository\UserRepository;
 
 use App\Repository\MemberRepository;
 use App\Entity\Member;
+use App\Entity\MemberAdditionalEmail;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -56,7 +57,22 @@ class DefaultApi implements DefaultApiInterface {
 
 		$result = array();
 		foreach($this->memberRepository->getOrderedListOfLastRegistrations($since) as $entity) {
-			$result []= new ApiMembersSortedByLastRegistrationDateGet200ResponseInner($entity);
+			$data = array();
+			$data['userId'] = $entity->getId();
+			$data['firstName'] = $entity->getFirstName();
+			$data['lastName'] = $entity->getLastName();
+			$data['email'] = $entity->getEmail();
+			$data['postalCode'] = $entity->getPostalCode();
+			$data['helloAssoLastRegistrationEventId'] = $entity->getHelloAssoLastRegistrationEventId();
+			$data['city'] = $entity->getCity();
+			$data['howDidYouKnowZwp'] = $entity->getHowDidYouKnowZwp();
+			$data['wantToDo'] = $entity->getWantToDo();
+			$data['firstRegistrationDate'] = $entity->getFirstRegistrationDate();
+			$data['lastRegistrationDate'] = $entity->getLastRegistrationDate();
+			$data['isZWProfessional'] = $entity->isIsZWProfessional();
+			$data['additionalEmails'] = $entity->getAdditionalEmails();
+
+			$result []= new ApiMembersSortedByLastRegistrationDateGet200ResponseInner($data);
 		}
 
 		return $result;

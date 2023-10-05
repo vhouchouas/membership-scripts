@@ -120,7 +120,7 @@ class MemberRepository extends ServiceEntityRepository
 			->setParameter('since', $since)
 			->orderBy('m.lastRegistrationDate', 'ASC')
 			->getQuery()
-			->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
+			->getResult();
 	}
 
 	// TODO: remove code duplicated with getOrderedListOfLastRegistrations
