@@ -18,7 +18,7 @@ To create the database (it will be a sqlite one in debug) run from this director
 
 and then, to create the schema:
 
-    php bin/console doctrine:migrations:migrate
+    php bin/console doctrine:schema:create
 
 and then, to initialize a value for the last successful run date:
 
@@ -42,3 +42,24 @@ See [Symfony's doc](https://symfony.com/doc/current/setup/symfony_server.html) f
 after installing the [symfony binary](https://symfony.com/download), you can run:
 
     symfony server:start --no-tls
+
+====== Generating a migration file (during development) ======
+
+Our prod uses mysql so we need to generate migration files that target mysql. So override the key
+DATABASE_URL in .env.local with a mysql local connection string, ie, something like
+
+    DATABASE_URL="mysql://<user>:<password>@localhost:3306/<database_name>?serverVersion=14.14"
+
+The user and password must be valid credentials against a local server, but the database should not exist.
+
+Then run:
+
+    php bin/console doctrine:database:create    # creates an empty database
+    php bin/console doctrine:migrations:migrate # align the schema to the latest existing migration file
+    php bin/console doctrine:migrations:diff    # creates the migration file (to commit in git)
+
+Then, during the next deployment in prod (or preprod), run (from the targeted environment):
+
+    php bin/console doctrine:migrations:migrate # This will apply in prod the newly generated migration files
+
+(and then remove the DATABASE_URL from the local .env.local file)

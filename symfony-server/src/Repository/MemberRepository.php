@@ -120,7 +120,7 @@ class MemberRepository extends ServiceEntityRepository
 			->setParameter('since', $since)
 			->orderBy('m.lastRegistrationDate', 'ASC')
 			->getQuery()
-			->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
+			->getResult();
 	}
 
 	// TODO: remove code duplicated with getOrderedListOfLastRegistrations
@@ -161,5 +161,19 @@ class MemberRepository extends ServiceEntityRepository
 			}
 		}
 		$this->getEntityManager()->flush();
+	}
+
+	/**
+	 * @return TRUE if we could delete the member, FALSE if the member did not exist already
+	 */
+	public function deleteMember(string $primaryEmail): bool {
+		$member = $this->findOneBy(['email' => $primaryEmail]);
+		if ($member) {
+			$this->getEntityManager()->remove($member);
+			$this->getEntityManager()->flush();
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

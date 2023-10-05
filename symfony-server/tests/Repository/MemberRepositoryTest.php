@@ -4,8 +4,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/../TestHelperTrait.php';
 
 use App\Repository\MemberRepository;
+use App\Repository\MemberAdditionalEmailRepository;
 use App\Models\RegistrationEvent;
 use App\Entity\Member;
+use App\Entity\MemberAdditionalEmail;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class MemberRepositoryTest extends KernelTestCase {
@@ -148,7 +151,7 @@ final class MemberRepositoryTest extends KernelTestCase {
 
 		$members = $this->memberRepository->getMembersForWhichNoNotificationHasBeenSentToAdmins();
 		$this->assertEquals(1, count($members), "now, we did not sent notification about Alice only");
-		$this->assertExpectedObjectMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
 
 		//  Act & assert: case 3: if bob registers again we should not send a new notification about him
 		$bobUpdateDate = "2020-09-08";
@@ -156,7 +159,53 @@ final class MemberRepositoryTest extends KernelTestCase {
 		$this->memberRepository->addOrUpdateMember($updateBob, $debug);
 
 		$this->assertEquals(1, count($members), "now, we did not sent notification about Alice only");
-		$this->assertExpectedObjectMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+		$this->assertExpectedMember($aliceRegistrationDate, $aliceRegistrationDate, "alice", "wonderland", "al@ice.com", $members[0]);
+	}
+
+	public function test_canSetAndGetAndDeleteAdditionalEmails() {
+		// Setup
+		$debug = false;
+		$registration = $this->buildHelloassoEvent("1985-04-03", "bob", "dylan", "primary@email.com");
+		$this->memberRepository->addOrUpdateMember($registration, $debug);
+		$member = $this->memberRepository->findOneBy(['email' => "primary@email.com"]);
+		$additionalEmailsRepository = static::getContainer()->get(MemberAdditionalEmailRepository::class);
+
+		$this->assertEquals(0, count($member->getAdditionalEmails()));
+
+		// Act & Assert 1: can write and read additional emails
+		$this->assertTrue($member->addAdditionalEmail("secondary@email.com"), "should be TRUE because we can add this email");
+		$this->assertFalse($member->addAdditionalEmail("secondary@email.com", "should be FALSE because the email was already registered"));
+		// // Make sure we can register several additional emails for a member (since we had issues with that)
+		$member->addAdditionalEmail("second_secondary@email.com");
+
+		$this->memberRepository->save($member, true);
+
+		$readAgainMember = $this->memberRepository->findOneBy(['email' => "primary@email.com"]);
+		// // Assert can get all additional emails of a member
+		$this->assertEquals(2, count($readAgainMember->getAdditionalEmails()));
+		$this->assertEquals("secondary@email.com", $readAgainMember->getAdditionalEmails()[0]);
+		$this->assertEquals("second_secondary@email.com", $readAgainMember->getAdditionalEmails()[1]);
+
+		// // Assert can check if a member has a given additional email
+		$this->assertTrue($member->hasAdditionalEmail("secondary@email.com"));
+		$this->assertTrue($member->hasAdditionalEmail("second_secondary@email.com"));
+		$this->assertFalse($member->hasAdditionalEmail("unknown@email.com"));
+
+		// Act & Assert 2: can delete additional emails
+		$this->assertFalse($member->rmAdditionalEmail("unknown@email.com", $additionalEmailsRepository), "should be FALSE because we can't delete an unkown email");
+		$this->assertTrue($member->rmAdditionalEmail("secondary@email.com", $additionalEmailsRepository), "should be TRUE because we can delete this email");
+		$this->memberRepository->save($member, true);
+
+		$readAgainMember = $this->memberRepository->findOneBy(['email' => "primary@email.com"]);
+		$this->assertEquals(1, count($readAgainMember->getAdditionalEmails()));
+		$this->assertEquals("second_secondary@email.com", $readAgainMember->getAdditionalEmails()[0]);
+		$this->assertFalse($readAgainMember->hasAdditionalEmail("secondary@email.com", true));
+		$this->assertTrue($readAgainMember->hasAdditionalEmail("second_secondary@email.com"));
+
+		// Act & Assert 3: deleting member also delete the associated additional emails
+		$this->assertEquals(1, count($additionalEmailsRepository->findAll()), "precondition: we should get the existing email");
+		$this->memberRepository->deleteMember("primary@email.com");
+		$this->assertEquals(0, count($additionalEmailsRepository->findAll()), "no member and hence no additional email should be left");
 	}
 
 	public function test_getMembersPerPostalCode() {
@@ -208,15 +257,7 @@ final class MemberRepositoryTest extends KernelTestCase {
 		$this->assertEquals(2, count($this->memberRepository->getMembersForWhichNoNotificationHasBeenSentToAdmins()), "We should still consider we haven't sent notifications for 2 members because we didn't update any status");
 	}
 
-	private function assertExpectedMember(string $firstRegistrationDate, string $lastRegistrationDate, string $firstName, string $lastName, string $email, array $actualMember) {
-		$this->assertEquals(new DateTimeImmutable($firstRegistrationDate), $actualMember["firstRegistrationDate"]);
-		$this->assertEquals(new DateTimeImmutable($lastRegistrationDate), $actualMember["lastRegistrationDate"]);
-		$this->assertEquals($firstName, $actualMember["firstName"]);
-		$this->assertEquals($lastName, $actualMember["lastName"]);
-		$this->assertEquals($email, $actualMember["email"]);
-	}
-
-	private function assertExpectedObjectMember(string $firstRegistrationDate, string $lastRegistrationDate, string $firstName, string $lastName, string $email, Member $actualMember) {
+	private function assertExpectedMember(string $firstRegistrationDate, string $lastRegistrationDate, string $firstName, string $lastName, string $email, Member $actualMember) {
 		$this->assertEquals(new DateTimeImmutable($firstRegistrationDate), $actualMember->getFirstRegistrationDate());
 		$this->assertEquals(new DateTimeImmutable($lastRegistrationDate), $actualMember->getLastRegistrationDate());
 		$this->assertEquals($firstName, $actualMember->getFirstName());
