@@ -103,7 +103,7 @@ class MemberImporter {
 		$this->memberRepository->deleteMembersOlderThan($upTo, $debug);
 
 		$this->groupMemberDeleter->deleteOutdatedMembersFromGroups(
-				array_map(fn(Member $m) => $m->getEmail(), $this->memberRepository->getListOfLastRegistrations($this->dateUtil->getDateAfterWhichMembershipIsConsideredValid())),
+				array_map(fn(Member $m) => $m->getEmail(), $this->memberRepository->getAllUpToDateMembers()),
 				[$this->googleConnector, $this->mailchimpConnector],
 				$debug);
 	}
