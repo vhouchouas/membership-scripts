@@ -36,6 +36,11 @@ class DefaultApiTest extends KernelTestCase {
 		$this->members = array();
 		self::bootKernel();
 
+		// Setup "now"
+		$nowProviderMock = $this->createMock(NowProvider::class);
+		$nowProviderMock->method('getNow')->willReturn(new \DateTime("2023-12-01"));
+		self::getContainer()->set(NowProvider::class, $nowProviderMock);
+
 		// Setup placeholder members
 		// (Nb: we rRegister in "random" order so that when we test how the API response are sorted, it does not work "by chance")
 		$memberRepo = self::getContainer()->get(MemberRepository::class);
@@ -43,11 +48,6 @@ class DefaultApiTest extends KernelTestCase {
 		$this->buildAndRegisterMember($memberRepo, "2023-11-08", "toto", "somename", "toto@mail.com", "92100");
 		$this->buildAndRegisterMember($memberRepo, "2023-03-04", "titi", "somename", "titi@mail.com", "92100");
 		$this->buildAndRegisterMember($memberRepo, "2020-01-01", "soOld", "shouldntBeReturned", "old@mail.com", "75018");
-
-		// Setup "now"
-		$nowProviderMock = $this->createMock(NowProvider::class);
-		$nowProviderMock->method('getNow')->willReturn(new \DateTime("2023-12-01"));
-		self::getContainer()->set(NowProvider::class, $nowProviderMock);
 	}
 
 	public function test_apiMembersSortedByLastRegistrationDateGet(): void {

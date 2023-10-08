@@ -54,7 +54,7 @@ class OptionsRepository extends ServiceEntityRepository
 		if ($option == null) {
 			$error = "Can't retrieve the last succesful run start date, we abort";
 			$this->logger->critical($error);
-			throw new Exception($error);
+			throw new \Exception($error);
 		}
 		return unserialize($option->getValue());
 	}

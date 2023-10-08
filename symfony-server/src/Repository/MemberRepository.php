@@ -23,6 +23,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Models\RegistrationEvent;
 use Psr\Log\LoggerInterface;
+use App\Services\RegistrationDateUtil;
 
 /**
  * @extends ServiceEntityRepository<Member>
@@ -34,7 +35,7 @@ use Psr\Log\LoggerInterface;
  */
 class MemberRepository extends ServiceEntityRepository
 {
-	public function __construct(ManagerRegistry $registry, private LoggerInterface $logger)
+	public function __construct(ManagerRegistry $registry, private LoggerInterface $logger, private RegistrationDateUtil $dateUtil)
 	{
 		parent::__construct($registry, Member::class);
 	}
@@ -130,6 +131,10 @@ class MemberRepository extends ServiceEntityRepository
 			->setParameter('since', $since)
 			->getQuery()
 			->getResult();
+	}
+
+	public function getAllUpToDateMembers(): array {
+		return $this->getListOfLastRegistrations($this->dateUtil->getDateAfterWhichMembershipIsConsideredValid());
 	}
 
 	public function getMembersPerPostalCode(\DateTime $since) : array {

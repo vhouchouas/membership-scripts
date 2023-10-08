@@ -103,20 +103,20 @@ final class MemberImporterTest extends KernelTestCase {
 		$this->expectsNoEventRegistration();
 		$this->setDatesInMock($now, $lastSuccessfulRunDate);
 
-		// We'd rather use an actual db because mocks are stateless but here we rely on a dynamic behavior
-		// (eg: if the tested code deletes users from db before or after deleting them from groups, matters)
-		$this->useMockForMemberRepository = false;
-		$memberRepo = self::getContainer()->get(MemberRepository::class);
-		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2021-12-31", "VeryOld", "Member", "veryold@member.com"), false);
-		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2022-12-31", "Old", "Member", "old@member.com"), false);
-		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2023-01-15", "Young", "Member", "young@member.com"), false);
-
 		// PHPUnit mock would not make it easy to assert we have all the individual deletions we expect, so mock GroupMemberDeleter directly in this test
 		$groupMemberDeleterMock = $this->createMock(GroupMemberDeleter::class);
 		$groupMemberDeleterMock->expects(self::once())->method('deleteOutdatedMembersFromGroups')->with($this->equalTo(['young@member.com']));
 		self::getContainer()->set(GroupMemberDeleter::class, $groupMemberDeleterMock);
 
+		$this->useMockForMemberRepository = false;
 		$this->registerAllMockInContainer();
+
+		// We'd rather use an actual db because mocks are stateless but here we rely on a dynamic behavior
+		// (eg: if the tested code deletes users from db before or after deleting them from groups, matters)
+		$memberRepo = self::getContainer()->get(MemberRepository::class);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2021-12-31", "VeryOld", "Member", "veryold@member.com"), false);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2022-12-31", "Old", "Member", "old@member.com"), false);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2023-01-15", "Young", "Member", "young@member.com"), false);
 
 		// Act
 		$sut = self::getContainer()->get(MemberImporter::class);
