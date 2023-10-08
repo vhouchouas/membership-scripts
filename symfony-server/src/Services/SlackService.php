@@ -38,10 +38,12 @@ class SlackService {
 	/**
 	 * Beware: rate limiting for this endpoint is Tier 2, which mean we can afford
 	 * roughly 20 call per minute.
+	 *
+	 * @return array<ObjsUser>
 	 */
-	public function usersList() {
+	public function usersList(): array {
 		try {
-			return $this->client->usersList();
+			return $this->client->usersList()->getMembers();
 		} catch (\Throwable $t) {
 			$this->logger->error("Failed to query slack because: " . $t->getMessage());
 			throw $t;
@@ -55,7 +57,7 @@ class SlackService {
 	 */
 	public function findDeactivatedMembers(): array {
 		$membersEmail = $this->getEmailOfAllUpToDateMembers();
-		$allSlackUsers = $this->usersList()->getMembers(); // array of ObjsUser
+		$allSlackUsers = $this->usersList();
 		$this->logger->info("Got " . count($allSlackUsers) . " slack users");
 		$emailsOfDeactivatedSlackUsers = array();
 		foreach($allSlackUsers as $slackUser) {
@@ -78,9 +80,8 @@ class SlackService {
 	}
 
 	public function findUsersToDeactivate(): array {
-		$membersEmail = $this->getEmailOfAllUpToDateMembers();
 		$membersEmail = array_map(function($email) {return strtolower($email);}, $this->getEmailOfAllUpToDateMembers());
-		$allSlackUsers = $this->usersList()->getMembers(); // array of ObjsUser
+		$allSlackUsers = $this->usersList();
 		$allActiveSlackUsers = array_filter($allSlackUsers, function($objUser) {return !$objUser->getDeleted();});
 		$allSlackUsersEmail = array_filter(array_map(function($objUser) {return $this->extractUserEmail($objUser);}, $allActiveSlackUsers));
 		$allLowerCasedSlackUsersEmail = array_map(function($email) {return strtolower($email);}, $allSlackUsersEmail);
