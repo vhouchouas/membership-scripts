@@ -283,4 +283,11 @@ class Member
 			}
 			return false;
 	}
+
+	/**
+	 * @returns the primary email + the additional emails (if any)
+	 */
+	public function getAllEmails(): array {
+		return array_merge(array($this->email), $this->getAdditionalEmails());
+	}
 }
