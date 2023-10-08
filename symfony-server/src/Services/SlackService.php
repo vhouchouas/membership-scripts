@@ -99,6 +99,10 @@ class SlackService {
 	}
 
 	private function getEmailOfAllUpToDateMembers(): array {
-		return array_map(function ($member) {return $member->getEmail();}, $this->memberRepository->findAll());
+		$ret = array();
+		foreach($this->memberRepository->getAllUpToDateMembers() as $member) {
+			$ret = array_merge($ret, $member->getAllEmails());
+		}
+		return $ret;
 	}
 }
