@@ -42,17 +42,14 @@ paths:
                       type: integer
   /api/slack-accounts-to-reactivate:
     get:
-      summary: "Return the emails of members which have a deactivated slack (which likely need to be manually re-enabled). Nb: this may fail because of Slack rate limiting on the endpoint we rely on"
+      summary: "Return the emails of members which have a deactivated slack (which likely need to be manually re-enabled)"
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
-                  format: email
+                $ref: '#/components/schemas/timestampedSlackUserList'
   /api/slack-accounts-to-deactivate:
     get:
       summary: "Return the email that match an active Slack account but not an up to date member"
@@ -62,10 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
-                  format: email
+                $ref: '#/components/schemas/timestampedSlackUserList'
   /api/update-user-password:
     post:
       summary: "Make it possible for a user to change his or her password"
@@ -153,3 +147,21 @@ paths:
                       items:
                         type: string
                         format: email
+components:
+  schemas:
+    timestampedSlackUserList:
+      type: object
+      required:
+        - isFresh
+        - timestamp
+        - members
+      properties:
+        isFresh:
+          type: boolean
+        timestamp:
+          type: integer
+        members:
+          type: array
+          items:
+            type: string
+            format: email

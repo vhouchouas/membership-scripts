@@ -20,6 +20,8 @@ namespace App\Services;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use JoliCode\Slack\ClientFactory;
+use App\Models\SlackMembersTimestamped;
+use App\Services\NowProvider;
 use App\Repository\MemberRepository;
 use Psr\Log\LoggerInterface;
 use JoliCode\Slack\Api\Model\ObjsUser;
@@ -30,9 +32,11 @@ class SlackService {
 		private LoggerInterface $logger,
 		private ContainerBagInterface $params,
 		private MemberRepository $memberRepository,
+		private NowProvider $nowProvider,
 	) {
 		$this->client = ClientFactory::create($params->get('slack.botToken'));
 		$this->allowListedDomain = $params->get('slack.allowListedDomain');
+		$this->usersListLocalCache = $params->get('localcache') . '/slackUserList.dat';
 	}
 
 	/**
@@ -41,12 +45,20 @@ class SlackService {
 	 *
 	 * @return array<ObjsUser>
 	 */
-	public function usersList(): array {
+	public function usersList(): SlackMembersTimestamped {
 		try {
-			return $this->client->usersList()->getMembers();
+			$usersList = $this->client->usersList();
+			$res = SlackMembersTimestamped::create($this->nowProvider, $usersList->getMembers());
+			$res->serializeToFile($this->usersListLocalCache);
+			return $res;
 		} catch (\Throwable $t) {
-			$this->logger->error("Failed to query slack because: " . $t->getMessage());
-			throw $t;
+			$this->logger->info("Failed to query slack because: " . $t->getMessage());
+			$res = SlackMembersTimestamped::fromFile($this->usersListLocalCache, $this->logger);
+			if ($res === null) {
+				$this->logger->error("Failed to read list members from disk");
+				throw $t;
+			}
+			return $res;
 		}
 	}
 
@@ -55,12 +67,12 @@ class SlackService {
 	 *         Those are likely old members that renew there susbscription recently
 	 *         and for which we need to manually reactivate the slack account
 	 */
-	public function findDeactivatedMembers(): array {
+	public function findDeactivatedMembers(): SlackMembersTimestamped {
 		$membersEmail = $this->getEmailOfAllUpToDateMembers();
 		$allSlackUsers = $this->usersList();
-		$this->logger->info("Got " . count($allSlackUsers) . " slack users");
+		$this->logger->info("Got " . count($allSlackUsers->getMembers()) . " slack users");
 		$emailsOfDeactivatedSlackUsers = array();
-		foreach($allSlackUsers as $slackUser) {
+		foreach($allSlackUsers->getMembers()  as $slackUser) {
 			if ($slackUser->getDeleted()) {
 				$slackEmail = $this->extractUserEmail($slackUser);
 				if ($slackEmail !== null) {
@@ -76,18 +88,22 @@ class SlackService {
 		foreach ($intersection as $index => $email) {
 			$result []= $email;
 		}
-		return $result;
+		return new SlackMembersTimestamped($allSlackUsers->getTimestamp(), $result, $allSlackUsers->isFresh());
 	}
 
-	public function findUsersToDeactivate(): array {
+	public function findUsersToDeactivate(): SlackMembersTimestamped {
 		$membersEmail = array_map(function($email) {return strtolower($email);}, $this->getEmailOfAllUpToDateMembers());
 		$allSlackUsers = $this->usersList();
-		$allActiveSlackUsers = array_filter($allSlackUsers, function($objUser) {return !$objUser->getDeleted();});
+		$allActiveSlackUsers = array_filter($allSlackUsers->getMembers(), function($objUser) {return !$objUser->getDeleted();});
 		$allSlackUsersEmail = array_filter(array_map(function($objUser) {return $this->extractUserEmail($objUser);}, $allActiveSlackUsers));
 		$allLowerCasedSlackUsersEmail = array_map(function($email) {return strtolower($email);}, $allSlackUsersEmail);
 
 		$emailOfNonMembers = array_diff($allLowerCasedSlackUsersEmail, $membersEmail);
-		return array_filter($emailOfNonMembers, function($email) {return explode('@', $email)[1] !== $this->allowListedDomain;});
+		return new SlackMembersTimestamped(
+			$allSlackUsers->getTimestamp(),
+			array_filter($emailOfNonMembers, function($email) {return explode('@', $email)[1] !== $this->allowListedDomain;}),
+			$allSlackUsers->isFresh()
+		);
 	}
 
 	private function extractUserEmail(ObjsUser $user): ?string {

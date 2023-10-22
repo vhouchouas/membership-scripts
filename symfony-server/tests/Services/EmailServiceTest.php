@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Services\EmailService;
 use App\Services\SlackService;
 use App\Entity\Member;
+use App\Models\SlackMembersTimestamped;
 
 final class EmailServiceTest extends KernelTestCase {
 
@@ -83,7 +84,7 @@ final class EmailServiceTest extends KernelTestCase {
 
 	private function setSlackMock(array $deactivatedMembers): void {
 		$slackMock = $this->createMock(SlackService::class);
-		$slackMock->expects(self::once())->method('findDeactivatedMembers')->willReturn($deactivatedMembers);
+		$slackMock->expects(self::once())->method('findDeactivatedMembers')->willReturn(new SlackMembersTimestamped(new \DateTime(), $deactivatedMembers, true));
 		self::getContainer()->set(SlackService::class, $slackMock);
 	}
 }

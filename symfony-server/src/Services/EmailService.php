@@ -74,7 +74,12 @@ class EmailService {
 	}
 
 	public function sendEmailAboutSlackMembersToReactivate($debug): void {
-		$membersToReactivate = $this->slack->findDeactivatedMembers();
+		// Technically we could check if this list is based on fresh data, but it should never more than a few monutes old
+		// and this mail notification is sent synchronously anyway and not more than once per hour, so it seems that the
+		// worst case is that we, in some circumstances, we may send a false positive by email (which wouldn't really
+		// be completely a false positive, as it would be have been a real issue a couple minutes before)
+		// so we don't bother with it for now
+		$membersToReactivate = $this->slack->findDeactivatedMembers()->getMembers();
 		if (empty($membersToReactivate)) {
 			$this->logger->info("no member to reactivate on Slack");
 		} else {

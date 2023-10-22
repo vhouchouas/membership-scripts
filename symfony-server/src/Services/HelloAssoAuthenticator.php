@@ -31,7 +31,7 @@ class HelloAssoAuthenticator {
 	private ?HelloAssoTokens $latestTokens = null;
 
 	public function __construct(private LoggerInterface $logger, private HttpClientInterface $client, private ContainerBagInterface $params) {
-		$this->tokensFile = $params->get("helloasso.tokensFile");
+		$this->tokensFile = $params->get("localcache") . "/helloassoV5_tokens.json";
 		// Don't refresh the token in the constructor, do it lazily.
 		// So if this class instantiated by the DI for a query which won't actually need
 		// to query helloasso, then we won't waste time performing queries to refresh our token

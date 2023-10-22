@@ -22,6 +22,8 @@ use OpenAPI\Server\Api\DefaultApiInterface;
 use OpenAPI\Server\Model\ApiMembersSortedByLastRegistrationDateGet200ResponseInner;
 use OpenAPI\Server\Model\ApiMembersPerPostalCodeGet200ResponseInner;
 use OpenAPI\Server\Model\ApiUpdateUserPasswordPostRequest;
+use OpenAPI\Server\Model\TimestampedSlackUserList;
+use App\Models\SlackMembersTimestamped;
 use App\Services\RegistrationDateUtil;
 use App\Services\MemberImporter;
 use App\Services\SlackService;
@@ -98,11 +100,21 @@ class DefaultApi implements DefaultApiInterface {
 	}
 
 	public function apiSlackAccountsToReactivateGet(int &$responseCode, array &$responseHeaders): array|object|null {
-		return $this->slackService->findDeactivatedMembers();
+		$data = $this->slackService->findDeactivatedMembers();
+		return $this->toTimestampedSlackUserList($data);
 	}
 
 	public function apiSlackAccountsToDeactivateGet(int &$responseCode, array &$responseHeaders): array|object|null {
-		return $this->slackService->findUsersToDeactivate();
+		$data = $this->slackService->findUsersToDeactivate();
+		return $this->toTimestampedSlackUserList($data);
+	}
+
+	private function toTimestampedSlackUserList(SlackMembersTimestamped $data) {
+		$res = new TimestampedSlackUserList();
+		$res->setMembers($data->getMembers());
+		$res->setIsFresh($data->isFresh());
+		$res->setTimestamp($data->getTimestamp()->getTimestamp());
+		return $res;
 	}
 
 	public function apiUpdateUserPasswordPost(ApiUpdateUserPasswordPostRequest $apiUpdateUserPasswordPostRequest, int &$responseCode, array &$responseHeaders): void {
