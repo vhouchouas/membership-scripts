@@ -48,7 +48,7 @@ class SlackService {
 	public function usersList(): SlackMembersTimestamped {
 		try {
 			$usersList = $this->client->usersList();
-			$res = SlackMembersTimestamped::create($this->nowProvider, $usersList->getMembers());
+			$res = SlackMembersTimestamped::create($this->nowProvider->getNow(), $usersList->getMembers());
 			$res->serializeToFile($this->usersListLocalCache);
 			return $res;
 		} catch (\Throwable $t) {

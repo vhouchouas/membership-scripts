@@ -38,8 +38,8 @@ class SlackMembersTimestamped {
 		return $this->isFresh;
 	}
 
-	public static function create(NowProvider $nowProvider, array $members) {
-		return new SlackMembersTimestamped($nowProvider->getNow(), $members, true);
+	public static function create(\DateTime $now, array $members) {
+		return new SlackMembersTimestamped($now, $members, true);
 	}
 
 	public function serializeToFile(string $file) {
