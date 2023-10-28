@@ -52,13 +52,15 @@ class SlackService {
 			$res->serializeToFile($this->usersListLocalCache);
 			return $res;
 		} catch (\Throwable $t) {
-			$this->logger->info("Failed to query slack because: " . $t->getMessage());
-			$res = SlackMembersTimestamped::fromFile($this->usersListLocalCache, $this->logger);
-			if ($res === null) {
-				$this->logger->error("Failed to read list members from disk");
+			$slackErrorMessage = "Failed to query slack because: " . $t->getMessage();
+			$this->logger->info($slackErrorMessage);
+			$maxAcceptableAgeInSeconds = 300; // We should be able to make at least a call per minute. If data is 5 minutes old, then something is wrong
+			try {
+				return SlackMembersTimestamped::fromFile($this->usersListLocalCache, $this->logger, $this->nowProvider->getNow(), $maxAcceptableAgeInSeconds);
+			} catch(Exception $e) {
+				$this->logger->error($slackErrorMessage . "; and failed to read data from cache because: " . $e->getMessage());
 				throw $t;
 			}
-			return $res;
 		}
 	}
 

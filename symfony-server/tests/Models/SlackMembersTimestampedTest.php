@@ -30,21 +30,25 @@ final class SlackMembersTimestampedTest extends TestCase {
 		$this->assertEquals($membersIsh, $sut->getMembers());
 
 		// // Precondition check: if we deserialize now we get null because the file does not exist yet
-		$this->assertNull(SlackMembersTimestamped::fromFile($this->tmpTestFilePath, $this->logger),
-			"This error case is currently designed to return null (instead of e.g. throwing, because it wouldn't be so unusual that it occurs (eg: after a release)");
+		$this->assertThrows(function() use(&$now) {SlackMembersTimestamped::fromFile($this->tmpTestFilePath, $this->logger, $now, 300);},
+			"Should throw if no serialized file exists");
 
 		// Act
 		$sut->serializeToFile($this->tmpTestFilePath);
-		$deserializedSut = SlackMembersTimestamped::fromFile($this->tmpTestFilePath, $this->logger);
+		$deserializedSut = SlackMembersTimestamped::fromFile($this->tmpTestFilePath, $this->logger, $now, 300);
 
 		// Assert
 		$this->assertFalse($deserializedSut->isFresh(), "The instance was deserialized so it's data should not be considered fresh");
 		$this->assertEquals($now->getTimestamp(), $deserializedSut->getTimestamp());
 		$this->assertEquals($membersIsh, $deserializedSut->getMembers());
-
-
-
 	}
 
-
+	private function assertThrows($lambda, $message) {
+		try {
+			$lambda();
+		} catch(\Throwable $t) {
+			return;
+		}
+		$this->fail("Expected to throw but did not: $message");
+	}
 }

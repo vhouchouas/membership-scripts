@@ -49,14 +49,19 @@ class SlackMembersTimestamped {
 		file_put_contents($file, serialize($this));
 	}
 
-	public static function fromFile(string $file, LoggerInterface $logger): ?SlackMembersTimestamped {
+	public static function fromFile(string $file, LoggerInterface $logger, \DateTime $now,  int $maxAllowedAgeInSecond): SlackMembersTimestamped {
 		if (!file_exists($file)){
 			$logger->info("The file " . $file . " doesn't exist");
-			return null;
+			throw new \Exception("Cannot deserialize SlackMembersTimestamped from file " . $file . " because the file does not exist");
 		}
 
 		$res = unserialize(file_get_contents($file));
 		$res->isFresh = false;
+
+		$age = $res->ageInSeconds($now);
+		if ($age > $maxAllowedAgeInSecond) {
+			throw new \Exception("Deserialized object is too old (timestamp: " . $res->timestamp . ", age: $age)");
+		}
 		return $res;
 	}
 
@@ -67,4 +72,9 @@ class SlackMembersTimestamped {
 	public function getTimestamp(): int {
 		return $this->timestamp;
 	}
+
+	public function ageInSeconds(\DateTime $now): int {
+		return $now->getTimestamp() - $this->timestamp;
+	}
 }
+
