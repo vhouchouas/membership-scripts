@@ -113,7 +113,7 @@ class DefaultApi implements DefaultApiInterface {
 		$res = new TimestampedSlackUserList();
 		$res->setMembers($data->getMembers());
 		$res->setIsFresh($data->isFresh());
-		$res->setTimestamp($data->getTimestamp()->getTimestamp());
+		$res->setTimestamp($data->getTimestamp());
 		return $res;
 	}
 

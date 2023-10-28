@@ -26,7 +26,7 @@ final class SlackMembersTimestampedTest extends TestCase {
 
 		// // Precondition checks: we should have instantiated the expected object
 		$this->assertTrue($sut->isFresh(), "The instance was created from scratch so it should be considered fresh");
-		$this->assertEquals($now, $sut->getTimestamp());
+		$this->assertEquals($now->getTimestamp(), $sut->getTimestamp());
 		$this->assertEquals($membersIsh, $sut->getMembers());
 
 		// // Precondition check: if we deserialize now we get null because the file does not exist yet
@@ -39,7 +39,7 @@ final class SlackMembersTimestampedTest extends TestCase {
 
 		// Assert
 		$this->assertFalse($deserializedSut->isFresh(), "The instance was deserialized so it's data should not be considered fresh");
-		$this->assertEquals($now, $deserializedSut->getTimestamp());
+		$this->assertEquals($now->getTimestamp(), $deserializedSut->getTimestamp());
 		$this->assertEquals($membersIsh, $deserializedSut->getMembers());
 
 

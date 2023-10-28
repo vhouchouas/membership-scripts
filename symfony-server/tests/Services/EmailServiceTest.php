@@ -84,7 +84,7 @@ final class EmailServiceTest extends KernelTestCase {
 
 	private function setSlackMock(array $deactivatedMembers): void {
 		$slackMock = $this->createMock(SlackService::class);
-		$slackMock->expects(self::once())->method('findDeactivatedMembers')->willReturn(new SlackMembersTimestamped(new \DateTime(), $deactivatedMembers, true));
+		$slackMock->expects(self::once())->method('findDeactivatedMembers')->willReturn(new SlackMembersTimestamped((new \DateTime())->getTimestamp(), $deactivatedMembers, true));
 		self::getContainer()->set(SlackService::class, $slackMock);
 	}
 }

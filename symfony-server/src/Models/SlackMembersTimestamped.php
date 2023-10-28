@@ -32,14 +32,14 @@ use Psr\Log\LoggerInterface;
  *   to know how old this data is.
  */
 class SlackMembersTimestamped {
-	function __construct(private \DateTime $timestamp, private array $members, private bool $isFresh) {}
+	function __construct(private int $timestamp, private array $members, private bool $isFresh) {}
 
 	public function isFresh(): bool {
 		return $this->isFresh;
 	}
 
 	public static function create(\DateTime $now, array $members) {
-		return new SlackMembersTimestamped($now, $members, true);
+		return new SlackMembersTimestamped($now->getTimestamp(), $members, true);
 	}
 
 	public function serializeToFile(string $file) {
@@ -64,7 +64,7 @@ class SlackMembersTimestamped {
 		return $this->members;
 	}
 
-	public function getTimestamp(): \DateTime {
+	public function getTimestamp(): int {
 		return $this->timestamp;
 	}
 }
