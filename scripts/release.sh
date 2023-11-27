@@ -125,7 +125,7 @@ DIST_DIR="$FRONT_DIR/dist/angular-front"
 rm "$DIST_DIR/favicon.ico"
 SYMFONY_PUBLIC_DIR="$TEMPORARY_RELEASE_DIR/public"
 rm -f "$SYMFONY_PUBLIC_PATH"/{index.html,main.*.js,main.js,polyfills.*.js,polyfill.js,runtime.*.js,runtime.js,styles.*.css,style.css,*map,vendor.js,3rdpartylicenses.txt}
-cp "$DIST_DIR"/* "$SYMFONY_PUBLIC_DIR"
+cp -r "$DIST_DIR"/* "$SYMFONY_PUBLIC_DIR"
 
 # Install the slack app
 pushd $ROOT_DIR
