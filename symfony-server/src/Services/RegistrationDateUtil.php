@@ -35,10 +35,11 @@ class RegistrationDateUtil {
 	 * to re-new their membership, otherwise we would have 0 members on 1st January at midnight)
 	 */
 	public function getDateAfterWhichMembershipIsConsideredValid() :\DateTime {
+		$monthAndDay = "-09-01"; // According to the status a registration after 1st september of year N is valid for all year N+1
 		if ( $this->nowProvider->getNow() >= $this->februaryFirstThisYear ){
-			return new \DateTime($this->thisYear . "-01-01", $this->timeZone);
+			return new \DateTime(($this->thisYear-1) . $monthAndDay, $this->timeZone);
 		} else {
-			return new \DateTime(($this->thisYear-1) . "-01-01", $this->timeZone);
+			return new \DateTime(($this->thisYear-2) . $monthAndDay, $this->timeZone);
 		}
 	}
 

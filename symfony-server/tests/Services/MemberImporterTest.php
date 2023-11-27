@@ -114,8 +114,8 @@ final class MemberImporterTest extends KernelTestCase {
 		// We'd rather use an actual db because mocks are stateless but here we rely on a dynamic behavior
 		// (eg: if the tested code deletes users from db before or after deleting them from groups, matters)
 		$memberRepo = self::getContainer()->get(MemberRepository::class);
-		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2021-12-31", "VeryOld", "Member", "veryold@member.com"), false);
-		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2022-12-31", "Old", "Member", "old@member.com"), false);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2021-08-31", "VeryOld", "Member", "veryold@member.com"), false);
+		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2022-08-31", "Old", "Member", "old@member.com"), false);
 		$memberRepo->addOrUpdateMember($this->buildHelloassoEvent("2023-01-15", "Young", "Member", "young@member.com"), false);
 
 		// Act

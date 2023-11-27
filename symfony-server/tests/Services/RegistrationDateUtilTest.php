@@ -8,7 +8,7 @@ use App\Services\NowProvider;
 
 final class RegistrationDateUtilTest extends TestCase {
 	public function test_getDateAfterWhichMembershipIsConsideredValid(){
-		$expected = new DateTime("2019-01-01T00:00:00", new DateTimeZone("Europe/Paris"));
+		$expected = new DateTime("2018-09-01T00:00:00", new DateTimeZone("Europe/Paris")); // According to current status
 
 		$this->assertCorrectValidMembershipDate($expected, new DateTime("2019-04-03Z"), "Usual case: membership is valid after January 1st");
 		$this->assertCorrectValidMembershipDate($expected, new DateTime("2020-01-03Z"), "Business rule: before 1st February we keep all those who registered during year N-1");
