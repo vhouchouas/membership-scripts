@@ -34,7 +34,7 @@ An image is worth a thousand words, here is what is done:
                                           +------>|  G-Group  |
                                           |       +-----------+
                                           |       +-----------+
-                                          +------>| Mysql db  |
+                                          +------>|  sql db   |
                                                   +-----------+
 
 
@@ -42,46 +42,92 @@ Those scripts are written in PHP in order to be used from our web hosting.
 
 This repo also contains as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) the [slack-agenda-app](https://github.com/Zero-Waste-Paris/slack-agenda-app/)
 
-How to use this repo if you are from Zero Waste Paris
-=====================================================
-Setup
------
-Those steps must be done by everyone who wants to be able to release those scripts. It is tedious and error-prone, but since not a lot of people at Zero Waste Paris is using it and since it has to be done only once, we're living with it for now.
+How to run locally
+=================
 
-1. Clone this repo: `git clone https://github.com/Zero-Waste-Paris/membership-scripts`
-1. Copy the template config file and edit them to put the correct config value
-   1. `cp scripts/prod-config/config.template.sh scripts/prod-config/config.sh`
-   1. `vim scripts/prod-config/config.sh`
-   1. `cp scripts/prod-config/config.template.php scripts/prod-config/config.php`
-   1. `vim scripts/prod-config/config.php`
-1. Setup the credentials for Google. See `files/google/README.md` for more information
-1. Retrieve the `.htaccess` file (put it in the `files` directory). Its main purpose is to add http authentication to prevent that anyone could use those scripts
+Prerequisite:
 
-Then, to release, run:
+- java 11 (or later)
+- curl
+- composer (see https://getcomposer.org/ )
+- symfony CLI (see https://symfony.com/download )
+- npm
+- ng (the angular CLI; see https://angular.io/guide/setup-local or run `npm install -g @angular/cli`)
 
-    ./scripts/release.sh --env prod
+After cloning this repo and from the top of it:
 
-Nb: you can use `scripts/preprod-config/` to set up a preprod environment, and then deploy to it with
+    # Generate code from OpenApi specification
+    ./scripts/generate.sh
+    
+    # Setup local conf
+    cd symfony-server
+		cp .env .env.local
+		vim .env.local # update the values you want to override
+    # to have a complete setup you also need some google tokens, but for local debug run we can skip it
 
-    ./scripts/release.sh --env preprod
+    # install the PHP packages and run the tests
+    composer install
+    ../scripts/runSymfonyTests.sh # This setups a test local sqlite db and runs the tests against it
 
-Setup of the database
----------------------
+    # Setup the database
+    ## If you want to create a brand new database, run this.
+    ## (what it does exactly depends on your local configuration. By default it creates a sqlite db (in var/data.db)
+    php bin/console doctrine:database:create
 
-If we ever want to recreate the database, here is the schema:
+    ## if you want to use an existing database, then just create the tables with this instead:
+    # php bin/console doctrine:schema:create
 
-and also run this to create the table which stores the members
+    ## Initialize a value for the 'last succesful run date'
+    php bin/console doctrine:database:initialize-last-successful-run-date 2022-01-01
 
-    ./scripts/doctrine/ orm:schema-tool:create
+    ## For debug runs we may also insert some test data
+    ## /!\ Do not do this in prod obviously /!\
+		php bin/console member:add someone@mail.fr
+		php bin/console member:add someonelse@mail.com
+		
+    ## And now let's create your user account (to access the API)
+		php bin/console user:add me@mail.eu my_password
 
-and then insert some data the scripts will need for bootstrapping:
+    ## Launch the local server
+    symfony server:start --no-tls # add --port=value to listen on a specific port
 
-    INSERT INTO `options` (`key`, `value`) VALUES
-    ('last_successful_run_date', 'O:8:"DateTime":3:{s:4:"date";s:26:"2023-06-19 21:45:07.675446";s:13:"timezone_type";i:3;s:8:"timezone";s:13:"Europe/Zurich";} ');
+We now have a server which listens by default on port 8000.
+For it to be useful we now need to setup the UI
+
+    cd ../angular-front/
+		npm install
+		ng build -c development # For a prod build just run `ng build`
+		cp -r dist/angular-front/* ../symfony-server/public
+
+That's it, now you can open http://localhost:8000 in your browser, and log in with the credentials created previously (if you followed those instructions, the login is `me@mail.fr` and the password is `my_password`).
+
+How to deploy in prod
+=====================
+
+Prerequisites:
+
+- rsync 
+
+from the root of the repo:
+
+    cd scripts/prod-config
+
+		cp deploysymfony-config.template.sh  deploysymfony-config.sh 
+		vim deploysymfony-config.sh  # put the rsync destination where to deploy. Nb: it is the `public` directory which should be the root of your web server
+
+		cp symfony.template.conf symfony.conf
+		vim symfony.conf # same kind of content as .env.local (nb: change at least the `APP_SECRET` to ay random string)
+
+		cp slack-config/config.json.sample slack-config/config.json
+		vim slack-config/config.json # conf for the agenda submodule
+
+    # you may also put in "prod-config" a favicon.webp and a google_tokens.json
+    # When all is done, run `./release.sh --env prod`
+    # Nb: you may put some conf in `scripts/preprod-config`, and then run `./release.sh` to take those confs into account
 
 
 What the repo looks like
-------------------------
+========================
 
 * The `files` directory contains the files which will end up on the server
 * The `tests` directory contains the non regression tests.
