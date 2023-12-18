@@ -39,26 +39,6 @@ class GoogleClientBuilder {
 		$client->setAccessType('offline');
 		$client->setPrompt('select_account consent');
 
-		$tokenFile = $this->params->get('google.tokenFile');
-		if (file_exists($tokenFile)) {
-			$accessToken = json_decode(file_get_contents($tokenFile), true);
-			$client->setAccessToken($accessToken);
-		}
-
-		if ($client->isAccessTokenExpired()) {
-			if ($client->getRefreshToken()) {
-				$client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-			} else {
-				$error = "Can't get fresh Google tokens";
-				$this->logger->error($error);
-				throw new \Exception($error);
-			}
-
-			if (!file_exists(dirname($tokenFile))) {
-				mkdir(dirname($tokenFile), 0700, true);
-			}
-			file_put_contents($tokenFile, json_encode($client->getAccessToken()));
-		}
 		return $client;
 	}
 }
