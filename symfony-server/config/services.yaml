@@ -17,7 +17,6 @@ parameters:
   mailchimp.userPassword: '%env(MC_USERPWD)%'
   google.groupName: '%env(GOOGLE_GROUP_NAME)%'
   google.jsonCredentials: '%env(GOOGLE_JSON_CREDENTIALS)%'
-  google.tokenFile: '%kernel.project_dir%/var/google_tokens.json'
   notification.fromEmail: '%env(NOTIFICATION_FROM_EMAIL)%'
   notification.newcomersEmail.to: '%env(NOTIFICATION_TO_EMAIL_ABOUT_NEWCOMERS)%'
   notification.newcomersEmail.subject: '%env(NOTIFICATION_SUBJECT_EMAIL_ABOUT_NEWCOMERS)%'
