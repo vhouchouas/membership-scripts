@@ -56,7 +56,6 @@ function testFileOrDie {
 }
 testFileOrDie "$CONF_DIR/htaccess"
 testFileOrDie "$CONF_DIR/symfony.conf"
-testFileOrDie "$CONF_DIR/google_tokens.json"
 testFileOrDie "$SLACK_CONF_DIR"/config.json
 testFileOrDie "$LOCAL_CONF_FILE"
 
@@ -102,7 +101,6 @@ pushd "$TEMPORARY_RELEASE_DIR"
 rm -rf var .env.* vendor tests coverage
 cp "$CONF_DIR"/symfony.conf .env.local
 mkdir var
-cp "$CONF_DIR"/google_tokens.json var/
 cp "$CONF_DIR"/htaccess public/.htaccess
 cp -f "$CONF_DIR"/favicon.* public/favicon.ico
 

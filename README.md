@@ -121,7 +121,7 @@ from the root of the repo:
 		cp slack-config/config.json.sample slack-config/config.json
 		vim slack-config/config.json # conf for the agenda submodule
 
-    # you may also put in "prod-config" a favicon.webp and a google_tokens.json
+    # you may also put in "prod-config" a favicon.webp
     # When all is done, run `./release.sh --env prod`
     # Nb: you may put some conf in `scripts/preprod-config`, and then run `./release.sh` to take those confs into account
 
