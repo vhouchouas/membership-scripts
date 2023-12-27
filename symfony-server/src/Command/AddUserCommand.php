@@ -24,6 +24,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Console\Question\Question;
 use App\Entity\User;
 use App\Repository\UserRepository;
 
@@ -34,14 +35,19 @@ class AddUserCommand extends Command {
 	}
 
 	protected function configure(): void {
-		$this
-			->addArgument('email', InputArgument::REQUIRED, 'User email (will be the login)')
-			->addArgument('password', InputArgument::REQUIRED, 'User password');
+		$this->addArgument('email', InputArgument::REQUIRED, 'User email (will be the login)');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$email = $input->getArgument('email');
-		$password = $input->getArgument('password');
+
+		$helper = $this->getHelper('question');
+
+		$question = new Question('password:');
+		$question->setHidden(true);
+		$question->setHiddenFallback(false);
+
+		$password = $helper->ask($input, $output, $question);
 
 		$user = $this->userRepository->findOneBy(['email' => $email]);
 		if ($user) {
